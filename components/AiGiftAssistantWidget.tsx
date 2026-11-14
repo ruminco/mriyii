@@ -1,7 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Sparkles, X, ExternalLink, Loader2, Gift, Globe, ListChecks } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import {
+  Sparkles,
+  X,
+  ExternalLink,
+  Loader2,
+  Gift,
+  Globe,
+  ListChecks,
+} from 'lucide-react';
 import type { ThemePreset } from '@/models/User';
 import type { AiAssistantMode } from '@/lib/gemini';
 import { THEME_TOKENS } from '@/lib/theme-data';
@@ -39,42 +47,51 @@ const BUDGET_PRESETS = [
   { label: 'VIP 15 000 ₴ 💎', value: 15000 },
 ];
 
+const INTEREST_CHIPS = [
+  { id: 'all', label: '✨ Усі інтереси', query: '' },
+  { id: 'coffee', label: '☕ Кава', query: 'кава' },
+  { id: 'beauty', label: "💄 Б'юті", query: "б'юті парфуми догляд" },
+  { id: 'gadgets', label: '🎧 Гаджети', query: 'гаджети Apple техніка' },
+  { id: 'flowers', label: '🌸 Квіти', query: 'квіти букет півонії' },
+  { id: 'travel', label: '✈️ Подорожі', query: 'подорожі релакс' },
+];
+
 const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
   rose_luxury: [
     {
-      title: 'Шовкова наволочка та маска для сну Mulberry Silk 22 Momme',
+      title: 'Шовкова наволочка та маска Mulberry Silk 22 Momme',
       emoji: '✨',
       description: 'Натуральний шовк преміум-класу у відтінку Champagne Rose Gold.',
       estimatedPrice: 2800,
       currency: 'UAH',
       searchQuery: 'шовкова наволочка mulberry silk 22 momme',
-      whyItFits: 'Ідеально доповнює beauty-ритуали та дбайливо доглядає за волоссям і шкірою.',
+      whyItFits: 'Ідеально доповнює beauty-ритуали та дбайливо доглядає за волоссям.',
       mode: 'web_search',
       sourceStore: 'Rozetka.ua',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=%D1%88%D0%BE%D0%B2%D0%BA%D0%BE%D0%B2%D0%B0+%D0%BD%D0%B0%D0%B2%D0%BE%D0%BB%D0%BE%D1%87%D0%BA%D0%B0&utm_source=mriyii',
     },
     {
-      title: 'Аромадифузор та свічка Rituals Private Collection Savage Garden',
+      title: 'Аромадифузор Rituals Private Collection Savage Garden',
       emoji: '🕯️',
-      description: 'Розкішний інтер’єрний сет для створення атмосфери SPA вдома.',
+      description: 'Розкішний інтер’єрний сет для атмосфери SPA та подорожей вдома.',
       estimatedPrice: 2450,
       currency: 'UAH',
       searchQuery: 'Rituals Private Collection дифузор',
-      whyItFits: 'Вписується у захоплення естетикою релаксу, подорожей та нішевих ароматів.',
+      whyItFits: 'Вписується у захоплення естетикою затишку та нішевих ароматів.',
       mode: 'web_search',
-      sourceStore: 'Brocard / Aromateque',
+      sourceStore: 'Aromateque.ua',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=Rituals+Private+Collection&utm_source=mriyii',
     },
     {
-      title: 'Бездротовий MagSafe павербанк Anker Nano 5000 mAh Rose Pink',
+      title: 'MagSafe павербанк Anker Nano 5000 mAh Rose Pink',
       emoji: '🔋',
-      description: 'Ультратонкий алюмінієвий корпус для iPhone, ідеальний для сторіз у подорожах.',
+      description: 'Ультратонкий алюмінієвий корпус для iPhone у подорожах.',
       estimatedPrice: 1999,
       currency: 'UAH',
       searchQuery: 'Anker MagSafe Power Bank Pink',
-      whyItFits: 'Поєднує любов до екосистеми Apple та активний лайфстайл.',
+      whyItFits: 'Поєднує любов до гаджетів Apple та активний лайфстайл.',
       mode: 'web_search',
       sourceStore: 'Rozetka.ua',
       affiliateSearchUrl:
@@ -83,7 +100,7 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
   ],
   cyber_titanium: [
     {
-      title: 'Набір для альтернативного заварювання кави Hario V60 Craft Coffee Maker',
+      title: 'Набір для specialty-кави Hario V60 Craft Coffee Maker',
       emoji: '☕',
       description: 'Скляний пуровер, сервер, мірна ложка та японські фільтри.',
       estimatedPrice: 1450,
@@ -96,9 +113,9 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
         'https://rozetka.com.ua/ua/search/?text=Hario+V60+Craft+Coffee+Maker&utm_source=mriyii',
     },
     {
-      title: 'Док-станція 3-в-1 Ugreen MagFlow Qi2 15W Magnetic Foldable Charger',
+      title: 'Док-станція 3-в-1 Ugreen MagFlow Qi2 15W Magnetic',
       emoji: '⚡',
-      description: 'Металевий складаний MagSafe-стенд для iPhone, Apple Watch та AirPods.',
+      description: 'Металевий складаний MagSafe-стенд для iPhone, Watch та AirPods.',
       estimatedPrice: 2699,
       currency: 'UAH',
       searchQuery: 'Ugreen Qi2 MagSafe 3 in 1',
@@ -109,15 +126,15 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
         'https://rozetka.com.ua/ua/search/?text=Ugreen+Qi2+MagSafe&utm_source=mriyii',
     },
     {
-      title: 'Дизайнерський килимок для столу Wool Felt Desk Mat Dark Anthracite',
+      title: 'Дизайнерський килимок Wool Felt Desk Mat Anthracite',
       emoji: '🖥️',
       description: 'Вовняний фетр під кастомну механічну клавіатуру (90x40 см).',
       estimatedPrice: 1290,
       currency: 'UAH',
       searchQuery: 'фетровий килимок на стіл 90x40',
-      whyItFits: 'Покращує акустику тайпінгу механічної клавіатури та естетику робочого місця.',
+      whyItFits: 'Покращує акустику тайпінгу та естетику робочого простору.',
       mode: 'web_search',
-      sourceStore: 'Prom.ua / Keychron UA',
+      sourceStore: 'Comfy.ua',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=desk+mat+felt&utm_source=mriyii',
     },
@@ -126,21 +143,32 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
 
 function buildDemoWishlistRecommendations(
   wishlistItems: UnifiedGiftCardItem[],
-  budget: number
+  budget: number,
+  interestFilter: string
 ): AiGiftRecommendationDTO[] {
   const freeItems = wishlistItems.filter((item) => !item.isBooked && !item.isAiSurprise);
-  const sorted = [...freeItems].sort((a, b) => {
+  const terms = interestFilter
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length > 2);
+
+  const scored = [...freeItems].sort((a, b) => {
+    const aText = `${a.title} ${a.description || ''}`.toLowerCase();
+    const bText = `${b.title} ${b.description || ''}`.toLowerCase();
+    const aMatch = terms.some((t) => aText.includes(t)) ? 0 : 1;
+    const bMatch = terms.some((t) => bText.includes(t)) ? 0 : 1;
+    if (aMatch !== bMatch) return aMatch - bMatch;
+
     const aPrice = a.price ?? budget;
     const bPrice = b.price ?? budget;
     const aFits = aPrice <= budget ? 0 : 1;
     const bFits = bPrice <= budget ? 0 : 1;
     if (aFits !== bFits) return aFits - bFits;
-    if (a.monoJarUrl && !b.monoJarUrl) return -1;
-    if (!a.monoJarUrl && b.monoJarUrl) return 1;
+
     return aPrice - bPrice;
   });
 
-  return sorted.slice(0, 3).map((item) => {
+  return scored.slice(0, 3).map((item) => {
     const price = item.price ?? budget;
     const isJarTopUp = Boolean((item.monoJarUrl || item.hasMonoJar) && price > budget);
     return {
@@ -160,6 +188,7 @@ function buildDemoWishlistRecommendations(
       mode: 'from_wishlist',
       wishlistItemId: item.id,
       isMonoJarContribution: isJarTopUp,
+      sourceStore: isJarTopUp ? 'Монобанка' : 'Зі списку',
       affiliateSearchUrl: item.affiliateUrl || item.originalUrl || '#wishlist-grid',
     };
   });
@@ -175,12 +204,12 @@ export function AiGiftAssistantWidget({
   onSelectWishlistItem,
   onSurpriseBooked,
 }: AiGiftAssistantWidgetProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<AiAssistantMode>('from_wishlist');
   const [budget, setBudget] = useState<number>(3000);
+  const [activeInterest, setActiveInterest] = useState<string>('all');
   const [guestQuery, setGuestQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [ideas, setIdeas] = useState<AiGiftRecommendationDTO[]>([]);
+  const [customIdeas, setCustomIdeas] = useState<AiGiftRecommendationDTO[] | null>(null);
   const [selectedIdea, setSelectedIdea] = useState<AiGiftRecommendationDTO | null>(null);
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
@@ -188,33 +217,58 @@ export function AiGiftAssistantWidget({
 
   const tokens = THEME_TOKENS[themePreset];
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const activeInterestQuery =
+    INTEREST_CHIPS.find((c) => c.id === activeInterest)?.query || '';
+
+  const displayedIdeas = useMemo<AiGiftRecommendationDTO[]>(() => {
+    if (customIdeas && customIdeas.length > 0) {
+      return customIdeas.slice(0, 3);
+    }
+    if (mode === 'from_wishlist') {
+      const fromList = buildDemoWishlistRecommendations(
+        wishlistItems,
+        budget,
+        `${activeInterestQuery} ${guestQuery}`
+      );
+      if (fromList.length > 0) return fromList;
+    }
+    return FALLBACK_AI_IDEAS[themePreset].map((item) => ({
+      ...item,
+      estimatedPrice: Math.min(item.estimatedPrice, budget),
+    }));
+  }, [customIdeas, mode, wishlistItems, budget, activeInterestQuery, guestQuery, themePreset]);
+
+  const runAiFetch = async (
+    nextMode: AiAssistantMode,
+    nextBudget: number,
+    nextQuery: string
+  ) => {
     setIsLoading(true);
     setErrorMessage(null);
     setSelectedIdea(null);
-
     try {
-      const generated = await askGiftAssistant(wishlistSlug, budget, guestQuery, mode);
-      if (generated.length === 0 && mode === 'from_wishlist' && wishlistItems.length > 0) {
-        setIdeas(buildDemoWishlistRecommendations(wishlistItems, budget));
+      const generated = await askGiftAssistant(
+        wishlistSlug,
+        nextBudget,
+        nextQuery,
+        nextMode
+      );
+      if (generated.length > 0) {
+        setCustomIdeas(generated.slice(0, 3));
       } else {
-        setIdeas(generated);
+        setCustomIdeas(null);
       }
     } catch {
-      if (mode === 'from_wishlist') {
-        const demoFromList = buildDemoWishlistRecommendations(wishlistItems, budget);
-        setIdeas(demoFromList);
-      } else {
-        const fallback = FALLBACK_AI_IDEAS[themePreset].map((item) => ({
-          ...item,
-          estimatedPrice: Math.min(item.estimatedPrice, budget),
-        }));
-        setIdeas(fallback);
-      }
+      setCustomIdeas(null);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const combinedQuery = [activeInterestQuery, guestQuery].filter(Boolean).join(' ');
+    await runAiFetch(mode, budget, combinedQuery);
   };
 
   const handleCommitSurprise = async (e: React.FormEvent) => {
@@ -253,7 +307,6 @@ export function AiGiftAssistantWidget({
       });
 
       setSelectedIdea(null);
-      setIsOpen(false);
     } catch (err) {
       if (err instanceof Error && err.message.includes('не більше 2')) {
         setErrorMessage(err.message);
@@ -270,7 +323,6 @@ export function AiGiftAssistantWidget({
           bookingToken: demoToken,
         });
         setSelectedIdea(null);
-        setIsOpen(false);
       }
     } finally {
       setIsLoading(false);
@@ -278,329 +330,296 @@ export function AiGiftAssistantWidget({
   };
 
   return (
-    <>
-      {/* Вбудований банер над сіткою подарунків */}
-      <div className="smoked-glass rounded-[24px] p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-white/20">
-        <div className="flex items-center gap-3.5">
+    <section
+      id="guest-ai-section"
+      className="smoked-glass rounded-[28px] p-5 sm:p-7 border border-white/25 space-y-5"
+    >
+      {/* Заголовок окремої секції ШІ-помічника */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex items-start gap-4">
           <div
-            className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tokens.emojiFrameGradient} p-[2px] shrink-0`}
+            className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tokens.emojiFrameGradient} p-[2px] shrink-0`}
           >
-            <div className="w-full h-full bg-[#161324] rounded-[14px] flex items-center justify-center text-2xl">
+            <div className="w-full h-full bg-[#161324] rounded-[14px] flex items-center justify-center text-3xl">
               ✨
             </div>
           </div>
           <div>
             <div className="inline-flex items-center gap-1.5 text-sm font-extrabold uppercase tracking-wider text-purple-200">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              Gemini 2.5 Flash • 2 режими підбору
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              Gemini 2.5 Flash • Google Search Grounding
             </div>
-            <h3 className="text-sm sm:text-base font-extrabold text-white mt-0.5">
-              Допомогти обрати з вішліста або знайти в інтернеті за інтересами?
-            </h3>
-            <p className="text-sm font-semibold text-slate-200 mt-0.5">
-              ШІ аналізує вільні лоти або шукає реальні товари в Україні з урахуванням прихованої анкети іменинника.
-            </p>
+            <h2 className="text-xl sm:text-2xl font-black text-white mt-0.5">
+              ШІ-Помічник подарунків для «{wishlistTitle}»
+            </h2>
+            {hasOwnerInterests && (
+              <p className="text-sm font-semibold text-emerald-300 mt-1">
+                🧠 ШІ враховує інтереси, розміри та табу іменинника (приховані від сторонніх очей)
+              </p>
+            )}
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className={`w-full sm:w-auto py-3 px-5 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95 flex items-center justify-center gap-2 shrink-0`}
-        >
-          <Sparkles className="w-4 h-4" />
-          Відкрити ШІ-помічник
-        </button>
+        {/* Перемикач 2 режимів */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/45 border border-white/15 shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('from_wishlist');
+              setCustomIdeas(null);
+              setSelectedIdea(null);
+            }}
+            className={`min-h-[48px] px-4 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
+              mode === 'from_wishlist'
+                ? `${tokens.primaryCtaGradient} text-white shadow-lg`
+                : 'text-slate-200 hover:text-white'
+            }`}
+          >
+            <ListChecks className="w-4 h-4" />
+            <span>📋 Обрати з вішліста</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('web_search');
+              setCustomIdeas(null);
+              setSelectedIdea(null);
+            }}
+            className={`min-h-[48px] px-4 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
+              mode === 'web_search'
+                ? `${tokens.primaryCtaGradient} text-white shadow-lg`
+                : 'text-slate-200 hover:text-white'
+            }`}
+          >
+            <Globe className="w-4 h-4" />
+            <span>🌐 Знайти в інтернеті</span>
+          </button>
+        </div>
       </div>
 
-      {/* Плаваюча кнопка (FAB) */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className={`fixed bottom-5 right-5 z-40 py-3 px-4 rounded-full text-sm font-extrabold ${tokens.primaryCtaGradient} text-white shadow-2xl border border-white/25 spring-transition hover:scale-105 active:scale-95 flex items-center gap-2`}
-      >
-        <Sparkles className="w-4 h-4" />
-        <span>✨ Не знаєш, що подарувати?</span>
-      </button>
-
-      {/* Модальне вікно ШІ-помічника */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-          <div className="smoked-glass rounded-[28px] w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 border border-white/25 space-y-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <span className="inline-flex items-center gap-1.5 text-sm font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/25 text-purple-200 border border-purple-400/40">
-                  <Sparkles className="w-3.5 h-3.5" /> Gemini 2.5 Flash • Google Search Grounding
-                </span>
-                <h2 className="text-xl font-extrabold text-white mt-2">
-                  ✨ ШІ-Помічник для «{wishlistTitle}»
-                </h2>
-                {hasOwnerInterests && (
-                  <p className="text-sm font-bold text-emerald-300 mt-1">
-                    🧠 ШІ врахував заповнені інтереси, розміри та табу іменинника (приховані від сторонніх очей)
-                  </p>
-                )}
-              </div>
+      {/* Клікабельні чіпси інтересів + Бюджет */}
+      <form onSubmit={handleGenerate} className="space-y-4">
+        <div className="space-y-2">
+          <div className="text-sm font-extrabold uppercase tracking-wider text-slate-200">
+            1. Оберіть інтерес іменинника (миттєво оновлює 3 картки):
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {INTEREST_CHIPS.map((chip) => (
               <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Перемикач 2 режимів */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/40 border border-white/15">
-              <button
+                key={chip.id}
                 type="button"
                 onClick={() => {
-                  setMode('from_wishlist');
-                  setIdeas([]);
-                  setSelectedIdea(null);
+                  setActiveInterest(chip.id);
+                  setCustomIdeas(null);
                 }}
-                className={`min-h-[44px] px-3 py-2 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
-                  mode === 'from_wishlist'
-                    ? `${tokens.primaryCtaGradient} text-white shadow-lg`
-                    : 'text-slate-200 hover:text-white'
+                className={`min-h-[48px] px-4 py-2 rounded-2xl text-sm font-extrabold border spring-transition ${
+                  activeInterest === chip.id
+                    ? `${tokens.primaryCtaGradient} text-white border-white/40 shadow-lg`
+                    : 'bg-white/10 text-slate-200 border-white/15 hover:bg-white/20'
                 }`}
               >
-                <ListChecks className="w-4 h-4" />
-                <span>📋 Обрати з вішліста</span>
+                {chip.label}
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('web_search');
-                  setIdeas([]);
-                  setSelectedIdea(null);
-                }}
-                className={`min-h-[44px] px-3 py-2 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
-                  mode === 'web_search'
-                    ? `${tokens.primaryCtaGradient} text-white shadow-lg`
-                    : 'text-slate-200 hover:text-white'
-                }`}
-              >
-                <Globe className="w-4 h-4" />
-                <span>🌐 Знайти в інтернеті за інтересами</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleGenerate} className="space-y-4">
-              <div>
-                <label className="block text-sm font-extrabold uppercase tracking-wider text-slate-200 mb-2">
-                  1. Оберіть ваш бюджет (₴):
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {BUDGET_PRESETS.map((preset) => (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onClick={() => setBudget(preset.value)}
-                      className={`px-3.5 py-2 rounded-xl text-sm font-extrabold spring-transition ${
-                        budget === preset.value
-                          ? `${tokens.primaryCtaGradient} text-white`
-                          : 'bg-white/10 text-slate-200 border border-white/15 hover:bg-white/20'
-                      }`}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-extrabold uppercase tracking-wider text-slate-200 mb-1.5">
-                  2. Побажання від себе (необов’язково):
-                </label>
-                <input
-                  type="text"
-                  value={guestQuery}
-                  onChange={(e) => setGuestQuery(e.target.value)}
-                  placeholder={
-                    mode === 'from_wishlist'
-                      ? 'Наприклад: щось практичне або донат у Монобанку...'
-                      : 'Наприклад: щось із кавою, гаджетами Apple або квітами...'
-                  }
-                  className="w-full rounded-xl bg-white/10 border border-white/20 px-3.5 py-2.5 text-sm font-semibold text-white placeholder:text-slate-300/70 focus:outline-none focus:border-white/50"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full min-h-[48px] py-3 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95 flex items-center justify-center gap-2`}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>
-                      {mode === 'from_wishlist'
-                        ? 'Підбираємо найкращі лоти зі списку...'
-                        : 'Шукаємо реальні товари через Google Search...'}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>
-                      {mode === 'from_wishlist'
-                        ? '📋 Підібрати зі списку під мій бюджет'
-                        : '🌐 Знайти 3 реальні ідеї в інтернеті'}
-                    </span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {errorMessage && (
-              <div className="p-3 rounded-xl bg-rose-500/25 border border-rose-400/40 text-sm font-bold text-rose-200">
-                {errorMessage}
-              </div>
-            )}
-
-            {/* Картки згенерованих ідей */}
-            {ideas.length > 0 && !selectedIdea && (
-              <div className="space-y-3 pt-2 border-t border-white/15">
-                <h3 className="text-sm font-extrabold uppercase tracking-wider text-emerald-300">
-                  {mode === 'from_wishlist'
-                    ? 'Рекомендовані позиції з вішліста:'
-                    : 'Знайдені в інтернеті ідеї без спойлерів для іменинника:'}
-                </h3>
-                <div className="grid gap-3">
-                  {ideas.map((idea, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-2xl bg-white/5 border border-white/15 p-4 flex flex-col justify-between gap-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3">
-                          <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-2xl shrink-0">
-                            {idea.emoji || '🎁'}
-                          </div>
-                          <div>
-                            <h4 className="text-sm sm:text-base font-extrabold text-white">
-                              {idea.title}
-                            </h4>
-                            {idea.sourceStore && (
-                              <span className="inline-block text-sm font-bold text-amber-300 mt-0.5">
-                                🛍️ {idea.sourceStore}
-                              </span>
-                            )}
-                            <p className="text-sm font-semibold text-slate-200 mt-0.5">
-                              {idea.description}
-                            </p>
-                            <p className="text-sm font-bold text-emerald-300 mt-1.5">
-                              💡 Чому підійде: {idea.whyItFits}
-                            </p>
-                          </div>
-                        </div>
-                        <span
-                          className={`text-sm font-black px-2.5 py-1 rounded-lg shrink-0 tabular-nums ${tokens.pricePillClass}`}
-                        >
-                          {idea.isMonoJarContribution ? 'Внесок ' : '~'}
-                          {idea.estimatedPrice.toLocaleString('uk-UA')} ₴
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-white/10">
-                        {idea.mode === 'from_wishlist' && idea.wishlistItemId ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsOpen(false);
-                              onSelectWishlistItem?.(idea.wishlistItemId!);
-                            }}
-                            className={`py-2.5 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
-                          >
-                            <Gift className="w-4 h-4" />
-                            <span>
-                              {idea.isMonoJarContribution
-                                ? '🫙 Докинути в Монобанку'
-                                : '🎁 Перейти до лоту в списку'}
-                            </span>
-                          </button>
-                        ) : (
-                          <>
-                            <a
-                              href={idea.affiliateSearchUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="py-2 px-3 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 inline-flex items-center gap-1.5"
-                            >
-                              <span>Знайти в магазині</span>
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </a>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedIdea(idea)}
-                              className={`py-2 px-3.5 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
-                            >
-                              <Gift className="w-3.5 h-3.5" />
-                              <span>✨ Зафіксувати як таємний сюрприз</span>
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Підтвердження фіксації сюрпризу (`isAiSurprise: true`) */}
-            {selectedIdea && (
-              <form
-                onSubmit={handleCommitSurprise}
-                className="rounded-2xl bg-white/10 border border-white/25 p-4 space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-extrabold text-white">
-                    🤫 Фіксація таємного сюрпризу: {selectedIdea.title}
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedIdea(null)}
-                    className="text-sm font-bold text-slate-200 underline"
-                  >
-                    Назад до ідей
-                  </button>
-                </div>
-                <p className="text-sm font-semibold text-slate-200">
-                  Інші гості побачать, що цей сюрприз уже зайнятий вами, але іменинник у своєму кабінеті НЕ побачить цей лот до свята!
-                </p>
-
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    required
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    placeholder="Ваше ім'я або нікнейм"
-                    className="rounded-xl bg-black/40 border border-white/20 px-3.5 py-2 text-sm font-semibold text-white placeholder:text-slate-300"
-                  />
-                  <input
-                    type="email"
-                    required
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
-                    placeholder="Ваш email (для керування бронню)"
-                    className="rounded-xl bg-black/40 border border-white/20 px-3.5 py-2 text-sm font-semibold text-white placeholder:text-slate-300"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-xl text-sm font-extrabold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/30 spring-transition"
-                >
-                  💎 Підтвердити та додати таємний сюрприз
-                </button>
-              </form>
-            )}
+            ))}
           </div>
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-end">
+          <div className="lg:col-span-5 space-y-2">
+            <label className="block text-sm font-extrabold uppercase tracking-wider text-slate-200">
+              2. Ваш бюджет (₴):
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {BUDGET_PRESETS.map((preset) => (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onClick={() => {
+                    setBudget(preset.value);
+                    setCustomIdeas(null);
+                  }}
+                  className={`min-h-[48px] px-3.5 py-2 rounded-xl text-sm font-extrabold spring-transition ${
+                    budget === preset.value
+                      ? `${tokens.primaryCtaGradient} text-white`
+                      : 'bg-white/10 text-slate-200 border border-white/15 hover:bg-white/20'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 space-y-2">
+            <label className="block text-sm font-extrabold uppercase tracking-wider text-slate-200">
+              3. Уточнення (необов’язково):
+            </label>
+            <input
+              type="text"
+              value={guestQuery}
+              onChange={(e) => setGuestQuery(e.target.value)}
+              placeholder="Наприклад: щось для подорожей чи кави..."
+              className="w-full min-h-[48px] rounded-xl bg-white/10 border border-white/20 px-4 text-sm font-semibold text-white placeholder:text-slate-300/70 focus:outline-none focus:border-white/50"
+            />
+          </div>
+
+          <div className="lg:col-span-3">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full min-h-[48px] py-3 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95 flex items-center justify-center gap-2`}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Підбираємо...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  <span>Оновити 3 ідеї з ШІ</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {errorMessage && (
+        <div className="p-3 rounded-xl bg-rose-500/25 border border-rose-400/40 text-sm font-bold text-rose-200">
+          {errorMessage}
+        </div>
       )}
-    </>
+
+      {/* Сітка з 3 інтерактивних карток (grid-cols-1 md:grid-cols-3) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-white/15">
+        {displayedIdeas.map((idea, idx) => (
+          <div
+            key={`${idea.title}-${idx}`}
+            className="rounded-2xl bg-white/10 border border-white/20 p-4 flex flex-col justify-between gap-4"
+          >
+            <div className="space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-3xl shrink-0">
+                  {idea.emoji || '🎁'}
+                </div>
+                <span
+                  className={`text-sm font-black px-3 py-1 rounded-xl shrink-0 tabular-nums ${tokens.pricePillClass}`}
+                >
+                  {idea.isMonoJarContribution ? 'Внесок ' : ''}
+                  {idea.estimatedPrice.toLocaleString('uk-UA')} ₴
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                {idea.sourceStore && (
+                  <span className="inline-block text-sm font-extrabold text-amber-300">
+                    🛍️ {idea.sourceStore}
+                  </span>
+                )}
+                <h3 className="text-base font-extrabold text-white leading-snug">
+                  {idea.title}
+                </h3>
+                <p className="text-sm font-medium text-slate-200 leading-relaxed">
+                  {idea.description}
+                </p>
+                <p className="text-sm font-bold text-emerald-300">
+                  💡 {idea.whyItFits}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2 border-t border-white/15">
+              {idea.mode === 'from_wishlist' && idea.wishlistItemId ? (
+                <button
+                  type="button"
+                  onClick={() => onSelectWishlistItem?.(idea.wishlistItemId!)}
+                  className={`w-full min-h-[48px] py-2.5 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center justify-center gap-2`}
+                >
+                  <Gift className="w-4 h-4" />
+                  <span>
+                    {idea.isMonoJarContribution
+                      ? '🫙 Скинутися на Банку'
+                      : '🎁 Забронювати цей подарунок'}
+                  </span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIdea(idea)}
+                    className={`w-full min-h-[48px] py-2.5 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center justify-center gap-2`}
+                  >
+                    <Gift className="w-4 h-4" />
+                    <span>🤫 Забронювати як сюрприз</span>
+                  </button>
+                  <a
+                    href={idea.affiliateSearchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full min-h-[48px] py-2.5 px-4 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 inline-flex items-center justify-center gap-2"
+                  >
+                    <span>🛒 Відкрити в магазині</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Підтвердження фіксації таємного сюрпризу */}
+      {selectedIdea && (
+        <form
+          onSubmit={handleCommitSurprise}
+          className="rounded-2xl bg-black/55 border border-white/25 p-5 space-y-4"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <h4 className="text-base font-extrabold text-white">
+              🤫 Фіксація таємного сюрпризу: {selectedIdea.title}
+            </h4>
+            <button
+              type="button"
+              onClick={() => setSelectedIdea(null)}
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white"
+              aria-label="Закрити"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <p className="text-sm font-semibold text-slate-200">
+            Інші гості побачать, що цей сюрприз уже зайнятий вами, але іменинник у своєму кабінеті НЕ побачить цей лот до свята!
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input
+              type="text"
+              required
+              value={guestName}
+              onChange={(e) => setGuestName(e.target.value)}
+              placeholder="Ваше ім'я або нікнейм"
+              className="min-h-[48px] rounded-xl bg-black/40 border border-white/20 px-4 text-sm font-semibold text-white placeholder:text-slate-300"
+            />
+            <input
+              type="email"
+              required
+              value={guestEmail}
+              onChange={(e) => setGuestEmail(e.target.value)}
+              placeholder="Ваш email (для керування бронню)"
+              className="min-h-[48px] rounded-xl bg-black/40 border border-white/20 px-4 text-sm font-semibold text-white placeholder:text-slate-300"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full min-h-[48px] py-3 px-4 rounded-xl text-sm font-extrabold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/30 spring-transition"
+          >
+            💎 Підтвердити та додати таємний сюрприз
+          </button>
+        </form>
+      )}
+    </section>
   );
 }
