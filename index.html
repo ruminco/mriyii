@@ -89,64 +89,34 @@
   <main id="screen-landing" class="mx-auto max-w-5xl px-4 pb-24">
 
     <!-- СЕКЦІЯ 1: ЧИСТИЙ ЦЕНТРОВАНИЙ HERO -->
-    <section class="max-w-3xl mx-auto text-center py-16 sm:py-24 space-y-6">
-      <div>
-        <span id="hero-badge" class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-pink-500/15 border border-pink-400/35 text-pink-200">
-          ✨ Розумні вішлісти • Монобанка • ШІ
-        </span>
+    <section class="max-w-3xl mx-auto text-center py-12 sm:py-20 space-y-5 sm:space-y-6">
+      <div class="h-11 sm:h-12 overflow-hidden flex items-center justify-center">
+        <button onclick="toggleHeroPill()" id="hero-morph-pill" class="inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 bg-rose-500/15 border border-rose-400/35 text-rose-200">
+          <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0"></span>
+          <span>🤫 Таємний чат у Telegram «То що даруємо?»</span>
+          <span>➔</span>
+        </button>
       </div>
-
       <h1 class="text-4xl sm:text-5xl lg:text-[56px] font-black tracking-tight text-white leading-[1.08]">
-        Твої мрії <span id="hero-accent" class="accent-rose">ВАРТІ ТОГО, ЩОБ ЗБУТИСЯ</span> саме так, як ти хочеш
+        Твої мрії <span id="hero-accent" class="accent-rose">ВАРТІ ТОГО,</span> щоб збутися
       </h1>
-
       <p class="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
-        Зроби свої бажання <strong class="text-white font-bold">видимими за 30 секунд</strong> — встав посилання на подарунок, квітковий шоурум чи Монобанку та отримай один стильний лінк для друзів.
+        Більше жодних таємних чатів у Telegram і незручних натяків. Додай лінк на подарунок — отримай стильну вітрину за <strong class="text-white font-bold">30 секунд</strong>.
       </p>
-
-      <!-- Компактний перемикач стилю -->
-      <div class="max-w-sm mx-auto grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/35 border border-white/15">
-        <button onclick="setThemeExplicit('rose_luxury')" id="hero-sw-rose" class="h-11 rounded-xl text-sm font-bold bg-gradient-to-r from-pink-500 to-amber-500 text-white shadow-lg spring">
-          👩 Для неї
-        </button>
-        <button onclick="setThemeExplicit('cyber_titanium')" id="hero-sw-cyber" class="h-11 rounded-xl text-sm font-bold text-slate-200 hover:text-white spring">
-          👨 Для нього
-        </button>
+      <div class="max-w-xs mx-auto grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/35 border border-white/15">
+        <button onclick="setThemeExplicit('rose_luxury')" id="hero-sw-rose" class="min-h-[48px] rounded-xl text-sm font-bold bg-gradient-to-r from-pink-500 to-amber-500 text-white shadow-lg spring">👩 Для неї</button>
+        <button onclick="setThemeExplicit('cyber_titanium')" id="hero-sw-cyber" class="min-h-[48px] rounded-xl text-sm font-bold text-slate-200 hover:text-white spring">👨 Для нього</button>
       </div>
-
-      <!-- Суцільна біла капсула вводу -->
-      <div class="max-w-2xl mx-auto bg-white rounded-2xl p-2 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-        <input
-          id="landing-input"
-          type="text"
-          placeholder="Встав посилання на товар або @instagram-шоурум..."
-          class="flex-1 px-4 py-3 text-base font-semibold text-slate-950 placeholder:text-slate-400 bg-transparent outline-none"
-        />
-        <button
-          onclick="addFromCapsule('landing-input')"
-          id="capsule-btn"
-          class="w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl text-base font-bold bg-gradient-to-r from-pink-600 to-amber-500 text-white shrink-0 spring active:scale-95"
-        >
-          ✨ Створити вішліст
-        </button>
-      </div>
-
-      <!-- 3 чисті пігулки швидкого тесту -->
+      <form onsubmit="handleCapsuleSubmit(event)" class="max-w-2xl mx-auto bg-white rounded-2xl p-2 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+        <input id="capsule-input" type="text" placeholder="Встав посилання або @instagram-шоурум..." class="flex-1 px-4 py-3 text-base font-semibold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none" />
+        <button id="capsule-btn" type="submit" class="w-full sm:w-auto min-h-[48px] sm:h-14 px-6 rounded-xl text-base font-bold bg-gradient-to-r from-pink-600 to-amber-500 text-white shrink-0 spring active:scale-95">✨ Створити вішліст</button>
+      </form>
       <div class="flex flex-wrap items-center justify-center gap-2.5">
-        <button onclick="quickAddDemo('Стайлер Dyson Airwrap', 26000, '✨')" class="h-11 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">
-          ✨ Dyson
-        </button>
-        <button onclick="quickAddDemo('Навушники Apple AirPods Max', 23999, '🎧')" class="h-11 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">
-          🎧 AirPods Max
-        </button>
-        <button onclick="quickAddDemo('Білі півонії @kamelia_flowers_kyiv', 4200, '💐')" class="h-11 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">
-          💐 Півонії з Instagram
-        </button>
+        <button onclick="quickAddDemo('Dyson Airwrap i.d. Rose Gold', 24999)" class="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">✨ Dyson</button>
+        <button onclick="quickAddDemo('Apple AirPods Max Midnight', 23999)" class="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">🎧 AirPods Max</button>
+        <button onclick="quickAddDemo('Букет білих півоній @kamelia_flowers_kyiv', 2800)" class="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">💐 Півонії</button>
       </div>
-
-      <p class="text-sm font-medium text-slate-300">
-        Без реєстрації для старту • 0% комісії • Тільки ₴ UAH
-      </p>
+      <p class="text-sm font-medium text-slate-200">Без реєстрації • 0% комісії • Тільки ₴ UAH</p>
     </section>
 
     <!-- СЕКЦІЯ 2: ЯК ЦЕ ЗМІНЮЄ ПІДГОТОВКУ ДО СВЯТА -->
@@ -338,8 +308,7 @@
     <!-- СЕКЦІЯ 7: ФІНАЛЬНИЙ МАНІФЕСТ -->
     <section class="py-20 sm:py-28 text-center space-y-6 max-w-3xl mx-auto">
       <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-[1.12]">
-        Твої мрії <span class="sec-accent accent-rose">ВАРТІ ТОГО, ЩОБ ЗБУТИСЯ</span>. Зроби бажання видимими за 30 секунд.
-      </h2>
+        Створи свій вішліст за <span class="sec-accent accent-rose">30 секунд</span> — безкоштовно</h2>
       <p class="text-base sm:text-xl text-slate-200">
         Повністю безкоштовно. Працює в Instagram Bio, Telegram та TikTok.
       </p>
@@ -716,11 +685,11 @@
         el.className = el.className.replace(/from-\S+ to-\S+/, grad);
       });
       document.getElementById('hero-sw-rose').className = !isCyber
-        ? 'h-11 rounded-xl text-sm font-bold bg-gradient-to-r from-pink-500 to-amber-500 text-white shadow-lg spring'
-        : 'h-11 rounded-xl text-sm font-bold text-slate-200 hover:text-white spring';
+        ? 'min-h-[48px] rounded-xl text-sm font-bold bg-gradient-to-r from-pink-500 to-amber-500 text-white shadow-lg spring'
+        : 'min-h-[48px] rounded-xl text-sm font-bold text-slate-200 hover:text-white spring';
       document.getElementById('hero-sw-cyber').className = isCyber
-        ? 'h-11 rounded-xl text-sm font-bold bg-gradient-to-r from-indigo-600 to-emerald-500 text-white shadow-lg spring'
-        : 'h-11 rounded-xl text-sm font-bold text-slate-200 hover:text-white spring';
+        ? 'min-h-[48px] rounded-xl text-sm font-bold bg-gradient-to-r from-indigo-600 to-emerald-500 text-white shadow-lg spring'
+        : 'min-h-[48px] rounded-xl text-sm font-bold text-slate-200 hover:text-white spring';
       renderAll();
     }
 
@@ -981,6 +950,22 @@
         </div>
       `;
     }
+
+
+    let heroPillState = "before";
+    function toggleHeroPill(forceNext) {
+      heroPillState = forceNext || (heroPillState === "before" ? "after" : "before");
+      const pill = document.getElementById("hero-morph-pill");
+      if (!pill) return;
+      if (heroPillState === "before") {
+        pill.className = "inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 bg-rose-500/15 border border-rose-400/35 text-rose-200";
+        pill.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0"></span><span>🤫 Таємний чат у Telegram «То що даруємо?»</span><span>➔</span>';
+      } else {
+        pill.className = "inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 bg-emerald-500/15 border border-emerald-400/40 text-emerald-200";
+        pill.innerHTML = '<span>✨ 1 лінк Mriyii без спойлерів і натяків</span><span class="font-black text-emerald-300">✓</span>';
+      }
+    }
+    setInterval(() => toggleHeroPill(), 3200);
 
     renderAll();
   </script>

@@ -41,6 +41,14 @@ export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [locale, setLocale] = useState<'ua' | 'en'>('ua');
+  const [heroPillState, setHeroPillState] = useState<'before' | 'after'>('before');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroPillState((prev) => (prev === 'before' ? 'after' : 'before'));
+    }, 3200);
+    return () => clearInterval(timer);
+  }, []);
 
   // Живий інтерактивний стан Монобанки у Секції 3
   const [demoJarAmount, setDemoJarAmount] = useState<Record<ThemePreset, number>>({
@@ -268,37 +276,57 @@ export default function LandingPage() {
 
       <main className="mx-auto max-w-5xl px-4">
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 1: ЧИСТИЙ ЦЕНТРОВАНИЙ HERO (SECRET.GIFT / REWISH STYLE)    */}
+        {/* СЕКЦІЯ 1: ЧИСТИЙ ЦЕНТРОВАНИЙ HERO V2 (HERO_V2_PROPOSAL.md)        */}
         {/* ================================================================= */}
         <section
           id="section-1-hero"
-          className="max-w-3xl mx-auto text-center py-16 sm:py-24 space-y-6"
+          className="max-w-3xl mx-auto text-center py-12 sm:py-20 space-y-5 sm:space-y-6"
         >
-          <div>
-            <span
-              className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${sectionBadgeClass}`}
+          <div className="h-11 sm:h-12 overflow-hidden flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() =>
+                setHeroPillState((prev) => (prev === 'before' ? 'after' : 'before'))
+              }
+              className={`inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 ${
+                heroPillState === 'before'
+                  ? 'bg-rose-500/15 border border-rose-400/35 text-rose-200'
+                  : 'bg-emerald-500/15 border border-emerald-400/40 text-emerald-200'
+              }`}
+              title="Натисни, щоб перемкнути До → Після"
             >
-              ✨ Розумні вішлісти • Монобанка • ШІ
-            </span>
+              {heroPillState === 'before' ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0" />
+                  <span>🤫 Таємний чат у Telegram «То що даруємо?»</span>
+                  <span aria-hidden="true">➔</span>
+                </>
+              ) : (
+                <>
+                  <span>✨ 1 лінк Mriyii без спойлерів і натяків</span>
+                  <span className="font-black text-emerald-300" aria-hidden="true">
+                    ✓
+                  </span>
+                </>
+              )}
+            </button>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black tracking-tight text-white leading-[1.08]">
-            Твої мрії <span className={accentTextClass}>ВАРТІ ТОГО, ЩОБ ЗБУТИСЯ</span> саме так, як
-            ти хочеш
+            Твої мрії <span className={accentTextClass}>ВАРТІ ТОГО,</span> щоб збутися
           </h1>
 
           <p className="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
-            Зроби свої бажання <strong className="text-white font-bold">видимими за 30 секунд</strong>{' '}
-            — встав посилання на подарунок, квітковий шоурум чи Монобанку та отримай один стильний
-            лінк для друзів.
+            Більше жодних таємних чатів у Telegram і незручних натяків. Додай лінк на подарунок —
+            отримай стильну вітрину за <strong className="text-white font-bold">30 секунд</strong>.
           </p>
 
           {/* Компактний перемикач стилю */}
-          <div className="max-w-sm mx-auto grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/35 border border-white/15">
+          <div className="max-w-xs mx-auto grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/35 border border-white/15">
             <button
               type="button"
               onClick={() => handleSwitchTheme('rose_luxury')}
-              className={`h-11 rounded-xl text-sm font-bold spring-transition ${
+              className={`min-h-[48px] rounded-xl text-sm font-bold spring-transition ${
                 themePreset === 'rose_luxury'
                   ? 'bg-gradient-to-r from-pink-500 to-amber-500 text-white shadow-lg'
                   : 'text-slate-200 hover:text-white'
@@ -309,7 +337,7 @@ export default function LandingPage() {
             <button
               type="button"
               onClick={() => handleSwitchTheme('cyber_titanium')}
-              className={`h-11 rounded-xl text-sm font-bold spring-transition ${
+              className={`min-h-[48px] rounded-xl text-sm font-bold spring-transition ${
                 themePreset === 'cyber_titanium'
                   ? 'bg-gradient-to-r from-indigo-600 to-emerald-500 text-white shadow-lg'
                   : 'text-slate-200 hover:text-white'
@@ -329,13 +357,13 @@ export default function LandingPage() {
               type="text"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="Встав посилання на товар або @instagram-шоурум..."
+              placeholder="Встав посилання або @instagram-шоурум..."
               className="flex-1 px-4 py-3 text-base font-semibold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none"
             />
             <button
               type="submit"
               disabled={isParsing}
-              className={`w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl text-base font-bold ${tokens.primaryCtaGradient} text-white shrink-0 spring-transition active:scale-95 flex items-center justify-center gap-2`}
+              className={`w-full sm:w-auto min-h-[48px] sm:h-14 px-6 rounded-xl text-base font-bold ${tokens.primaryCtaGradient} text-white shrink-0 spring-transition active:scale-95 flex items-center justify-center gap-2`}
             >
               {isParsing ? (
                 <>
@@ -362,7 +390,7 @@ export default function LandingPage() {
                   isBooked: false,
                 })
               }
-              className="h-11 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
+              className="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
             >
               ✨ Dyson
             </button>
@@ -383,7 +411,7 @@ export default function LandingPage() {
                   isBooked: false,
                 })
               }
-              className="h-11 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
+              className="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
             >
               🎧 AirPods Max
             </button>
@@ -396,7 +424,7 @@ export default function LandingPage() {
                   isBooked: false,
                 })
               }
-              className="h-11 px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
+              className="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
             >
               💐 Півонії з Instagram
             </button>
@@ -842,8 +870,7 @@ export default function LandingPage() {
           className="py-20 sm:py-28 text-center space-y-6 max-w-3xl mx-auto"
         >
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-[1.12]">
-            Твої мрії <span className={accentTextClass}>ВАРТІ ТОГО, ЩОБ ЗБУТИСЯ</span>. Зроби
-            бажання видимими за 30 секунд.
+            Створи свій вішліст за <span className={accentTextClass}>30 секунд</span> — безкоштовно
           </h2>
           <p className="text-base sm:text-xl text-slate-200">
             Повністю безкоштовно. Працює в Instagram Bio, Telegram та TikTok.
