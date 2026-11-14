@@ -12,27 +12,55 @@ export interface MonoJarStatus {
   isGoalReached: boolean;
 }
 
-const ALLOWED_MONO_HOSTS = new Set(['send.monobank.ua', 'www.send.monobank.ua']);
+const ALLOWED_JAR_OR_ENVELOPE_HOSTS = new Set([
+  'send.monobank.ua',
+  'www.send.monobank.ua',
+  'next.privat24.ua',
+  'www.next.privat24.ua',
+]);
 
 /**
- * Перевіряє посилання на Банку Monobank та витягує ідентифікатор Банки (clientId / jarId).
- * Підтримує посилання формату https://send.monobank.ua/jar/XXXXXXXXXX
+ * Перевіряє посилання на Банку Monobank або Конверт Приват24 за суворим білим списком доменів.
+ * Підтримує:
+ * - https://send.monobank.ua/jar/XXXXXXXXXX
+ * - https://next.privat24.ua/send/XXXXXXXXXX
  */
-export function extractMonoJarId(rawJarUrl: string): { cleanUrl: string; jarId: string } {
+export function extractMonoJarId(rawJarUrl: string): {
+  cleanUrl: string;
+  jarId: string;
+  provider: 'monobank' | 'privat24';
+} {
   let parsed: URL;
   try {
     parsed = new URL(rawJarUrl.trim());
   } catch {
-    throw new Error('Некоректне посилання на Банку Monobank.');
+    throw new Error('Некоректне посилання на Банку Monobank або Конверт Приват24.');
   }
 
   if (parsed.protocol !== 'https:') {
-    throw new Error('Посилання на Банку Monobank повинно використовувати протокол HTTPS.');
+    throw new Error('Посилання повинно використовувати захищений протокол HTTPS.');
   }
 
   const host = parsed.hostname.toLowerCase();
-  if (!ALLOWED_MONO_HOSTS.has(host)) {
-    throw new Error('Дозволені лише офіційні посилання https://send.monobank.ua/jar/...');
+  if (!ALLOWED_JAR_OR_ENVELOPE_HOSTS.has(host)) {
+    throw new Error(
+      'Дозволені лише офіційні домени: https://send.monobank.ua/jar/... або https://next.privat24.ua/send/...'
+    );
+  }
+
+  if (host.includes('privat24.ua')) {
+    const p24Match = parsed.pathname.match(/^\/send\/([A-Za-z0-9_-]{4,64})\/?$/);
+    if (!p24Match || !p24Match[1]) {
+      throw new Error(
+        'Не вдалося розпізнати ID Конверта Приват24. Формат: https://next.privat24.ua/send/XXXXXXXX'
+      );
+    }
+    const envelopeId = p24Match[1];
+    return {
+      cleanUrl: `https://next.privat24.ua/send/${envelopeId}`,
+      jarId: `p24_${envelopeId}`,
+      provider: 'privat24',
+    };
   }
 
   const match = parsed.pathname.match(/^\/jar\/([A-Za-z0-9_-]{6,64})\/?$/);
@@ -46,6 +74,7 @@ export function extractMonoJarId(rawJarUrl: string): { cleanUrl: string; jarId: 
   return {
     cleanUrl: `https://send.monobank.ua/jar/${jarId}`,
     jarId,
+    provider: 'monobank',
   };
 }
 
@@ -60,32 +89,31 @@ interface MonobankPublicJarResponse {
 }
 
 /**
- * Отримує актуальний баланс та цільову суму Банки Monobank.
- * Примітка: Monobank віддає суми в копійках (мінімальних одиницях валюти), тому конвертуємо у гривні (/ 100),
- * якщо значення передано в копійках, або використовуємо fallback.
+ * Отримує актуальний баланс та цільову суму Банки Monobank (або валідує Конверт Приват24).
  */
 export async function fetchMonoJarStatus(
   rawJarUrl: string,
   fallbackTargetUah?: number
 ): Promise<MonoJarStatus> {
-  const { cleanUrl, jarId } = extractMonoJarId(rawJarUrl);
+  const { cleanUrl, jarId, provider } = extractMonoJarId(rawJarUrl);
 
   let currentAmountUah = 0;
   let targetAmountUah = fallbackTargetUah;
   let title: string | undefined;
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+  if (provider === 'monobank') {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    const response = await fetch(`https://api.monobank.ua/bank/jar/${encodeURIComponent(jarId)}`, {
-      method: 'GET',
-      signal: controller.signal,
-      headers: {
-        Accept: 'application/json',
-      },
-      cache: 'no-store',
-    });
+      const response = await fetch(`https://api.monobank.ua/bank/jar/${encodeURIComponent(jarId)}`, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+      });
 
     clearTimeout(timeoutId);
 
@@ -105,9 +133,12 @@ export async function fetchMonoJarStatus(
 
       title = data.title ?? data.name;
     }
-  } catch {
-    // У разі тимчасової недоступності публічного ендпоінту повертаємо початковий стан (0 грн та задану ціль),
-    // щоб не блокувати прив'язку Банки гостем.
+    } catch {
+      // У разі тимчасової недоступності публічного ендпоінту повертаємо початковий стан (0 грн та задану ціль),
+      // щоб не блокувати прив'язку Банки гостем.
+    }
+  } else {
+    title = 'Конверт Приват24';
   }
 
   const isGoalReached =

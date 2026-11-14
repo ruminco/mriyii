@@ -69,6 +69,8 @@ function DashboardContent() {
     monoJarUrl: string;
   } | null>(null);
 
+  const [isPostEventReveal, setIsPostEventReveal] = useState(false);
+
   // Поля анкети для ШІ-помічника (aiPreferences)
   const [selectedInterestChips, setSelectedInterestChips] = useState<string[]>([
     '☕ Specialty кава',
@@ -835,6 +837,42 @@ function DashboardContent() {
                   </span>
                 </button>
               </form>
+            </div>
+
+            {/* COPY-01: Розкриття дарувальників наступного дня після свята */}
+            <div className="solid-white-card rounded-[26px] p-5 border border-white space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-extrabold text-slate-950">
+                  🎉 Кому подякувати за подарунки
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsPostEventReveal((v) => !v)}
+                  className={`px-3 py-1.5 rounded-xl text-sm font-extrabold transition ${
+                    isPostEventReveal
+                      ? 'bg-emerald-500 text-slate-950'
+                      : 'bg-slate-200 text-slate-800 hover:bg-slate-300'
+                  }`}
+                >
+                  {isPostEventReveal ? '🎉 Після свята' : '🔒 До свята'}
+                </button>
+              </div>
+              {isPostEventReveal ? (
+                <ul className="space-y-2 text-sm text-slate-800">
+                  <li className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 font-semibold">
+                    🎁 <strong className="text-slate-950">Аліна</strong> подарувала{' '}
+                    <span className="font-bold">Dyson Airwrap</span>
+                  </li>
+                  <li className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 font-semibold">
+                    🫙 <strong className="text-slate-950">Максим, Оля, Діма</strong> скинулись у{' '}
+                    <span className="font-bold">Монобанку / Конверт Приват24</span>
+                  </li>
+                </ul>
+              ) : (
+                <p className="text-sm font-medium text-slate-600">
+                  Імена дарувальників приховані Сюрприз-режимом і автоматично відкриються наступного дня після дати свята!
+                </p>
+              )}
             </div>
           </aside>
         </div>

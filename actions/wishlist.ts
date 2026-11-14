@@ -37,6 +37,7 @@ export interface OwnerGiftItemDTO {
   affiliateUrl?: string;
   instagramHandle?: string;
   isBooked: boolean;
+  bookedByName?: string;
   hasMonoJar: boolean;
   jarTargetAmount?: number;
   createdAt: string;
@@ -75,6 +76,7 @@ export interface WishlistViewDTO {
   themePreset: ThemePreset;
   flowerAndGiftNotes?: string;
   eventDate?: string;
+  isEventPassed?: boolean;
   isSurpriseActive: boolean;
   isOwnerViewer: boolean;
   ownerName?: string;
@@ -530,10 +532,14 @@ export async function getWishlistBySlug(
   const isOwnerViewer = Boolean(
     viewerUserId && String(wishlist.ownerId) === String(viewerUserId)
   );
-  const enforceSurprisePrivacy = isOwnerViewer && wishlist.isSurpriseActive;
+  const isEventPassed = Boolean(
+    wishlist.eventDate && new Date(wishlist.eventDate).getTime() < Date.now()
+  );
+  const enforceSurprisePrivacy =
+    isOwnerViewer && wishlist.isSurpriseActive && !isEventPassed;
 
   if (enforceSurprisePrivacy) {
-    // ПРАВИЛО 1 [Tech Lead]: Сувора фільтрація на рівні запиту Mongoose для власника
+    // ПРАВИЛО 1 [Tech Lead]: Сувора фільтрація на рівні запиту Mongoose для власника (поки свято не минуло)
     const ownerRawItems = await GiftItem.find({
       wishlistId: wishlist._id,
       isAiSurprise: { $ne: true },
@@ -567,6 +573,7 @@ export async function getWishlistBySlug(
       themePreset: resolvedThemePreset,
       flowerAndGiftNotes: wishlist.flowerAndGiftNotes,
       eventDate: wishlist.eventDate ? new Date(wishlist.eventDate).toISOString() : undefined,
+      isEventPassed: false,
       isSurpriseActive: wishlist.isSurpriseActive,
       isOwnerViewer: true,
       ownerName: owner?.name,
@@ -617,6 +624,7 @@ export async function getWishlistBySlug(
     themePreset: resolvedThemePreset,
     flowerAndGiftNotes: wishlist.flowerAndGiftNotes,
     eventDate: wishlist.eventDate ? new Date(wishlist.eventDate).toISOString() : undefined,
+    isEventPassed,
     isSurpriseActive: wishlist.isSurpriseActive,
     isOwnerViewer,
     ownerName: owner?.name,

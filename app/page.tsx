@@ -40,6 +40,7 @@ export default function LandingPage() {
   const [wishlistTitle, setWishlistTitle] = useState(DEMO_WISHLISTS.rose_luxury.title);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [locale, setLocale] = useState<'ua' | 'en'>('ua');
 
   // Живий інтерактивний стан Монобанки у Секції 3
   const [demoJarAmount, setDemoJarAmount] = useState<Record<ThemePreset, number>>({
@@ -228,18 +229,38 @@ export default function LandingPage() {
             <span className="text-xl font-black tracking-tight text-white">Mriyii</span>
           </Link>
 
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-3">
+            <div className="inline-flex items-center rounded-xl bg-white/10 border border-white/15 p-0.5">
+              <button
+                type="button"
+                onClick={() => setLocale('ua')}
+                className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
+                  locale === 'ua' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                }`}
+              >
+                UA
+              </button>
+              <button
+                type="button"
+                onClick={() => setLocale('en')}
+                className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
+                  locale === 'en' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+            </div>
             <Link
               href={`/w/${currentDemoWishlist.slug}`}
               className="hidden sm:inline-block text-sm font-bold text-slate-200 hover:text-white spring-transition"
             >
-              Приклад
+              {locale === 'en' ? 'Demo' : 'Приклад'}
             </Link>
             <Link
               href={`/dashboard?theme=${themePreset}`}
               className={`h-11 px-5 rounded-xl text-sm font-bold ${tokens.primaryCtaGradient} text-white inline-flex items-center spring-transition active:scale-95`}
             >
-              Мій кабінет →
+              {locale === 'en' ? 'Dashboard →' : 'Мій кабінет →'}
             </Link>
           </nav>
         </div>

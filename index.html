@@ -63,6 +63,10 @@
       </button>
 
       <div class="flex items-center gap-4">
+        <div class="inline-flex items-center rounded-xl bg-white/10 border border-white/15 p-0.5 mr-1">
+          <button onclick="setLocale('ua')" id="lang-ua" class="px-2.5 py-1 rounded-lg text-sm font-extrabold bg-white text-slate-950 spring">UA</button>
+          <button onclick="setLocale('en')" id="lang-en" class="px-2.5 py-1 rounded-lg text-sm font-extrabold text-slate-200 hover:text-white spring">EN</button>
+        </div>
         <button onclick="switchScreen('guest')" class="hidden sm:inline-block text-sm font-bold text-slate-200 hover:text-white spring">
           Приклад
         </button>
@@ -406,6 +410,7 @@
       </button>
     </div>
 
+    <div id="dashboard-post-event-card" class="solid-white-card rounded-3xl p-6 space-y-3"></div>
     <div id="dashboard-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
   </main>
 
@@ -556,6 +561,7 @@
         selectedInterests.push(chip);
       }
       renderInterestChips();
+      renderPostEventCard();
     }
 
     function saveInterestsProfile() {
@@ -639,9 +645,14 @@
           </div>
         `;
       } else if (item.instagramHandle) {
-        bottomControls = `<button onclick="orderIgDirect('${item.instagramHandle}', '${item.title.replace(/'/g, '')}')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-gradient-to-r from-pink-600 to-amber-500 text-white shadow spring active:scale-95">📸 Замовити в @${item.instagramHandle}</button>`;
+        bottomControls = `<button onclick="orderIgDirect('${item.instagramHandle}', '${item.title.replace(/'/g, '')}')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-gradient-to-r from-pink-600 to-amber-500 text-white shadow spring active:scale-95">${currentLocale === 'en' ? '📸 Order in Direct @' + item.instagramHandle : '📸 Замовити в @' + item.instagramHandle}</button>`;
       } else {
-        bottomControls = `<button onclick="showToast('💎 Подарунок заброньовано!')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold ${ctaClass} text-white shadow spring active:scale-95">🎁 Забронювати</button>`;
+        bottomControls = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button onclick="showToast(currentLocale === 'en' ? '💎 Gift reserved!' : '💎 Подарунок заброньовано!')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold ${ctaClass} text-white shadow spring active:scale-95">${currentLocale === 'en' ? '🎁 Reserve gift' : '🎁 Забронювати'}</button>
+            <button onclick="markPurchasedElsewhere('${item.id}')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 spring active:scale-95">${currentLocale === 'en' ? '✅ Purchased elsewhere' : '✅ Купив деінде'}</button>
+          </div>
+        `;
       }
 
       return `

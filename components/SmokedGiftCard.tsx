@@ -37,6 +37,7 @@ interface SmokedGiftCardProps {
   item: UnifiedGiftCardItem;
   themePreset: ThemePreset;
   viewMode: 'owner' | 'guest';
+  locale?: 'ua' | 'en';
   ownerInstagramHandle?: string;
   forceFallbackPoster?: boolean;
   isBookedByCurrentVisitor?: boolean;
@@ -52,13 +53,19 @@ interface SmokedGiftCardProps {
 
 /**
  * Генерує текст замовлення в Instagram Direct без необхідності знати домашню адресу отримувача (Zero Home Address Storage).
+ * У режимі 'en' формує двомовний шаблон (EN + UA), щоб іноземний гість розумів, а український магазин миттєво обробив замовлення.
  */
 export function buildInstagramDirectOrderMessage(
   ownerInstagramHandle: string | undefined,
-  itemTitle: string
+  itemTitle: string,
+  locale: 'ua' | 'en' = 'ua'
 ): string {
-  const cleanOwnerIg = (ownerInstagramHandle || 'нікнейм_отримувачки').replace(/^@+/, '');
-  return `Привіт! 👋 Хочу оплатити подарунок зі списку бажань Mriyii для @${cleanOwnerIg}: ${itemTitle}. Напишіть їй, будь ласка, у Direct після оплати, щоб вона сама вказала, куди і коли їй зручно прийняти доставку!`;
+  const cleanOwnerIg = (ownerInstagramHandle || 'recipient_handle').replace(/^@+/, '');
+  const uaText = `Привіт! 👋 Хочу оплатити подарунок зі списку бажань Mriyii для @${cleanOwnerIg}: ${itemTitle}. Напишіть їй, будь ласка, у Direct після оплати, щоб вона сама вказала, куди і коли їй зручно прийняти доставку!`;
+  if (locale === 'en') {
+    return `Hi! 👋 I'd like to pay for a gift from @${cleanOwnerIg}'s Mriyii wishlist: ${itemTitle}. Please DM her for delivery details after payment.\n\n[UA для магазину]: ${uaText}`;
+  }
+  return uaText;
 }
 
 function getStoreLabel(url?: string, instagramHandle?: string): string {
@@ -83,6 +90,7 @@ export function SmokedGiftCard({
   item,
   themePreset,
   viewMode,
+  locale = 'ua',
   ownerInstagramHandle,
   forceFallbackPoster = false,
   isBookedByCurrentVisitor = false,
@@ -98,9 +106,11 @@ export function SmokedGiftCard({
   const [isSyncing, setIsSyncing] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [igCopiedLocal, setIgCopiedLocal] = useState(false);
+  const [purchasedElsewhere, setPurchasedElsewhere] = useState(false);
   const tokens = THEME_TOKENS[themePreset];
 
   const hasJar = Boolean(item.monoJarUrl || item.hasMonoJar);
+  const isPrivat24 = Boolean(item.monoJarUrl?.includes('privat24.ua'));
   const targetAmount = item.jarTargetAmount ?? item.price ?? 0;
   const currentAmount = item.jarCurrentAmount ?? 0;
   const progressPct =
@@ -127,7 +137,7 @@ export function SmokedGiftCard({
 
   const handleInstagramOrderClick = async () => {
     if (!cleanShopHandle) return;
-    const message = buildInstagramDirectOrderMessage(ownerInstagramHandle, item.title);
+    const message = buildInstagramDirectOrderMessage(ownerInstagramHandle, item.title, locale);
     try {
       await navigator.clipboard.writeText(message);
     } catch {
@@ -136,7 +146,11 @@ export function SmokedGiftCard({
     setIgCopiedLocal(true);
     setTimeout(() => setIgCopiedLocal(false), 3500);
     if (onInstagramOrderToast) {
-      onInstagramOrderToast('Текст замовлення скопійовано в буфер обміну! 💌');
+      onInstagramOrderToast(
+        locale === 'en'
+          ? 'Bilingual order message (EN+UA) copied to clipboard! 💌'
+          : 'Текст замовлення скопійовано в буфер обміну! 💌'
+      );
     }
     void trackClientInteraction({
       eventType: 'instagram_dm_copied',
@@ -342,7 +356,15 @@ export function SmokedGiftCard({
               <div className="bg-gradient-to-br from-emerald-50/95 via-teal-50/70 to-indigo-50/60 border border-emerald-200 rounded-2xl p-3 space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-extrabold text-emerald-950 flex items-center gap-1.5">
-                    <span>🐈‍⬛ Монобанка збору</span>
+                    <span>
+                      {isPrivat24
+                        ? locale === 'en'
+                          ? '💚 Privat24 Envelope'
+                          : '💚 Конверт Приват24'
+                        : locale === 'en'
+                        ? '🐈‍⬛ Monobank Jar'
+                        : '🐈‍⬛ Монобанка збору'}
+                    </span>
                     <span
                       className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${tokens.donorsBadgeClass}`}
                     >
@@ -476,6 +498,36 @@ export function SmokedGiftCard({
                     </a>
                   )}
 
+                  {isBookedByCurrentVisitor && !purchasedElsewhere && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPurchasedElsewhere(true);
+                        void trackClientInteraction({
+                          eventType: 'gift_purchased_elsewhere',
+                          itemId: item.id,
+                          priceUah: item.price,
+                        });
+                        if (onInstagramOrderToast) {
+                          onInstagramOrderToast(
+                            locale === 'en'
+                              ? 'Marked as purchased elsewhere! Thanks for confirming ✅'
+                              : 'Позначено як «Куплено деінде»! Дякуємо за чесність ✅'
+                          );
+                        }
+                      }}
+                      className="py-2 px-2.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 spring-transition inline-flex items-center gap-1"
+                    >
+                      {locale === 'en' ? '✅ Purchased elsewhere' : '✅ Купив деінде'}
+                    </button>
+                  )}
+
+                  {purchasedElsewhere && (
+                    <span className="py-2 px-2.5 rounded-xl text-xs font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                      {locale === 'en' ? '✅ Purchased' : '✅ Куплено'}
+                    </span>
+                  )}
+
                   {isBookedByCurrentVisitor && onCancelBookingClick && (
                     <button
                       type="button"
@@ -483,7 +535,7 @@ export function SmokedGiftCard({
                       className="py-2 px-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 spring-transition inline-flex items-center gap-1"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
-                      Скасувати
+                      {locale === 'en' ? 'Cancel' : 'Скасувати'}
                     </button>
                   )}
                 </div>
@@ -498,7 +550,7 @@ export function SmokedGiftCard({
                       onClick={() => onBookClick(item)}
                       className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold ${tokens.primaryCtaGradient} hover:brightness-110 text-white spring-transition active:scale-95 flex items-center justify-center gap-1.5`}
                     >
-                      <span>{tokens.primaryBookBtnText}</span>
+                      <span>{locale === 'en' ? '🎁 Reserve gift' : tokens.primaryBookBtnText}</span>
                     </button>
                   )}
 
@@ -508,7 +560,7 @@ export function SmokedGiftCard({
                       onClick={() => onAttachJarClick(item)}
                       className="py-2.5 px-3 rounded-xl text-xs font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 spring-transition active:scale-95"
                     >
-                      🫙 Збір у Банку
+                      {locale === 'en' ? '🫙 Group Jar / P24' : '🫙 Банка / Приват24'}
                     </button>
                   )}
                 </div>

@@ -41,6 +41,7 @@ export function GuestWishlistClient({
   initialItems,
 }: GuestWishlistClientProps) {
   const [themePreset, setThemePreset] = useState<ThemePreset>(initialThemePreset);
+  const [locale, setLocale] = useState<'ua' | 'en'>('ua');
   const [items, setItems] = useState<UnifiedGiftCardItem[]>(initialItems);
   const [bookingTokensMap, setBookingTokensMap] = useState<Record<string, string>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -300,6 +301,27 @@ export function GuestWishlistClient({
           </Link>
 
           <div className="flex flex-wrap items-center gap-1.5">
+            <div className="inline-flex items-center rounded-xl bg-white/10 border border-white/15 p-0.5">
+              <button
+                type="button"
+                onClick={() => setLocale('ua')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition ${
+                  locale === 'ua' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                }`}
+              >
+                UA
+              </button>
+              <button
+                type="button"
+                onClick={() => setLocale('en')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition ${
+                  locale === 'en' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={() => setForceFallbackPoster((p) => !p)}
@@ -326,7 +348,7 @@ export function GuestWishlistClient({
               href="/"
               className="py-1.5 px-3 rounded-xl text-xs font-extrabold bg-white text-slate-950 shadow"
             >
-              ✨ Створити свій вішліст
+              {locale === 'en' ? '✨ Create wishlist' : '✨ Створити свій вішліст'}
             </Link>
           </div>
         </div>
@@ -623,6 +645,7 @@ export function GuestWishlistClient({
               item={item}
               themePreset={themePreset}
               viewMode="guest"
+              locale={locale}
               ownerInstagramHandle={resolvedOwnerIg}
               forceFallbackPoster={forceFallbackPoster}
               isBookedByCurrentVisitor={Boolean(bookingTokensMap[item.id])}

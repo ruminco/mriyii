@@ -8,7 +8,8 @@ export type AnalyticsEventType =
   | 'jar_clicked'
   | 'instagram_dm_copied'
   | 'ai_assistant_used'
-  | 'growth_loop_clicked';
+  | 'growth_loop_clicked'
+  | 'gift_purchased_elsewhere';
 
 export interface IAnalyticsEventMetadata {
   segment?: 'mass_b2c' | 'creator_bio';

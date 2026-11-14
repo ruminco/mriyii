@@ -15,7 +15,12 @@ import CreatorCohort, { type CreatorCohortStatus } from '@/models/CreatorCohort'
 import Wishlist from '@/models/Wishlist';
 
 const ClientInteractionZodSchema = z.object({
-  eventType: z.enum(['jar_clicked', 'instagram_dm_copied', 'growth_loop_clicked']),
+  eventType: z.enum([
+    'jar_clicked',
+    'instagram_dm_copied',
+    'growth_loop_clicked',
+    'gift_purchased_elsewhere',
+  ]),
   wishlistId: z.string().trim().optional(),
   wishlistSlug: z.string().trim().optional(),
   itemId: z.string().trim().optional(),
