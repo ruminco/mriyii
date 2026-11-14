@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Sparkles, X, ExternalLink, Loader2, Gift } from 'lucide-react';
+import { Sparkles, X, ExternalLink, Loader2, Gift, Globe, ListChecks } from 'lucide-react';
 import type { ThemePreset } from '@/models/User';
+import type { AiAssistantMode } from '@/lib/gemini';
 import { THEME_TOKENS } from '@/lib/theme-data';
+import type { UnifiedGiftCardItem } from '@/components/SmokedGiftCard';
 import {
   askGiftAssistant,
   bookAiSurpriseGift,
@@ -15,6 +17,9 @@ interface AiGiftAssistantWidgetProps {
   wishlistTitle: string;
   themePreset: ThemePreset;
   existingBrowserTokens: string[];
+  wishlistItems?: UnifiedGiftCardItem[];
+  hasOwnerInterests?: boolean;
+  onSelectWishlistItem?: (itemId: string) => void;
   onSurpriseBooked: (item: {
     id: string;
     title: string;
@@ -44,6 +49,8 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
       currency: 'UAH',
       searchQuery: 'шовкова наволочка mulberry silk 22 momme',
       whyItFits: 'Ідеально доповнює beauty-ритуали та дбайливо доглядає за волоссям і шкірою.',
+      mode: 'web_search',
+      sourceStore: 'Rozetka.ua',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=%D1%88%D0%BE%D0%B2%D0%BA%D0%BE%D0%B2%D0%B0+%D0%BD%D0%B0%D0%B2%D0%BE%D0%BB%D0%BE%D1%87%D0%BA%D0%B0&utm_source=mriyii',
     },
@@ -55,6 +62,8 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
       currency: 'UAH',
       searchQuery: 'Rituals Private Collection дифузор',
       whyItFits: 'Вписується у захоплення естетикою релаксу, подорожей та нішевих ароматів.',
+      mode: 'web_search',
+      sourceStore: 'Brocard / Aromateque',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=Rituals+Private+Collection&utm_source=mriyii',
     },
@@ -66,6 +75,8 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
       currency: 'UAH',
       searchQuery: 'Anker MagSafe Power Bank Pink',
       whyItFits: 'Поєднує любов до екосистеми Apple та активний лайфстайл.',
+      mode: 'web_search',
+      sourceStore: 'Rozetka.ua',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=Anker+MagSafe+Power+Bank&utm_source=mriyii',
     },
@@ -79,17 +90,21 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
       currency: 'UAH',
       searchQuery: 'Hario V60 Craft Coffee Maker',
       whyItFits: 'Точне влучання у захоплення specialty-кавою та ранковими ритуалами.',
+      mode: 'web_search',
+      sourceStore: 'Rozetka.ua',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=Hario+V60+Craft+Coffee+Maker&utm_source=mriyii',
     },
     {
-      title: 'док-станція 3-в-1 Ugreen MagFlow Qi2 15W Magnetic Foldable Charger',
+      title: 'Док-станція 3-в-1 Ugreen MagFlow Qi2 15W Magnetic Foldable Charger',
       emoji: '⚡',
       description: 'Металевий складаний MagSafe-стенд для iPhone, Apple Watch та AirPods.',
       estimatedPrice: 2699,
       currency: 'UAH',
       searchQuery: 'Ugreen Qi2 MagSafe 3 in 1',
       whyItFits: 'Мінімалістичний сетап на робочому столі у стилі Apple Pro Titanium.',
+      mode: 'web_search',
+      sourceStore: 'Rozetka.ua',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=Ugreen+Qi2+MagSafe&utm_source=mriyii',
     },
@@ -101,20 +116,67 @@ const FALLBACK_AI_IDEAS: Record<ThemePreset, AiGiftRecommendationDTO[]> = {
       currency: 'UAH',
       searchQuery: 'фетровий килимок на стіл 90x40',
       whyItFits: 'Покращує акустику тайпінгу механічної клавіатури та естетику робочого місця.',
+      mode: 'web_search',
+      sourceStore: 'Prom.ua / Keychron UA',
       affiliateSearchUrl:
         'https://rozetka.com.ua/ua/search/?text=desk+mat+felt&utm_source=mriyii',
     },
   ],
 };
 
+function buildDemoWishlistRecommendations(
+  wishlistItems: UnifiedGiftCardItem[],
+  budget: number
+): AiGiftRecommendationDTO[] {
+  const freeItems = wishlistItems.filter((item) => !item.isBooked && !item.isAiSurprise);
+  const sorted = [...freeItems].sort((a, b) => {
+    const aPrice = a.price ?? budget;
+    const bPrice = b.price ?? budget;
+    const aFits = aPrice <= budget ? 0 : 1;
+    const bFits = bPrice <= budget ? 0 : 1;
+    if (aFits !== bFits) return aFits - bFits;
+    if (a.monoJarUrl && !b.monoJarUrl) return -1;
+    if (!a.monoJarUrl && b.monoJarUrl) return 1;
+    return aPrice - bPrice;
+  });
+
+  return sorted.slice(0, 3).map((item) => {
+    const price = item.price ?? budget;
+    const isJarTopUp = Boolean((item.monoJarUrl || item.hasMonoJar) && price > budget);
+    return {
+      title: item.title,
+      emoji: item.emoji || '🎁',
+      description:
+        item.description ||
+        (isJarTopUp
+          ? `Товар коштує ${price.toLocaleString('uk-UA')} ₴ — ви можете закинути комфортний внесок ${budget.toLocaleString('uk-UA')} ₴ у Монобанку!`
+          : 'Позиція вже є у вішлісті іменинника та вільна для бронювання.'),
+      estimatedPrice: isJarTopUp ? budget : price,
+      currency: 'UAH',
+      searchQuery: item.title,
+      whyItFits: isJarTopUp
+        ? 'Спільний збір на Монобанку дозволяє підтримати мрію в межах вашого бюджету.'
+        : '100% збіг із бажанням іменинника зі списку.',
+      mode: 'from_wishlist',
+      wishlistItemId: item.id,
+      isMonoJarContribution: isJarTopUp,
+      affiliateSearchUrl: item.affiliateUrl || item.originalUrl || '#wishlist-grid',
+    };
+  });
+}
+
 export function AiGiftAssistantWidget({
   wishlistSlug,
   wishlistTitle,
   themePreset,
   existingBrowserTokens,
+  wishlistItems = [],
+  hasOwnerInterests = true,
+  onSelectWishlistItem,
   onSurpriseBooked,
 }: AiGiftAssistantWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState<AiAssistantMode>('from_wishlist');
   const [budget, setBudget] = useState<number>(3000);
   const [guestQuery, setGuestQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -133,15 +195,23 @@ export function AiGiftAssistantWidget({
     setSelectedIdea(null);
 
     try {
-      const generated = await askGiftAssistant(wishlistSlug, budget, guestQuery);
-      setIdeas(generated);
+      const generated = await askGiftAssistant(wishlistSlug, budget, guestQuery, mode);
+      if (generated.length === 0 && mode === 'from_wishlist' && wishlistItems.length > 0) {
+        setIdeas(buildDemoWishlistRecommendations(wishlistItems, budget));
+      } else {
+        setIdeas(generated);
+      }
     } catch {
-      // Якщо БД або GEMINI_API_KEY ще не підключені в демо-режимі, показуємо релевантні ідеї під бюджет і стать
-      const fallback = FALLBACK_AI_IDEAS[themePreset].map((item) => ({
-        ...item,
-        estimatedPrice: Math.min(item.estimatedPrice, budget),
-      }));
-      setIdeas(fallback);
+      if (mode === 'from_wishlist') {
+        const demoFromList = buildDemoWishlistRecommendations(wishlistItems, budget);
+        setIdeas(demoFromList);
+      } else {
+        const fallback = FALLBACK_AI_IDEAS[themePreset].map((item) => ({
+          ...item,
+          estimatedPrice: Math.min(item.estimatedPrice, budget),
+        }));
+        setIdeas(fallback);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -188,7 +258,6 @@ export function AiGiftAssistantWidget({
       if (err instanceof Error && err.message.includes('не більше 2')) {
         setErrorMessage(err.message);
       } else {
-        // Оптимістичний фолбек для демо-режиму без підключеної MongoDB
         const demoToken = `demo_token_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
         onSurpriseBooked({
           id: `ai-surprise-${Date.now()}`,
@@ -223,13 +292,13 @@ export function AiGiftAssistantWidget({
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-purple-200">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              Powered by Gemini 2.5 Flash
+              Gemini 2.5 Flash • 2 режими підбору
             </div>
             <h3 className="text-sm sm:text-base font-extrabold text-white mt-0.5">
-              Хочете подарувати ексклюзивний сюрприз поза списком?
+              Допомогти обрати з вішліста або знайти в інтернеті за інтересами?
             </h3>
             <p className="text-xs font-semibold text-slate-200 mt-0.5">
-              ШІ проаналізує приховану анкету інтересів, розміри та анти-подарунки іменинника під ваш бюджет.
+              ШІ аналізує вільні лоти або шукає реальні товари в Україні з урахуванням прихованої анкети іменинника.
             </p>
           </div>
         </div>
@@ -237,18 +306,18 @@ export function AiGiftAssistantWidget({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className={`w-full sm:w-auto py-2.5 px-4 rounded-xl text-xs font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95 flex items-center justify-center gap-2 shrink-0`}
+          className={`w-full sm:w-auto py-3 px-5 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95 flex items-center justify-center gap-2 shrink-0`}
         >
           <Sparkles className="w-4 h-4" />
-          Підібрати ШІ-сюрприз
+          Відкрити ШІ-помічник
         </button>
       </div>
 
-      {/* Плаваюча кнопка (FAB) у правому нижньому кутку */}
+      {/* Плаваюча кнопка (FAB) */}
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-5 right-5 z-40 py-3 px-4 rounded-full text-xs sm:text-sm font-extrabold ${tokens.primaryCtaGradient} text-white shadow-2xl border border-white/25 spring-transition hover:scale-105 active:scale-95 flex items-center gap-2`}
+        className={`fixed bottom-5 right-5 z-40 py-3 px-4 rounded-full text-sm font-extrabold ${tokens.primaryCtaGradient} text-white shadow-2xl border border-white/25 spring-transition hover:scale-105 active:scale-95 flex items-center gap-2`}
       >
         <Sparkles className="w-4 h-4" />
         <span>✨ Не знаєш, що подарувати?</span>
@@ -261,14 +330,16 @@ export function AiGiftAssistantWidget({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/25 text-purple-200 border border-purple-400/40">
-                  <Sparkles className="w-3.5 h-3.5" /> Gemini 2.5 Flash • Structured Outputs
+                  <Sparkles className="w-3.5 h-3.5" /> Gemini 2.5 Flash • Google Search Grounding
                 </span>
                 <h2 className="text-xl font-extrabold text-white mt-2">
-                  ✨ ШІ-Помічник подарунків для «{wishlistTitle}»
+                  ✨ ШІ-Помічник для «{wishlistTitle}»
                 </h2>
-                <p className="text-xs font-semibold text-slate-200 mt-1">
-                  Оберіть бюджет — ШІ врахує стиль ({tokens.label}), хобі та список табу, а ви зможете зафіксувати ідею як таємний сюрприз.
-                </p>
+                {hasOwnerInterests && (
+                  <p className="text-xs font-bold text-emerald-300 mt-1">
+                    🧠 ШІ врахував заповнені інтереси, розміри та табу іменинника (приховані від сторонніх очей)
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -276,6 +347,42 @@ export function AiGiftAssistantWidget({
                 className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15"
               >
                 <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Перемикач 2 режимів */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/40 border border-white/15">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('from_wishlist');
+                  setIdeas([]);
+                  setSelectedIdea(null);
+                }}
+                className={`min-h-[44px] px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
+                  mode === 'from_wishlist'
+                    ? `${tokens.primaryCtaGradient} text-white shadow-lg`
+                    : 'text-slate-200 hover:text-white'
+                }`}
+              >
+                <ListChecks className="w-4 h-4" />
+                <span>📋 Обрати з вішліста</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('web_search');
+                  setIdeas([]);
+                  setSelectedIdea(null);
+                }}
+                className={`min-h-[44px] px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
+                  mode === 'web_search'
+                    ? `${tokens.primaryCtaGradient} text-white shadow-lg`
+                    : 'text-slate-200 hover:text-white'
+                }`}
+              >
+                <Globe className="w-4 h-4" />
+                <span>🌐 Знайти в інтернеті за інтересами</span>
               </button>
             </div>
 
@@ -290,7 +397,7 @@ export function AiGiftAssistantWidget({
                       key={preset.value}
                       type="button"
                       onClick={() => setBudget(preset.value)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-extrabold spring-transition ${
+                      className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold spring-transition ${
                         budget === preset.value
                           ? `${tokens.primaryCtaGradient} text-white`
                           : 'bg-white/10 text-slate-200 border border-white/15 hover:bg-white/20'
@@ -310,7 +417,11 @@ export function AiGiftAssistantWidget({
                   type="text"
                   value={guestQuery}
                   onChange={(e) => setGuestQuery(e.target.value)}
-                  placeholder="Наприклад: щось пов'язане з кавою, гаджетами або враженнями..."
+                  placeholder={
+                    mode === 'from_wishlist'
+                      ? 'Наприклад: щось практичне або донат у Монобанку...'
+                      : 'Наприклад: щось із кавою, гаджетами Apple або квітами...'
+                  }
                   className="w-full rounded-xl bg-white/10 border border-white/20 px-3.5 py-2.5 text-sm font-semibold text-white placeholder:text-slate-300/70 focus:outline-none focus:border-white/50"
                 />
               </div>
@@ -318,17 +429,25 @@ export function AiGiftAssistantWidget({
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-3 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95 flex items-center justify-center gap-2`}
+                className={`w-full min-h-[48px] py-3 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95 flex items-center justify-center gap-2`}
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Аналізуємо вподобання через Gemini 2.5 Flash...</span>
+                    <span>
+                      {mode === 'from_wishlist'
+                        ? 'Підбираємо найкращі лоти зі списку...'
+                        : 'Шукаємо реальні товари через Google Search...'}
+                    </span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    <span>🚀 Згенерувати 3 персоналізовані ідеї</span>
+                    <span>
+                      {mode === 'from_wishlist'
+                        ? '📋 Підібрати зі списку під мій бюджет'
+                        : '🌐 Знайти 3 реальні ідеї в інтернеті'}
+                    </span>
                   </>
                 )}
               </button>
@@ -344,7 +463,9 @@ export function AiGiftAssistantWidget({
             {ideas.length > 0 && !selectedIdea && (
               <div className="space-y-3 pt-2 border-t border-white/15">
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-emerald-300">
-                  Підібрані ідеї без спойлерів для іменинника:
+                  {mode === 'from_wishlist'
+                    ? 'Рекомендовані позиції з вішліста:'
+                    : 'Знайдені в інтернеті ідеї без спойлерів для іменинника:'}
                 </h3>
                 <div className="grid gap-3">
                   {ideas.map((idea, idx) => (
@@ -358,10 +479,15 @@ export function AiGiftAssistantWidget({
                             {idea.emoji || '🎁'}
                           </div>
                           <div>
-                            <h4 className="text-sm font-extrabold text-white">
+                            <h4 className="text-sm sm:text-base font-extrabold text-white">
                               {idea.title}
                             </h4>
-                            <p className="text-xs font-semibold text-slate-200 mt-0.5">
+                            {idea.sourceStore && (
+                              <span className="inline-block text-xs font-bold text-amber-300 mt-0.5">
+                                🛍️ {idea.sourceStore}
+                              </span>
+                            )}
+                            <p className="text-xs sm:text-sm font-semibold text-slate-200 mt-0.5">
                               {idea.description}
                             </p>
                             <p className="text-xs font-bold text-emerald-300 mt-1.5">
@@ -370,30 +496,51 @@ export function AiGiftAssistantWidget({
                           </div>
                         </div>
                         <span
-                          className={`text-xs font-black px-2.5 py-1 rounded-lg shrink-0 tabular-nums ${tokens.pricePillClass}`}
+                          className={`text-xs sm:text-sm font-black px-2.5 py-1 rounded-lg shrink-0 tabular-nums ${tokens.pricePillClass}`}
                         >
-                          ~{idea.estimatedPrice.toLocaleString('uk-UA')} ₴
+                          {idea.isMonoJarContribution ? 'Внесок ' : '~'}
+                          {idea.estimatedPrice.toLocaleString('uk-UA')} ₴
                         </span>
                       </div>
 
                       <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-white/10">
-                        <a
-                          href={idea.affiliateSearchUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="py-2 px-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 inline-flex items-center gap-1.5"
-                        >
-                          <span>Знайти в магазині</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedIdea(idea)}
-                          className={`py-2 px-3.5 rounded-xl text-xs font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
-                        >
-                          <Gift className="w-3.5 h-3.5" />
-                          <span>✨ Зафіксувати як таємний сюрприз</span>
-                        </button>
+                        {idea.mode === 'from_wishlist' && idea.wishlistItemId ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsOpen(false);
+                              onSelectWishlistItem?.(idea.wishlistItemId!);
+                            }}
+                            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
+                          >
+                            <Gift className="w-4 h-4" />
+                            <span>
+                              {idea.isMonoJarContribution
+                                ? '🫙 Докинути в Монобанку'
+                                : '🎁 Перейти до лоту в списку'}
+                            </span>
+                          </button>
+                        ) : (
+                          <>
+                            <a
+                              href={idea.affiliateSearchUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="py-2 px-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 inline-flex items-center gap-1.5"
+                            >
+                              <span>Знайти в магазині</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedIdea(idea)}
+                              className={`py-2 px-3.5 rounded-xl text-xs font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
+                            >
+                              <Gift className="w-3.5 h-3.5" />
+                              <span>✨ Зафіксувати як таємний сюрприз</span>
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

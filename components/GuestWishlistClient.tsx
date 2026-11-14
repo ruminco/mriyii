@@ -541,6 +541,12 @@ export function GuestWishlistClient({
             wishlistTitle={initialTitle}
             themePreset={themePreset}
             existingBrowserTokens={existingBrowserTokens}
+            wishlistItems={items}
+            hasOwnerInterests={true}
+            onSelectWishlistItem={() => {
+              setShowFullAiGenerator(false);
+              triggerToast('🎁 Оберіть підсвічений лот зі списку нижче!');
+            }}
             onSurpriseBooked={(surprise) => {
               persistBookingToken(surprise.id, surprise.bookingToken);
               setItems((prev) => [

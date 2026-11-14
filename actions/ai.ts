@@ -4,7 +4,11 @@ import crypto from 'node:crypto';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 import { connectToDatabase } from '@/lib/mongodb';
-import { generateGiftIdeas, type GeneratedGiftIdea } from '@/lib/gemini';
+import {
+  generateGiftIdeas,
+  type AiAssistantMode,
+  type GeneratedGiftIdea,
+} from '@/lib/gemini';
 import { buildSearchAffiliateUrl } from '@/lib/affiliate';
 import { assertGuestBookingQuota } from '@/actions/booking';
 import Wishlist from '@/models/Wishlist';
@@ -15,6 +19,7 @@ const AskGiftAssistantZodSchema = z.object({
   wishlistSlug: z.string().trim().min(1),
   budgetUah: z.number().min(100, 'Мінімальний бюджет для підбору — 100 грн').max(500_000),
   guestQuery: z.string().trim().max(300).optional(),
+  mode: z.enum(['from_wishlist', 'web_search']).default('web_search'),
 });
 
 const CommitAiSurpriseGiftZodSchema = z.object({
@@ -48,20 +53,23 @@ async function resolveClientIp(): Promise<string> {
 
 /**
  * Server Action ШІ-асистента подарунків для гостей (`askGiftAssistant`).
- * Аналізує стать (`gender`: 'female' | 'male') та приховану анкету `aiPreferences` іменинника
- * (не розкриваючи її текст клієнту), враховує існуючі лоти вішліста та повертає 3 структуровані
- * рекомендації з емодзі та партнерськими посиланнями.
+ * Підтримує два режими:
+ * - `'from_wishlist'`: підбирає вільні лоти зі списку іменинника (або пропонує докинути у Монобанку);
+ * - `'web_search'`: шукає реальні товари в інтернеті через Gemini Google Search Grounding
+ *   з урахуванням прихованої анкети `aiPreferences` (не розкриваючи її текст клієнту).
  * Захищено Rate Limiter-ом (макс. 5 запитів / хвилину з однієї IP-адреси).
  */
 export async function askGiftAssistant(
   wishlistSlug: string,
   budgetUah: number,
-  guestQuery?: string
+  guestQuery?: string,
+  mode: AiAssistantMode = 'web_search'
 ): Promise<AiGiftRecommendationDTO[]> {
   const input = AskGiftAssistantZodSchema.parse({
     wishlistSlug,
     budgetUah,
     guestQuery,
+    mode,
   });
 
   const clientIp = await resolveClientIp();
@@ -74,26 +82,47 @@ export async function askGiftAssistant(
 
   const [owner, existingItems] = await Promise.all([
     User.findById(wishlist.ownerId).select('gender aiPreferences').lean(),
-    GiftItem.find({ wishlistId: wishlist._id }).select('title').lean(),
+    GiftItem.find({ wishlistId: wishlist._id, isAiSurprise: { $ne: true } })
+      .select('title price description isBooked monoJarUrl jarCurrentAmount jarTargetAmount emoji')
+      .lean(),
   ]);
 
   const existingGiftTitles = existingItems.map((item) => item.title);
+  const availableWishlistItems = existingItems
+    .filter((item) => !item.isBooked)
+    .map((item) => ({
+      id: String(item._id),
+      title: item.title,
+      emoji: item.emoji,
+      price: item.price,
+      description: item.description,
+      hasMonoJar: Boolean(item.monoJarUrl),
+      jarCurrentAmount: item.jarCurrentAmount,
+      jarTargetAmount: item.jarTargetAmount,
+    }));
+
   const fallbackGender =
     wishlist.themePreset === 'cyber_titanium' ? 'male' : 'female';
 
   const ideas = await generateGiftIdeas({
     wishlistTitle: wishlist.title,
     budgetUah: input.budgetUah,
+    mode: input.mode,
     guestQuery: input.guestQuery,
     ownerGender: owner?.gender ?? fallbackGender,
     aiPreferences: owner?.aiPreferences,
     existingGiftTitles,
+    availableWishlistItems,
     clientIdentifier: clientIp,
   });
 
   return ideas.map((idea) => ({
     ...idea,
-    affiliateSearchUrl: buildSearchAffiliateUrl(idea.searchQuery || idea.title),
+    mode: input.mode,
+    affiliateSearchUrl:
+      idea.sourceUrl && /^https?:\/\//i.test(idea.sourceUrl)
+        ? idea.sourceUrl
+        : buildSearchAffiliateUrl(idea.searchQuery || idea.title),
   }));
 }
 

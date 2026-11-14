@@ -234,7 +234,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-7 text-slate-950 shadow-2xl space-y-5">
-          <div className="flex items-center gap-4">
+          <div class="flex items-center gap-4">
             <h3 class="text-xl font-black text-slate-950">🌸 Які квіти я люблю та мої побажання</h3>
           </div>
           <div class="bg-rose-50 rounded-2xl p-4 space-y-2.5 text-base font-medium text-slate-900">
@@ -376,6 +376,33 @@
         🔗 Скопіювати лінк →
       </button>
     </div>
+
+    <!-- Профіль смаків та інтересів для ШІ-помічника -->
+    <div class="solid-white-card rounded-3xl p-6 space-y-4">
+      <div>
+        <h3 class="text-xl font-black text-slate-950">🧠 Мій профіль смаків та інтересів (для ШІ-помічника)</h3>
+        <p class="text-base text-slate-600 mt-1">Оберіть теги та вкажіть табу — ШІ використає це для точного пошуку подарунків в інтернеті.</p>
+      </div>
+      <div id="dash-interest-chips" class="flex flex-wrap gap-2"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">🎨 Хобі та улюблені бренди:</label>
+          <input id="dash-hobbies-input" type="text" class="w-full rounded-xl bg-slate-100 border border-slate-200 px-3.5 py-2.5 text-base font-semibold text-slate-950" value="Dyson, Apple, @cher17.ua, бежевий та rose gold" />
+        </div>
+        <div>
+          <label class="block font-bold text-emerald-800 mb-1">📏 Розміри та улюблені квіти:</label>
+          <input id="dash-sizes-input" type="text" class="w-full rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-2.5 text-base font-semibold text-slate-950" value="Одяг S • Взуття 37 • Білі півонії" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block font-bold text-rose-800 mb-1">🚫 Анти-подарунки (табу — ШІ ніколи не запропонує):</label>
+          <input id="dash-antigifts-input" type="text" class="w-full rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2.5 text-base font-semibold text-slate-950" value="Сувеніри, свічки, м'які іграшки" />
+        </div>
+      </div>
+      <button onclick="saveInterestsProfile()" class="min-h-[48px] px-6 rounded-xl text-base font-bold bg-gradient-to-r from-pink-600 to-amber-500 text-white shadow-lg spring active:scale-95">
+        ✨ Зберегти профіль інтересів для ШІ
+      </button>
+    </div>
+
     <div id="dashboard-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
   </main>
 
@@ -505,23 +532,71 @@
       `;
     }
 
+    const INTEREST_CHIPS = ['☕ Specialty кава', "💄 Б'юті та парфуми", '🎧 Гаджети Apple', '✈️ Подорожі', '📚 Книги', '🕯️ Дім і затишок', '🏋️ Фітнес/Пілатес', '🎨 Творчість'];
+    let selectedInterests = ['☕ Specialty кава', "💄 Б'юті та парфуми"];
+    let aiMode = 'from_wishlist';
+
+    function renderInterestChips() {
+      const box = document.getElementById('dash-interest-chips');
+      if (!box) return;
+      box.innerHTML = INTEREST_CHIPS.map((chip) => {
+        const active = selectedInterests.includes(chip);
+        return `<button type="button" onclick="toggleInterest('${chip.replace(/'/g, "\\'")}')" class="min-h-[40px] px-3.5 py-1.5 rounded-xl text-sm font-bold spring ${active ? 'bg-gradient-to-r from-pink-600 to-amber-500 text-white shadow' : 'bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200'}">${chip}</button>`;
+      }).join('');
+    }
+
+    function toggleInterest(chip) {
+      if (selectedInterests.includes(chip)) {
+        selectedInterests = selectedInterests.filter((c) => c !== chip);
+      } else {
+        selectedInterests.push(chip);
+      }
+      renderInterestChips();
+    }
+
+    function saveInterestsProfile() {
+      const h = document.getElementById('dash-hobbies-input').value;
+      const s = document.getElementById('dash-sizes-input').value;
+      const a = document.getElementById('dash-antigifts-input').value;
+      DATA[currentTheme].chipHobby = selectedInterests.slice(0, 2).join(', ') || h;
+      DATA[currentTheme].chipSize = '📏 ' + s;
+      DATA[currentTheme].chipTaboo = '🚫 ' + a;
+      try {
+        localStorage.setItem('mriyii_ai_preferences_v1', JSON.stringify({ selectedInterests, h, s, a }));
+      } catch (e) {}
+      renderAll();
+      showToast('🧠 Профіль інтересів збережено — ШІ-помічник уже враховує ваші смаки!');
+    }
+
     function renderMiniAiHtml() {
       const grad = currentTheme === 'rose_luxury' ? 'from-pink-600 to-amber-500' : 'from-indigo-600 to-emerald-500';
+      const isList = aiMode === 'from_wishlist';
+      const defaultTitle = isList
+        ? DATA[currentTheme].items[1]?.title || 'Позиція зі списку'
+        : 'Термокружка Fellow Carter (Rozetka.ua)';
+      const defaultPrice = isList
+        ? (DATA[currentTheme].items[1]?.price || 4200).toLocaleString('uk-UA') + ' ₴ • Зі списку іменинника'
+        : '1 650 ₴ • Знайдено за інтересами';
+
       return `
         <div class="bg-gradient-to-br ${grad} rounded-3xl p-6 text-white shadow-xl space-y-4 h-full flex flex-col justify-between">
           <div>
-            <div class="text-lg font-black">🤖 ШІ-Агент подарунків</div>
-            <div class="text-sm text-white/95 mt-1">Таємний сюрприз за 10 сек під ваш бюджет:</div>
+            <div class="text-lg font-black">🤖 ШІ-Агент подарунків (Gemini)</div>
+            <div class="text-sm text-white/95 mt-1">🧠 Враховано інтереси: ${selectedInterests.join(', ') || 'загальні'}</div>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/30">
+            <button onclick="setAiMode('from_wishlist')" class="min-h-[40px] px-2 rounded-lg text-sm font-bold ${isList ? 'bg-white text-slate-950 shadow' : 'text-white/90'}">📋 З вішліста</button>
+            <button onclick="setAiMode('web_search')" class="min-h-[40px] px-2 rounded-lg text-sm font-bold ${!isList ? 'bg-white text-slate-950 shadow' : 'text-white/90'}">🌐 В інтернеті</button>
           </div>
           <div class="grid grid-cols-3 gap-2">
-            <button onclick="triggerAiIdea('Дріп-кава MadHeads Set', '750 ₴')" class="min-h-[48px] px-2 rounded-xl bg-white/20 hover:bg-white/30 text-sm font-bold">До 1 000 ₴</button>
-            <button onclick="triggerAiIdea('Термокружка Fellow Carter', '1 650 ₴')" class="min-h-[48px] px-2 rounded-xl bg-white text-slate-950 text-sm font-bold shadow">До 3 000 ₴</button>
-            <button onclick="triggerAiIdea('Сет Kurkdjian Discovery', '4 800 ₴')" class="min-h-[48px] px-2 rounded-xl bg-white/20 hover:bg-white/30 text-sm font-bold">VIP 💎</button>
+            <button onclick="triggerAiIdea('${isList ? 'Внесок у Монобанку' : 'Дріп-кава MadHeads Set (Rozetka)'}', '${isList ? '1 000 ₴' : '750 ₴'}')" class="min-h-[48px] px-2 rounded-xl bg-white/20 hover:bg-white/30 text-sm font-bold">До 1 000 ₴</button>
+            <button onclick="triggerAiIdea('${isList ? (DATA[currentTheme].items[1]?.title || 'Букет півоній').replace(/'/g, '') : 'Термокружка Fellow Carter (Rozetka)'}', '${isList ? '4 200 ₴' : '1 650 ₴'}')" class="min-h-[48px] px-2 rounded-xl bg-white text-slate-950 text-sm font-bold shadow">До 3 000 ₴</button>
+            <button onclick="triggerAiIdea('${isList ? (DATA[currentTheme].items[0]?.title || 'Dyson Airwrap').replace(/'/g, '') : 'Сет Kurkdjian Discovery (Aromateque)'}', '${isList ? '26 000 ₴' : '4 800 ₴'}')" class="min-h-[48px] px-2 rounded-xl bg-white/20 hover:bg-white/30 text-sm font-bold">VIP 💎</button>
           </div>
           <div class="bg-slate-950/75 rounded-2xl p-3 flex items-center justify-between gap-2 text-sm">
             <div class="min-w-0">
-              <div class="text-amber-300 font-bold truncate" id="ai-title">💡 Термокружка Fellow Carter</div>
-              <div class="text-slate-200 text-sm" id="ai-price">1 650 ₴ • Таємний лот</div>
+              <div class="text-amber-300 font-bold truncate" id="ai-title">💡 ${defaultTitle}</div>
+              <div class="text-slate-200 text-sm" id="ai-price">${defaultPrice}</div>
             </div>
             <button onclick="showToast('🤫 Таємний ШІ-сюрприз заброньовано!')" class="min-h-[44px] px-3 rounded-xl bg-amber-300 text-slate-950 font-bold text-sm shrink-0">Подарувати</button>
           </div>
@@ -529,9 +604,14 @@
       `;
     }
 
+    function setAiMode(nextMode) {
+      aiMode = nextMode;
+      renderAll();
+    }
+
     function triggerAiIdea(title, price) {
       document.getElementById('ai-title').textContent = '💡 ' + title;
-      document.getElementById('ai-price').textContent = price + ' • Таємний лот';
+      document.getElementById('ai-price').textContent = price + (aiMode === 'from_wishlist' ? ' • Зі списку' : ' • Google Search');
     }
 
     function renderRichPhotoCard(item, roleMode) {
@@ -587,6 +667,7 @@
       `;
       document.getElementById('guest-cards-grid').innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'guest')).join('');
       document.getElementById('dashboard-cards-grid').innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'owner')).join('');
+      renderInterestChips();
     }
 
     function switchScreen(screen) {

@@ -20,6 +20,18 @@ import { SmokedGiftCard, type UnifiedGiftCardItem } from '@/components/SmokedGif
 import { parseProductUrlAction } from '@/actions/wishlist';
 
 const DRAFT_STORAGE_KEY = 'mriyii_delayed_auth_draft_v1';
+const AI_PREFS_STORAGE_KEY = 'mriyii_ai_preferences_v1';
+
+const INTEREST_CHIPS = [
+  '☕ Specialty кава',
+  "💄 Б'юті та парфуми",
+  '🎧 Гаджети Apple',
+  '✈️ Подорожі',
+  '📚 Книги',
+  '🕯️ Дім і затишок',
+  '🏋️ Фітнес/Пілатес',
+  '🎨 Творчість',
+];
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -58,8 +70,15 @@ function DashboardContent() {
   } | null>(null);
 
   // Поля анкети для ШІ-помічника (aiPreferences)
+  const [selectedInterestChips, setSelectedInterestChips] = useState<string[]>([
+    '☕ Specialty кава',
+    "💄 Б'юті та парфуми",
+  ]);
   const [hobbiesInput, setHobbiesInput] = useState(
     DEMO_WISHLISTS[themePreset].aiHobbies.join(', ')
+  );
+  const [favoriteBrandsInput, setFavoriteBrandsInput] = useState(
+    'Dyson, Apple, @cher17.ua, бежевий та rose gold'
   );
   const [sizesInput, setSizesInput] = useState(DEMO_WISHLISTS[themePreset].aiSizes);
   const [flowerPrefsInput, setFlowerPrefsInput] = useState(
@@ -68,6 +87,7 @@ function DashboardContent() {
   const [antiGiftsInput, setAntiGiftsInput] = useState(
     DEMO_WISHLISTS[themePreset].aiAntiGifts.join(', ')
   );
+  const [showInterestsOnProfile, setShowInterestsOnProfile] = useState(false);
   const [aiSavedToast, setAiSavedToast] = useState(false);
   const [flowerSavedToast, setFlowerSavedToast] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
@@ -209,8 +229,30 @@ function DashboardContent() {
     setItems((prev) => prev.filter((item) => item.id !== target.id));
   };
 
+  const toggleInterestChip = (chip: string) => {
+    setSelectedInterestChips((prev) =>
+      prev.includes(chip) ? prev.filter((c) => c !== chip) : [...prev, chip]
+    );
+  };
+
   const handleSaveAiPrefs = (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      localStorage.setItem(
+        AI_PREFS_STORAGE_KEY,
+        JSON.stringify({
+          selectedInterestChips,
+          hobbiesInput,
+          favoriteBrandsInput,
+          sizesInput,
+          flowerPrefsInput,
+          antiGiftsInput,
+          showInterestsOnProfile,
+        })
+      );
+    } catch {
+      // Ігноруємо помилки localStorage
+    }
     setAiSavedToast(true);
     setTimeout(() => setAiSavedToast(false), 3000);
   };
@@ -538,6 +580,119 @@ function DashboardContent() {
                 </form>
               )}
             </div>
+
+            {/* Помітний блок «🧠 Мій профіль смаків та інтересів (для ШІ-помічника)» */}
+            <form
+              onSubmit={handleSaveAiPrefs}
+              className="solid-white-card rounded-[26px] p-5 sm:p-6 space-y-4 border-2 border-white shadow-xl"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span className="text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900">
+                    🧠 Живить ШІ-помічника Gemini
+                  </span>
+                  <h2 className="text-lg font-black text-slate-950 mt-1">
+                    🧠 Інтереси та смаки для ШІ-помічника
+                  </h2>
+                  <p className="text-xs sm:text-sm font-medium text-slate-600">
+                    Оберіть теги та вкажіть табу — ШІ використає це для точного пошуку подарунків в інтернеті.
+                  </p>
+                </div>
+
+                <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 bg-slate-100 px-3 py-2 rounded-xl cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showInterestsOnProfile}
+                    onChange={(e) => setShowInterestsOnProfile(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span>Показувати підказки гостям</span>
+                </label>
+              </div>
+
+              {/* Швидкі клікабельні чіпси інтересів */}
+              <div className="flex flex-wrap gap-2">
+                {INTEREST_CHIPS.map((chip) => {
+                  const active = selectedInterestChips.includes(chip);
+                  return (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => toggleInterestChip(chip)}
+                      className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold spring-transition ${
+                        active
+                          ? `${tokens.primaryCtaGradient} text-white shadow-md`
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200'
+                      }`}
+                    >
+                      {chip}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    🎨 Свої хобі та інтереси:
+                  </label>
+                  <input
+                    type="text"
+                    value={hobbiesInput}
+                    onChange={(e) => setHobbiesInput(e.target.value)}
+                    placeholder="Кераміка, вініл, пілатес..."
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5 font-semibold text-slate-950"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    ✨ Улюблені бренди та кольори:
+                  </label>
+                  <input
+                    type="text"
+                    value={favoriteBrandsInput}
+                    onChange={(e) => setFavoriteBrandsInput(e.target.value)}
+                    placeholder="Apple, Dyson, @cher17.ua, молочний..."
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5 font-semibold text-slate-950"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-emerald-800 mb-1">
+                    📏 Розміри (одяг / взуття) та квіти:
+                  </label>
+                  <input
+                    type="text"
+                    value={`${sizesInput} • ${flowerPrefsInput}`}
+                    onChange={(e) => setSizesInput(e.target.value)}
+                    className="w-full rounded-xl bg-emerald-50/70 border border-emerald-200 px-3 py-2.5 font-semibold text-slate-950"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-rose-800 mb-1">
+                    🚫 Анти-подарунки (табу):
+                  </label>
+                  <input
+                    type="text"
+                    value={antiGiftsInput}
+                    onChange={(e) => setAntiGiftsInput(e.target.value)}
+                    placeholder="Сувеніри, м'які іграшки, чашки..."
+                    className="w-full rounded-xl bg-rose-50/70 border border-rose-200 px-3 py-2.5 font-semibold text-slate-950"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className={`min-h-[44px] px-5 py-2.5 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-2 shadow-md`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>
+                  {aiSavedToast
+                    ? '✅ Профіль інтересів збережено для ШІ!'
+                    : 'Зберегти профіль інтересів для ШІ'}
+                </span>
+              </button>
+            </form>
 
             {/* Сітка карток подарунків на суцільному білому тлі (Сюрприз-захист) */}
             <div className="grid gap-5 sm:grid-cols-2">
