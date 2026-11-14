@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mriyii — Linktree × wishjar.tsx × Apple App Store Live App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .spring {
+      transition: all 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Пресет 1: Для неї — rose_luxury */
+    .canvas-rose {
+      background:
+        radial-gradient(at 15% 10%, rgba(236, 72, 153, 0.45) 0px, transparent 50%),
+        radial-gradient(at 85% 15%, rgba(139, 92, 246, 0.50) 0px, transparent 55%),
+        linear-gradient(170deg, #190d2c 0%, #2d124d 50%, #1a103c 100%);
+    }
+
+    /* Пресет 2: Для нього — cyber_titanium */
+    .canvas-cyber {
+      background:
+        radial-gradient(at 15% 10%, rgba(52, 211, 153, 0.40) 0px, transparent 50%),
+        radial-gradient(at 85% 15%, rgba(99, 102, 241, 0.50) 0px, transparent 55%),
+        linear-gradient(170deg, #090e1a 0%, #111e3d 50%, #091e26 100%);
+    }
+
+    .avatar-ring-rose {
+      background: linear-gradient(135deg, #f472b6, #fbbf24, #c084fc);
+    }
+    .avatar-ring-cyber {
+      background: linear-gradient(135deg, #34d399, #38bdf8, #818cf8);
+    }
+
+    /* Smart Luxury Poster Fallback (Коли og:image відсутнє) */
+    .fallback-rose {
+      background:
+        radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.45), transparent 55%),
+        linear-gradient(135deg, #db2777 0%, #7c3aed 60%, #1e1b4b 100%);
+    }
+    .fallback-cyber {
+      background:
+        radial-gradient(circle at 80% 20%, rgba(52, 211, 153, 0.45), transparent 55%),
+        linear-gradient(135deg, #2563eb 0%, #4f46e5 60%, #0f172a 100%);
+    }
+    .poster-pattern {
+      background-image: radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+
+    .solid-white-card {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 20px 38px -10px rgba(0, 0, 0, 0.42), 0 6px 14px -3px rgba(0, 0, 0, 0.18);
+    }
+  </style>
+</head>
+<body class="bg-[#190d2c] min-h-screen text-[var(--foreground)] antialiased p-0 m-0 select-none">
+  <div id="app-stage" class="canvas-rose min-h-screen sm:rounded-[28px] p-3.5 sm:p-5 border border-white/20 text-white spring space-y-4">
+
+    <!-- Top Navigation & Controls Bar -->
+    <div class="bg-black/35 backdrop-blur-xl rounded-2xl p-2.5 px-3.5 border border-white/15 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <div id="brand-icon" class="w-8 h-8 rounded-xl bg-gradient-to-br from-pink-500 via-fuchsia-500 to-amber-400 p-[2px]">
+          <div class="w-full h-full bg-[#161324] rounded-[10px] flex items-center justify-center text-base">🎁</div>
+        </div>
+        <div>
+          <span class="text-sm font-black tracking-tight text-white">Mriyii</span>
+          <span class="ml-1.5 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">100% Безкоштовно</span>
+        </div>
+      </div>
+
+      <!-- Screen Switcher -->
+      <div class="flex flex-wrap items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/15 text-xs">
+        <button onclick="switchScreen('landing')" id="tab-landing" class="px-3 py-1 rounded-lg font-extrabold bg-white text-slate-950 shadow spring">
+          🚀 1. Продаючий Лендінг (/)
+        </button>
+        <button onclick="switchScreen('guest')" id="tab-guest" class="px-3 py-1 rounded-lg font-bold text-white/85 hover:text-white spring">
+          🎁 2. Профіль Гостя (/w/olena)
+        </button>
+        <button onclick="switchScreen('dashboard')" id="tab-dashboard" class="px-3 py-1 rounded-lg font-bold text-white/85 hover:text-white spring">
+          👑 3. Кабінет Іменинника (/dashboard)
+        </button>
+      </div>
+
+      <!-- Gender & Photo Mode Toggles -->
+      <div class="flex items-center gap-1.5 text-xs">
+        <button onclick="toggleGender()" id="gender-btn" class="px-2.5 py-1 rounded-xl font-extrabold bg-pink-500 text-white shadow spring">
+          👩 Дівчина (Rose)
+        </button>
+        <button onclick="togglePhotoMode()" id="photo-btn" class="px-2.5 py-1 rounded-xl font-bold bg-white/15 hover:bg-white/25 text-white border border-white/20 spring">
+          🖼️ Фото: Є
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-box" class="hidden bg-slate-950/95 backdrop-blur-xl rounded-xl px-4 py-2.5 border border-emerald-400/50 text-xs font-extrabold text-emerald-300 flex items-center justify-between shadow-xl">
+      <span id="toast-text">✅ Дію виконано!</span>
+      <button onclick="document.getElementById('toast-box').classList.add('hidden')" class="text-white/70 hover:text-white">✕</button>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- SCREEN 1: SELLING LANDING PAGE (PROBLEM -> SOLUTION -> LIVE APP -> CTA) -->
+    <!-- ======================================================================= -->
+    <div id="screen-landing" class="space-y-5">
+      <!-- SPLIT HERO: Left = Offer + Solid White Input Capsule; Right = Live Interactive App Demo -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+        <!-- LEFT (5 cols): Hitting the Problem + Instant Start -->
+        <div class="lg:col-span-5 space-y-3">
+          <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-amber-300">
+            ✨ Link-in-Bio для бажань • Як Linktree, але для подарунків
+          </span>
+
+          <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">
+            Тобі дарують саме те, про що ти мрієш — без незручних натяків і хаосу в чатах 🎁
+          </h1>
+
+          <!-- Problem vs Solution Pills (Zero fluff, instant clarity) -->
+          <div class="space-y-1.5 text-xs">
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-2.5 flex items-start gap-2">
+              <span class="text-sm shrink-0">❌</span>
+              <div>
+                <strong class="text-rose-200">Проблема:</strong>
+                <span class="text-white/90"> Друзі питають «Що подарувати?», дарують непотрібні сувеніри або губляться в табличках.</span>
+              </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-2.5 flex items-start gap-2">
+              <span class="text-sm shrink-0">✅</span>
+              <div>
+                <strong class="text-emerald-300">Рішення за 30 сек:</strong>
+                <span class="text-white/90"> Один красивий лінк із твоїми розмірами, Монобанкою, квітами з Instagram та ШІ-консьєржем!</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- SOLID WHITE INPUT CAPSULE (Impossible to miss!) -->
+          <div class="pt-1 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px] font-bold text-white/90">
+              <span>⚡ Створи свій вішліст прямо зараз:</span>
+              <span class="text-emerald-300 font-extrabold">Без реєстрації</span>
+            </div>
+            <div class="bg-white rounded-2xl p-1.5 shadow-2xl flex items-center gap-1.5 border-2 border-white">
+              <input
+                id="landing-input"
+                type="text"
+                placeholder="Встав лінк (Rozetka, Apple, @instagram) або мрію..."
+                class="flex-1 px-2.5 py-2 text-xs font-bold text-slate-950 placeholder:text-slate-400 bg-[#190d2c] min-h-screen outline-none"
+              />
+              <button
+                onclick="addFromCapsule('landing-input')"
+                id="capsule-btn"
+                class="px-4 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-pink-600 via-fuchsia-600 to-violet-600 text-white shrink-0 shadow spring active:scale-95"
+              >
+                + Додати мрію
+              </button>
+            </div>
+
+            <!-- 1-Tap Quick Demo Chips -->
+            <div class="flex flex-wrap items-center gap-1 pt-0.5 text-[11px]">
+              <span class="font-bold text-white/75">Тест у 1 клік:</span>
+              <button onclick="quickAddDemo(0)" id="quick-0" class="px-2 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-bold border border-white/20">
+                + ✨ Стайлер Dyson
+              </button>
+              <button onclick="quickAddDemo(1)" id="quick-1" class="px-2 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-bold border border-white/20">
+                + 🌸 Півонії @kamelia_flowers
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Value Pillars Strip -->
+          <div class="grid grid-cols-3 gap-1.5 text-[10px] pt-1">
+            <div class="bg-black/30 rounded-xl p-2 border border-white/15">
+              <div class="font-black text-emerald-300">0 ₴ і 0% комісії</div>
+              <div class="text-white/80">100% безкоштовно для всіх</div>
+            </div>
+            <div class="bg-black/30 rounded-xl p-2 border border-white/15">
+              <div class="font-black text-amber-300">🫙 Монобанка</div>
+              <div class="text-white/80">Спільний збір на дорогі мрії</div>
+            </div>
+            <div class="bg-black/30 rounded-xl p-2 border border-white/15">
+              <div class="font-black text-pink-300">🤫 Таємниця</div>
+              <div class="text-white/80">Без спойлерів до свята</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT (7 cols): LIVE INTERACTIVE APP DEMO RIGHT ON THE LANDING PAGE -->
+        <div class="lg:col-span-7 bg-black/30 backdrop-blur-xl rounded-[26px] p-3 border border-white/20 shadow-2xl space-y-2.5">
+          <div class="flex items-center justify-between text-[11px] pb-1.5 border-b border-white/15">
+            <span class="font-extrabold text-emerald-300 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              Жива демонстрація профілю (поклацай кнопки!):
+            </span>
+            <button onclick="togglePreviewRole()" id="role-btn" class="px-2.5 py-0.5 rounded-full font-extrabold bg-amber-300 text-slate-950 shadow">
+              👀 Очима Гостя (клік = Сюрприз-режим)
+            </button>
+          </div>
+
+          <!-- Combined Linktree Profile + Top AI Concierge + Solid White Photo Card -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+            <!-- Left Mini-Col (5 cols): Linktree Profile + AI Widget right underneath -->
+            <div class="sm:col-span-5 space-y-2">
+              <div id="mini-profile-container"></div>
+              <div id="mini-ai-container"></div>
+            </div>
+
+            <!-- Right Mini-Col (7 cols): Featured Solid White Photo Gift Card -->
+            <div class="sm:col-span-7" id="hero-featured-card"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- SCREEN 2: FULL GUEST PROFILE (/w/olena) — LINKTREE + AI + PHOTO CARDS   -->
+    <!-- ======================================================================= -->
+    <div id="screen-guest" class="hidden space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
+        <div class="lg:col-span-7" id="guest-profile-header"></div>
+        <div class="lg:col-span-5" id="guest-ai-header"></div>
+      </div>
+
+      <!-- Flower & Instagram Direct Banner -->
+      <div id="guest-flower-banner"></div>
+
+      <!-- Solid White Photo Cards Grid -->
+      <div id="guest-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- SCREEN 3: OWNER DASHBOARD (/dashboard) — SURPRISE PROTECTION MODE       -->
+    <!-- ======================================================================= -->
+    <div id="screen-dashboard" class="hidden space-y-4">
+      <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[24px] p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-400/25 text-emerald-200 border border-emerald-400/30">
+            🔒 СЮРПРИЗ-ЗАХИСТ АКТИВНИЙ
+          </span>
+          <h2 id="dash-title" class="text-lg font-black text-white mt-1">Кабінет іменинника • Мої бажання</h2>
+          <p class="text-xs text-white/85">Ви бачите, які лоти зайняті, але імена друзів, сума в Монобанці та ШІ-сюрпризи приховані до свята!</p>
+        </div>
+        <button onclick="showToast('🔗 Посилання mriyii.app/w/' + DATA[currentTheme].slug + ' скопійовано для Instagram Bio!'); switchScreen('guest');" class="px-4 py-2.5 rounded-xl text-xs font-black bg-white text-slate-950 shadow-xl">
+          🔗 Скопіювати лінк для Bio →
+        </button>
+      </div>
+
+      <div id="dashboard-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentTheme = 'rose_luxury';
+    let currentScreen = 'landing';
+    let hasPhoto = true;
+    let previewRole = 'guest';
+
+    const DATA = {
+      rose_luxury: {
+        slug: 'olena-vip',
+        ownerName: 'Олена Ковальчук • Мої 25 рочків 🥂',
+        ownerIg: 'olena.muse',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+        bio: 'Зібрала тут речі, про які справді мрію. Можна бронювати або скидатися на Банку!',
+        chipSize: '📏 Одяг S • Взуття 37',
+        chipHobby: '💖 Б\'юті, кава, естетика',
+        chipTaboo: '🚫 Без сувенірів і свічок',
+        flowerNotes: '🌸 Люблю білі півонії, кремові гортензії та ранункулюси (@kamelia_flowers). Сукні — S (@cher17.ua). Доставка через Direct @olena.muse без домашньої адреси!',
+        featuredShop: 'kamelia_flowers',
+        items: [
+          {
+            id: 'lux-1',
+            title: 'Стайлер Dyson Airwrap i.d.™ Strawberry Bronze',
+            emoji: '✨',
+            store: '🛍️ Rozetka',
+            priority: '🔥 Мрія #1',
+            price: 26000,
+            image: 'https://images.unsplash.com/photo-1522338140262-f46f5913618a?auto=format&fit=crop&w=700&q=80',
+            comment: 'Хочу саме в кольорі Strawberry Bronze для ідеальних локонів ✨',
+            hasJar: true,
+            jarCurrent: 19500,
+            jarTarget: 26000,
+            instagramHandle: '',
+            isBooked: false,
+            bookedBy: ''
+          },
+          {
+            id: 'lux-2',
+            title: 'Авторський букет з 25 білих півоній та ранункулюсів 🌸',
+            emoji: '🌸',
+            store: '📸 @kamelia_flowers',
+            priority: '🌸 Улюблені квіти',
+            price: 4200,
+            image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=700&q=80',
+            comment: 'Оплатіть у Direct — магазин сам спитає у мене зручний час доставки!',
+            hasJar: false,
+            jarCurrent: 0,
+            jarTarget: 0,
+            instagramHandle: 'kamelia_flowers',
+            isBooked: false,
+            bookedBy: ''
+          }
+        ]
+      },
+      cyber_titanium: {
+        slug: 'max-cyber',
+        ownerName: 'Максим Дмитренко • Мої 30 рочків 🎉',
+        ownerIg: 'max.tech',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=250&q=80',
+        bio: 'Список гаджетів та апгрейду робочого сетапу. Можна скинутися в Монобанку!',
+        chipSize: '📏 Одяг L • Взуття 43 EU',
+        chipHobby: '⚡ Вело, кава, PS5, код',
+        chipTaboo: '🚫 Без чашок і краваток',
+        flowerNotes: '☕ Люблю Specialty каву в зернах під V60 (@foundation.coffee) та вініл Daft Punk. Напишіть магазину мій @max.tech!',
+        featuredShop: 'foundation.coffee',
+        items: [
+          {
+            id: 'cyb-1',
+            title: 'Ігрова консоль Sony PlayStation 5 Pro 2TB',
+            emoji: '🎮',
+            store: '🛍️ Rozetka',
+            priority: '⚡ Топ-бажання',
+            price: 32999,
+            image: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=700&q=80',
+            comment: 'Мрія для вечірніх каток з друзями на вихідних 🎮',
+            hasJar: true,
+            jarCurrent: 24500,
+            jarTarget: 32999,
+            instagramHandle: '',
+            isBooked: false,
+            bookedBy: ''
+          },
+          {
+            id: 'cyb-2',
+            title: 'Кастомна клавіатура Keychron Q1 Pro Wireless',
+            emoji: '⌨️',
+            store: '📸 @keychron_ua',
+            priority: '⚡ Сетап',
+            price: 8999,
+            image: 'https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=700&q=80',
+            comment: 'Колір Carbon Black, свічі Gateron Jupiter Banana.',
+            hasJar: false,
+            jarCurrent: 0,
+            jarTarget: 0,
+            instagramHandle: 'keychron_ua',
+            isBooked: false,
+            bookedBy: ''
+          }
+        ]
+      }
+    };
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-text').textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => box.classList.add('hidden'), 3800);
+    }
+
+    function renderMiniProfileHtml() {
+      const d = DATA[currentTheme];
+      const ring = currentTheme === 'rose_luxury' ? 'avatar-ring-rose' : 'avatar-ring-cyber';
+      return `
+        <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[24px] p-3.5 text-center text-white h-full flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-[10px] font-bold text-white/85 mb-1">
+              <span class="px-2 py-0.5 rounded-full bg-white/15">mriyii.app/${d.slug}</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-400/25 text-emerald-200 border border-emerald-400/30">🎂 До ДН 12 днів</span>
+            </div>
+            <div class="relative inline-block">
+              <div class="w-16 h-16 rounded-full ${ring} p-[2.5px] shadow-lg mx-auto">
+                <img src="${d.avatar}" alt="Avatar" class="w-full h-full rounded-full object-cover border-2 border-slate-950" />
+              </div>
+              <span class="absolute -bottom-1 right-0 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full bg-amber-300 text-slate-950 shadow">VIP ✨</span>
+            </div>
+            <h2 class="text-sm font-black mt-1.5 tracking-tight">${d.ownerName}</h2>
+            <p class="text-[11px] text-white/85 mt-0.5 leading-snug">${d.bio}</p>
+          </div>
+          <div class="flex flex-wrap justify-center gap-1 mt-2.5 text-[10px] font-bold">
+            <span class="px-2 py-0.5 rounded-lg bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">${d.chipSize}</span>
+            <span class="px-2 py-0.5 rounded-lg bg-pink-400/25 text-pink-100 border border-pink-400/30">${d.chipHobby}</span>
+            <span class="px-2 py-0.5 rounded-lg bg-rose-500/25 text-rose-200 border border-rose-400/30">${d.chipTaboo}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMiniAiHtml(suffix) {
+      const grad = currentTheme === 'rose_luxury'
+        ? 'from-fuchsia-600 via-purple-600 to-indigo-700'
+        : 'from-indigo-600 via-blue-700 to-emerald-600';
+      return `
+        <div class="bg-gradient-to-br ${grad} rounded-[24px] p-3.5 text-white shadow-xl border border-white/25 space-y-2 h-full flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-base shrink-0">🤖</div>
+            <div>
+              <div class="text-xs font-black tracking-tight flex items-center gap-1">
+                <span>ШІ-Асистент подарунків</span>
+                <span class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-amber-300 text-slate-950 font-black">Gemini</span>
+              </div>
+              <div class="text-[10px] text-white/90">Підбере сюрприз за розмірами й табу:</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 pt-0.5">
+            <button onclick="triggerAiIdea('${suffix}', '800 ₴', 'Дріп-кава MadHeads Specialty Set', '750 ₴')" class="py-1.5 px-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-extrabold spring active:scale-95">до 1 000 ₴</button>
+            <button onclick="triggerAiIdea('${suffix}', '~1 500 ₴', 'Термокружка Fellow Carter Mug', '1 650 ₴')" class="py-1.5 px-2 rounded-xl bg-white text-slate-950 text-[11px] font-extrabold shadow spring active:scale-95">✨ ~1 500 ₴</button>
+            <button onclick="triggerAiIdea('${suffix}', 'VIP 💎', 'Нішевий сет Kurkdjian Discovery', '4 800 ₴')" class="py-1.5 px-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-extrabold spring active:scale-95">VIP 💎</button>
+          </div>
+          <div id="ai-res-${suffix}" class="hidden bg-slate-950/70 backdrop-blur-md rounded-xl p-2 border border-white/20 flex items-center justify-between gap-2 text-[11px]">
+            <div class="min-w-0">
+              <div class="text-amber-300 font-extrabold truncate" id="ai-title-${suffix}">💡 Ідея</div>
+              <div class="text-white/80 text-[10px]" id="ai-price-${suffix}">Точний збіг з анкетою!</div>
+            </div>
+            <button onclick="showToast('🤫 Таємний ШІ-сюрприз заброньовано! Іменинник не побачить його до свята.')" class="px-2.5 py-1 rounded-lg bg-amber-300 text-slate-950 font-extrabold text-[10px] shrink-0">🎁 Подарувати</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function triggerAiIdea(suffix, budget, title, price) {
+      const box = document.getElementById('ai-res-' + suffix);
+      box.classList.remove('hidden');
+      document.getElementById('ai-title-' + suffix).textContent = '💡 ' + title;
+      document.getElementById('ai-price-' + suffix).textContent = price + ' • Враховано хобі й табу!';
+    }
+
+    function renderRichPhotoCard(item, roleMode) {
+      const isCyber = currentTheme === 'cyber_titanium';
+      const fallbackClass = isCyber ? 'fallback-cyber' : 'fallback-rose';
+      const priorityClass = isCyber ? 'bg-indigo-600/90' : 'bg-pink-600/90';
+      const commentClass = isCyber
+        ? 'text-indigo-950 bg-gradient-to-r from-indigo-50 via-blue-50 to-cyan-50 border-l-4 border-indigo-600'
+        : 'text-pink-950 bg-gradient-to-r from-pink-50 via-fuchsia-50 to-purple-50 border-l-4 border-pink-500';
+      const ctaClass = isCyber
+        ? 'bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-600 shadow-indigo-500/20'
+        : 'bg-gradient-to-r from-pink-600 via-fuchsia-600 to-violet-600 shadow-pink-500/20';
+
+      const pct = item.hasJar && item.jarTarget > 0 ? Math.min(100, Math.round((item.jarCurrent / item.jarTarget) * 100)) : 0;
+
+      const statusBadge = roleMode === 'owner'
+        ? `<span class="bg-indigo-600 text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">🔒 Заброньовано (Сюрприз!)</span>`
+        : item.isBooked || (item.hasJar && pct >= 100)
+        ? `<span class="bg-emerald-400 text-slate-950 font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">🎉 Зібрано 100%!</span>`
+        : item.hasJar
+        ? `<span class="bg-amber-400 text-slate-950 font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">🫙 Йде збір на Банку (${pct}%)</span>`
+        : `<span class="bg-pink-500 text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">📸 Instagram Direct</span>`;
+
+      const mediaLayer = (hasPhoto && item.image) ? `
+        <div class="w-full h-full relative">
+          <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
+        </div>
+      ` : `
+        <div class="w-full h-full ${fallbackClass} relative flex flex-col items-center justify-center">
+          <div class="absolute inset-0 poster-pattern"></div>
+          <div class="relative z-10 w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-3xl shadow-lg -translate-y-1">
+            <span>${item.emoji}</span>
+          </div>
+          <span class="relative z-10 text-[10px] font-bold uppercase tracking-wider text-white/85">Офіційний магазин • Перевірено</span>
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+        </div>
+      `;
+
+      let bottomControls = '';
+      if (roleMode === 'owner') {
+        bottomControls = `
+          <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-2xl p-3 flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shrink-0">🔒</span>
+            <div class="text-xs">
+              <div class="font-extrabold text-indigo-950">Сюрприз-захист активний! ✨</div>
+              <div class="text-[11px] font-semibold text-indigo-800">Друзі вже збирають Банку або забронювали цей лот. Деталі приховано до свята!</div>
+            </div>
+          </div>
+        `;
+      } else if (item.hasJar) {
+        bottomControls = `
+          <div class="bg-gradient-to-br from-emerald-50/90 via-teal-50/60 to-indigo-50/50 border border-emerald-200 rounded-2xl p-3 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-extrabold text-emerald-950 flex items-center gap-1.5">
+                <span>🐈‍⬛ Монобанка збору</span>
+                <span class="text-[10px] font-bold bg-emerald-200/80 text-emerald-900 px-1.5 py-0.5 rounded-md">+7 друзів</span>
+              </span>
+              <span class="font-black text-emerald-700 tabular-nums">${item.jarCurrent.toLocaleString('uk-UA')} / ${item.jarTarget.toLocaleString('uk-UA')} ₴</span>
+            </div>
+            <div class="w-full h-2.5 bg-emerald-950/10 rounded-full overflow-hidden p-[1px]">
+              <div class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 rounded-full spring" style="width: ${pct}%"></div>
+            </div>
+            <div class="flex items-center gap-2 pt-0.5">
+              <button onclick="donateJar('${item.id}')" class="flex-1 ${ctaClass} hover:brightness-110 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl shadow-md spring active:scale-95">
+                🐈 Поповнити Банку (+2 000 ₴)
+              </button>
+              <button onclick="finishJar100('${item.id}')" class="bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-xs py-2.5 px-3 rounded-xl spring active:scale-95">
+                👑 Закрити 100%
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (item.instagramHandle) {
+        bottomControls = `
+          <div class="space-y-1.5">
+            <button onclick="orderIgDirect('${item.instagramHandle}', '${item.title.replace(/'/g, '')}')" class="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 text-white shadow-md spring active:scale-95">
+              📸 Замовити в Instagram @${item.instagramHandle} (без домашньої адреси)
+            </button>
+          </div>
+        `;
+      } else {
+        bottomControls = `
+          <button onclick="showToast('💎 Подарунок заброньовано! Сюрприз збережено.')" class="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold ${ctaClass} text-white shadow-md spring active:scale-95">
+            🎁 Забронювати подарунок
+          </button>
+        `;
+      }
+
+      return `
+        <div class="solid-white-card rounded-[26px] overflow-hidden border border-white flex flex-col justify-between spring">
+          <div class="relative h-40 w-full overflow-hidden">
+            ${mediaLayer}
+            <div class="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+              <span class="bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20">${item.store}</span>
+              <span class="${priorityClass} backdrop-blur-md text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full">${item.priority}</span>
+            </div>
+            <div class="absolute top-3 right-3 z-10">${statusBadge}</div>
+            <div class="absolute bottom-2.5 left-3.5 right-3.5 flex items-end justify-between z-10">
+              <div class="text-2xl font-black text-white drop-shadow tabular-nums">${item.price.toLocaleString('uk-UA')} ₴</div>
+              <span class="text-[11px] font-extrabold text-amber-300 bg-slate-950/75 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-amber-400/40">
+                ${item.hasJar ? '✨ Груповий подарунок' : '🌸 Доставка через Direct'}
+              </span>
+            </div>
+          </div>
+          <div class="p-3.5 space-y-2.5 bg-white text-slate-950">
+            <div>
+              <h3 class="font-extrabold text-sm sm:text-base text-slate-950 leading-snug">${item.title}</h3>
+              <div class="mt-1.5 text-xs font-bold ${commentClass} rounded-r-xl px-3 py-1.5">
+                💬 «${item.comment}»
+              </div>
+            </div>
+            ${bottomControls}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAll() {
+      const d = DATA[currentTheme];
+      document.getElementById('mini-profile-container').innerHTML = renderMiniProfileHtml();
+      document.getElementById('mini-ai-container').innerHTML = renderMiniAiHtml('landing');
+      document.getElementById('hero-featured-card').innerHTML = renderRichPhotoCard(d.items[0], previewRole);
+
+      document.getElementById('guest-profile-header').innerHTML = renderMiniProfileHtml();
+      document.getElementById('guest-ai-header').innerHTML = renderMiniAiHtml('guest');
+      document.getElementById('guest-flower-banner').innerHTML = `
+        <div class="bg-white/10 backdrop-blur-xl rounded-[22px] p-3.5 border border-pink-400/35 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div>
+            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-pink-500/25 text-pink-200 border border-pink-400/40">🌸 Які квіти я люблю та мої побажання</span>
+            <p class="font-semibold text-white/90 mt-1">${d.flowerNotes}</p>
+          </div>
+          <button onclick="orderIgDirect('${d.featuredShop}', 'Улюблений букет квітів за списком побажань 🌸')" class="py-2 px-3.5 rounded-xl font-extrabold bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 text-white shrink-0">
+            Замовити в @${d.featuredShop} 📸
+          </button>
+        </div>
+      `;
+      document.getElementById('guest-cards-grid').innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'guest')).join('');
+      document.getElementById('dashboard-cards-grid').innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'owner')).join('');
+    }
+
+    function switchScreen(screen) {
+      currentScreen = screen;
+      ['landing', 'guest', 'dashboard'].forEach((s) => {
+        const el = document.getElementById('screen-' + s);
+        const tab = document.getElementById('tab-' + s);
+        if (s === screen) {
+          el.classList.remove('hidden');
+          tab.className = 'px-3 py-1 rounded-lg font-extrabold bg-white text-slate-950 shadow spring';
+        } else {
+          el.classList.add('hidden');
+          tab.className = 'px-3 py-1 rounded-lg font-bold text-white/85 hover:text-white spring';
+        }
+      });
+      renderAll();
+    }
+
+    function toggleGender() {
+      currentTheme = currentTheme === 'rose_luxury' ? 'cyber_titanium' : 'rose_luxury';
+      const stage = document.getElementById('app-stage');
+      const gBtn = document.getElementById('gender-btn');
+      const cBtn = document.getElementById('capsule-btn');
+
+      if (currentTheme === 'cyber_titanium') {
+        stage.className = 'canvas-cyber min-h-screen sm:rounded-[28px] p-3.5 sm:p-5 border border-white/20 text-white spring space-y-4';
+        gBtn.textContent = '👨 Чоловік (Cyber)';
+        gBtn.className = 'px-2.5 py-1 rounded-xl font-extrabold bg-indigo-600 text-white shadow spring';
+        cBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-600 text-white shrink-0 shadow spring active:scale-95';
+        document.getElementById('quick-0').textContent = '+ 🎮 PlayStation 5 Pro';
+        document.getElementById('quick-1').textContent = '+ ⌨️ Keychron @keychron_ua';
+      } else {
+        stage.className = 'canvas-rose min-h-screen sm:rounded-[28px] p-3.5 sm:p-5 border border-white/20 text-white spring space-y-4';
+        gBtn.textContent = '👩 Дівчина (Rose)';
+        gBtn.className = 'px-2.5 py-1 rounded-xl font-extrabold bg-pink-500 text-white shadow spring';
+        cBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-pink-600 via-fuchsia-600 to-violet-600 text-white shrink-0 shadow spring active:scale-95';
+        document.getElementById('quick-0').textContent = '+ ✨ Стайлер Dyson';
+        document.getElementById('quick-1').textContent = '+ 🌸 Півонії @kamelia_flowers';
+      }
+      renderAll();
+    }
+
+    function togglePhotoMode() {
+      hasPhoto = !hasPhoto;
+      document.getElementById('photo-btn').textContent = hasPhoto ? '🖼️ Фото: Є' : '✨ Smart Постер';
+      renderAll();
+    }
+
+    function togglePreviewRole() {
+      previewRole = previewRole === 'guest' ? 'owner' : 'guest';
+      const btn = document.getElementById('role-btn');
+      btn.textContent = previewRole === 'guest' ? '👀 Очима Гостя (клік = Сюрприз-режим)' : '👑 Очима Іменинника (Сюрприз!)';
+      renderAll();
+    }
+
+    function donateJar(id) {
+      const it = DATA[currentTheme].items.find((x) => x.id === id);
+      if (!it) return;
+      it.jarCurrent = Math.min(it.jarTarget, it.jarCurrent + 2000);
+      renderAll();
+      showToast('🐈‍⬛ +2 000 ₴ додано у Монобанку!');
+    }
+
+    function finishJar100(id) {
+      const it = DATA[currentTheme].items.find((x) => x.id === id);
+      if (!it) return;
+      it.jarCurrent = it.jarTarget;
+      it.isBooked = true;
+      renderAll();
+      showToast('🎉 Ви закрили 100% збору у Монобанці!');
+    }
+
+    async function orderIgDirect(shop, title) {
+      const ownerIg = DATA[currentTheme].ownerIg;
+      const msg = `Привіт! 👋 Хочу оплатити подарунок зі списку бажань Mriyii для @${ownerIg}: ${title}. Напишіть їй, будь ласка, у Direct після оплати, щоб вона сама вказала, куди і коли їй зручно прийняти доставку!`;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(msg);
+        }
+      } catch (e) {}
+      showToast('Текст замовлення скопійовано в буфер обміну! 💌');
+      window.open('https://ig.me/m/' + encodeURIComponent(shop) + '?ref=mriyii', '_blank', 'noopener,noreferrer');
+    }
+
+    function addFromCapsule(inputId) {
+      const input = document.getElementById(inputId);
+      const val = input.value.trim();
+      if (!val) {
+        showToast('Вставте посилання на товар або натисніть швидку кнопку нижче!');
+        return;
+      }
+      const igMatch = val.match(/@([a-zA-Z0-9._]{2,30})/);
+      DATA[currentTheme].items.unshift({
+        id: 'new-' + Date.now(),
+        title: val.replace(/^https?:\/\/(www\.)?/i, ''),
+        emoji: '✨',
+        store: igMatch ? '📸 @' + igMatch[1] : '🛍️ Офіційний стор',
+        priority: '🔥 Нова мрія',
+        price: 4900,
+        image: '',
+        comment: 'Додано через білу капсулу швидкого старту ✨',
+        hasJar: false,
+        jarCurrent: 0,
+        jarTarget: 0,
+        instagramHandle: igMatch ? igMatch[1] : '',
+        isBooked: false,
+        bookedBy: ''
+      });
+      input.value = '';
+      renderAll();
+      showToast('✨ Мрію додано! Перевірте прев’ю справа або перейдіть у Профіль Гостя.');
+    }
+
+    function quickAddDemo(idx) {
+      switchScreen('guest');
+      showToast('✨ Відкрито живий профіль вішліста з вашими мріями!');
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
