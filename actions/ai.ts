@@ -11,6 +11,7 @@ import {
 } from '@/lib/gemini';
 import { buildSearchAffiliateUrl } from '@/lib/affiliate';
 import { assertGuestBookingQuota } from '@/actions/booking';
+import { markCreatorGiftValidated, trackEvent } from '@/lib/analytics';
 import Wishlist from '@/models/Wishlist';
 import User from '@/models/User';
 import GiftItem from '@/models/GiftItem';
@@ -116,6 +117,19 @@ export async function askGiftAssistant(
     clientIdentifier: clientIp,
   });
 
+  const budgetTier: 'up_to_1000' | 'around_1500' | 'vip' =
+    input.budgetUah <= 1000 ? 'up_to_1000' : input.budgetUah <= 5000 ? 'around_1500' : 'vip';
+
+  void trackEvent({
+    eventType: 'ai_assistant_used',
+    wishlistId: String(wishlist._id),
+    wishlistSlug: wishlist.slug,
+    metadata: {
+      budgetTier,
+      convertedToSurpriseBooking: false,
+    },
+  });
+
   return ideas.map((idea) => ({
     ...idea,
     mode: input.mode,
@@ -166,6 +180,18 @@ export async function bookAiSurpriseGift(
     bookingToken,
     isAiSurprise: true,
   });
+
+  void trackEvent({
+    eventType: 'gift_booked',
+    wishlistId: String(wishlist._id),
+    wishlistSlug: wishlist.slug,
+    itemId: String(surpriseItem._id),
+    metadata: {
+      priceUah: input.estimatedPrice,
+      itemType: 'affiliate',
+      isAiSurprise: true,
+    },
+  }).then(() => markCreatorGiftValidated(String(wishlist._id), wishlist.slug));
 
   return {
     itemId: String(surpriseItem._id),

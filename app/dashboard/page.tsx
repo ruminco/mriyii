@@ -343,13 +343,13 @@ function DashboardContent() {
                   className="w-full h-full rounded-full object-cover border-2 border-slate-950"
                 />
               </div>
-              <span className="absolute -bottom-1 right-0 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 shadow">
+              <span className="absolute -bottom-1 right-0 text-sm font-extrabold px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 shadow">
                 VIP ✨
               </span>
             </div>
 
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 text-[11px] font-extrabold">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 text-sm font-extrabold">
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/25 text-emerald-200 border border-emerald-400/30">
                   🔒 СЮРПРИЗ-ЗАХИСТ УВІМКНЕНО
                 </span>
@@ -406,7 +406,7 @@ function DashboardContent() {
                   <Plus className="w-4 h-4 text-emerald-300" />
                   <span>Додати нову мрію за посиланням або @instagram_shop</span>
                 </h2>
-                <span className="text-[11px] font-bold text-emerald-300">
+                <span className="text-sm font-bold text-emerald-300">
                   Автопідбір фото + Smart Постер
                 </span>
               </div>
@@ -463,7 +463,7 @@ function DashboardContent() {
 
                   <div className="grid sm:grid-cols-12 gap-2.5">
                     <div className="sm:col-span-2">
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      <label className="block text-sm font-bold text-slate-700 mb-1">
                         Емодзі
                       </label>
                       <input
@@ -476,7 +476,7 @@ function DashboardContent() {
                       />
                     </div>
                     <div className="sm:col-span-7">
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      <label className="block text-sm font-bold text-slate-700 mb-1">
                         Назва подарунка
                       </label>
                       <input
@@ -490,7 +490,7 @@ function DashboardContent() {
                       />
                     </div>
                     <div className="sm:col-span-3">
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      <label className="block text-sm font-bold text-slate-700 mb-1">
                         Ціна (₴)
                       </label>
                       <input
@@ -506,7 +506,7 @@ function DashboardContent() {
 
                   <div className="grid sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      <label className="block text-sm font-bold text-slate-700 mb-1">
                         💬 Ваш коментар гостям (колір, розмір, деталі):
                       </label>
                       <input
@@ -520,7 +520,7 @@ function DashboardContent() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      <label className="block text-sm font-bold text-slate-700 mb-1">
                         🖼️ URL фото товару (якщо порожньо — буде Smart Постер):
                       </label>
                       <input
@@ -537,7 +537,7 @@ function DashboardContent() {
 
                   <div className="grid sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-[11px] font-bold text-pink-700 mb-1 flex items-center gap-1">
+                      <label className="block text-sm font-bold text-pink-700 mb-1 flex items-center gap-1">
                         <Camera className="w-3 h-3" />
                         <span>Instagram-магазин (@shop):</span>
                       </label>
@@ -556,7 +556,7 @@ function DashboardContent() {
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold text-emerald-800 mb-1">
+                      <label className="block text-sm font-bold text-emerald-800 mb-1">
                         🫙 Банка Monobank для збору (необов’язково):
                       </label>
                       <input
@@ -720,7 +720,7 @@ function DashboardContent() {
                   <h2 className="text-sm font-black text-slate-950">
                     Які квіти я люблю та @Instagram
                   </h2>
-                  <p className="text-[11px] font-semibold text-slate-500">
+                  <p className="text-sm font-semibold text-slate-500">
                     Без домашньої адреси — доставка через Direct
                   </p>
                 </div>
@@ -770,7 +770,7 @@ function DashboardContent() {
                   <h2 className="text-sm font-black text-slate-950">
                     ✨ Анкета для Профілю та ШІ
                   </h2>
-                  <p className="text-[11px] font-semibold text-slate-500">
+                  <p className="text-sm font-semibold text-slate-500">
                     Формує кольорові чіпси у шапці та підказки Gemini
                   </p>
                 </div>

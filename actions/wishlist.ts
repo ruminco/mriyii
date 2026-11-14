@@ -14,6 +14,7 @@ import User, {
 } from '@/models/User';
 import Wishlist from '@/models/Wishlist';
 import GiftItem, { SURPRISE_MODE_EXCLUDED_FIELDS } from '@/models/GiftItem';
+import { trackEvent } from '@/lib/analytics';
 
 // ==========================================
 // 1. DTO Типи (Суворе розмежування Сюрприз-режиму)
@@ -384,6 +385,17 @@ export async function createWishlist(
     flowerAndGiftNotes: input.flowerAndGiftNotes,
     eventDate: input.eventDate ? new Date(input.eventDate) : undefined,
     isSurpriseActive: input.isSurpriseActive,
+  });
+
+  void trackEvent({
+    eventType: 'wishlist_created',
+    wishlistId: String(created._id),
+    wishlistSlug: created.slug,
+    metadata: {
+      segment: 'mass_b2c',
+      themePreset: created.themePreset,
+      fromGrowthLoop: false,
+    },
   });
 
   return {

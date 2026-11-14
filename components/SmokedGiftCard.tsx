@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import type { ThemePreset } from '@/models/User';
 import { THEME_TOKENS } from '@/lib/theme-data';
+import { trackClientInteraction } from '@/actions/analytics';
 
 export interface UnifiedGiftCardItem {
   id: string;
@@ -107,6 +108,9 @@ export function SmokedGiftCard({
   const isGoalReached = targetAmount > 0 && currentAmount >= targetAmount;
 
   const storeUrl = item.affiliateUrl || item.originalUrl;
+  const outUrl = storeUrl
+    ? `/api/out?itemId=${encodeURIComponent(item.id)}&src=card_button&url=${encodeURIComponent(storeUrl)}`
+    : undefined;
   const cleanShopHandle = item.instagramHandle?.replace(/^@+/, '').trim();
   const storeBadgeText = getStoreLabel(storeUrl, cleanShopHandle);
   const showRealPhoto = Boolean(item.imageUrl && !imgError && !forceFallbackPoster);
@@ -134,6 +138,13 @@ export function SmokedGiftCard({
     if (onInstagramOrderToast) {
       onInstagramOrderToast('Текст замовлення скопійовано в буфер обміну! 💌');
     }
+    void trackClientInteraction({
+      eventType: 'instagram_dm_copied',
+      itemId: item.id,
+      shopHandle: cleanShopHandle,
+      priceUah: item.price,
+      isFlowerPreferenceCard: false,
+    });
     window.open(
       `https://ig.me/m/${encodeURIComponent(cleanShopHandle)}?ref=mriyii`,
       '_blank',
@@ -174,9 +185,9 @@ export function SmokedGiftCard({
 
         {/* Верхній лівий кут: Магазин + Пріоритет */}
         <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
-          {storeUrl ? (
+          {outUrl ? (
             <a
-              href={storeUrl}
+              href={viewMode === 'guest' ? outUrl : storeUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-slate-950/80 hover:bg-slate-950 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20 inline-flex items-center gap-1"
@@ -366,6 +377,14 @@ export function SmokedGiftCard({
                         href={item.monoJarUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() =>
+                          void trackClientInteraction({
+                            eventType: 'jar_clicked',
+                            itemId: item.id,
+                            jarGoalUah: targetAmount,
+                            jarCurrentUah: currentAmount,
+                          })
+                        }
                         className={`flex-1 ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl spring-transition active:scale-95 inline-flex items-center justify-center gap-1.5`}
                       >
                         <span>{tokens.primaryJarBtnText}</span>
@@ -445,9 +464,9 @@ export function SmokedGiftCard({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  {storeUrl && (
+                  {outUrl && (
                     <a
-                      href={storeUrl}
+                      href={outUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="py-2 px-3 rounded-xl text-xs font-extrabold bg-slate-950 hover:bg-slate-800 text-amber-300 shadow spring-transition active:scale-95 inline-flex items-center gap-1.5"

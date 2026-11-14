@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import { z } from 'zod';
 import { connectToDatabase } from '@/lib/mongodb';
 import { fetchMonoJarStatus, type MonoJarStatus } from '@/lib/monobank';
+import { markCreatorGiftValidated, trackEvent } from '@/lib/analytics';
 import GiftItem from '@/models/GiftItem';
 
 /**
@@ -172,6 +173,24 @@ export async function bookGiftItem(
       'Цей подарунок щойно забронював інший гість! Будь ласка, оберіть іншу позицію у списку.'
     );
   }
+
+  const itemType = updatedItem.instagramHandle
+    ? 'instagram_shop'
+    : updatedItem.affiliateUrl
+    ? 'affiliate'
+    : 'regular';
+
+  void trackEvent({
+    eventType: 'gift_booked',
+    wishlistId: String(updatedItem.wishlistId),
+    itemId: String(updatedItem._id),
+    visitorHash: fingerprint,
+    metadata: {
+      priceUah: updatedItem.price ?? 0,
+      itemType,
+      isAiSurprise: Boolean(updatedItem.isAiSurprise),
+    },
+  }).then(() => markCreatorGiftValidated(String(updatedItem.wishlistId)));
 
   return {
     success: true,

@@ -290,14 +290,14 @@ export function AiGiftAssistantWidget({
             </div>
           </div>
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-purple-200">
+            <div className="inline-flex items-center gap-1.5 text-sm font-extrabold uppercase tracking-wider text-purple-200">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               Gemini 2.5 Flash • 2 режими підбору
             </div>
             <h3 className="text-sm sm:text-base font-extrabold text-white mt-0.5">
               Допомогти обрати з вішліста або знайти в інтернеті за інтересами?
             </h3>
-            <p className="text-xs font-semibold text-slate-200 mt-0.5">
+            <p className="text-sm font-semibold text-slate-200 mt-0.5">
               ШІ аналізує вільні лоти або шукає реальні товари в Україні з урахуванням прихованої анкети іменинника.
             </p>
           </div>
@@ -329,14 +329,14 @@ export function AiGiftAssistantWidget({
           <div className="smoked-glass rounded-[28px] w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 border border-white/25 space-y-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/25 text-purple-200 border border-purple-400/40">
+                <span className="inline-flex items-center gap-1.5 text-sm font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-500/25 text-purple-200 border border-purple-400/40">
                   <Sparkles className="w-3.5 h-3.5" /> Gemini 2.5 Flash • Google Search Grounding
                 </span>
                 <h2 className="text-xl font-extrabold text-white mt-2">
                   ✨ ШІ-Помічник для «{wishlistTitle}»
                 </h2>
                 {hasOwnerInterests && (
-                  <p className="text-xs font-bold text-emerald-300 mt-1">
+                  <p className="text-sm font-bold text-emerald-300 mt-1">
                     🧠 ШІ врахував заповнені інтереси, розміри та табу іменинника (приховані від сторонніх очей)
                   </p>
                 )}
@@ -359,7 +359,7 @@ export function AiGiftAssistantWidget({
                   setIdeas([]);
                   setSelectedIdea(null);
                 }}
-                className={`min-h-[44px] px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
+                className={`min-h-[44px] px-3 py-2 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
                   mode === 'from_wishlist'
                     ? `${tokens.primaryCtaGradient} text-white shadow-lg`
                     : 'text-slate-200 hover:text-white'
@@ -375,7 +375,7 @@ export function AiGiftAssistantWidget({
                   setIdeas([]);
                   setSelectedIdea(null);
                 }}
-                className={`min-h-[44px] px-3 py-2 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
+                className={`min-h-[44px] px-3 py-2 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
                   mode === 'web_search'
                     ? `${tokens.primaryCtaGradient} text-white shadow-lg`
                     : 'text-slate-200 hover:text-white'
@@ -388,7 +388,7 @@ export function AiGiftAssistantWidget({
 
             <form onSubmit={handleGenerate} className="space-y-4">
               <div>
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-200 mb-2">
+                <label className="block text-sm font-extrabold uppercase tracking-wider text-slate-200 mb-2">
                   1. Оберіть ваш бюджет (₴):
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -397,7 +397,7 @@ export function AiGiftAssistantWidget({
                       key={preset.value}
                       type="button"
                       onClick={() => setBudget(preset.value)}
-                      className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold spring-transition ${
+                      className={`px-3.5 py-2 rounded-xl text-sm font-extrabold spring-transition ${
                         budget === preset.value
                           ? `${tokens.primaryCtaGradient} text-white`
                           : 'bg-white/10 text-slate-200 border border-white/15 hover:bg-white/20'
@@ -410,7 +410,7 @@ export function AiGiftAssistantWidget({
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-200 mb-1.5">
+                <label className="block text-sm font-extrabold uppercase tracking-wider text-slate-200 mb-1.5">
                   2. Побажання від себе (необов’язково):
                 </label>
                 <input
@@ -454,7 +454,7 @@ export function AiGiftAssistantWidget({
             </form>
 
             {errorMessage && (
-              <div className="p-3 rounded-xl bg-rose-500/25 border border-rose-400/40 text-xs font-bold text-rose-200">
+              <div className="p-3 rounded-xl bg-rose-500/25 border border-rose-400/40 text-sm font-bold text-rose-200">
                 {errorMessage}
               </div>
             )}
@@ -462,7 +462,7 @@ export function AiGiftAssistantWidget({
             {/* Картки згенерованих ідей */}
             {ideas.length > 0 && !selectedIdea && (
               <div className="space-y-3 pt-2 border-t border-white/15">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+                <h3 className="text-sm font-extrabold uppercase tracking-wider text-emerald-300">
                   {mode === 'from_wishlist'
                     ? 'Рекомендовані позиції з вішліста:'
                     : 'Знайдені в інтернеті ідеї без спойлерів для іменинника:'}
@@ -483,20 +483,20 @@ export function AiGiftAssistantWidget({
                               {idea.title}
                             </h4>
                             {idea.sourceStore && (
-                              <span className="inline-block text-xs font-bold text-amber-300 mt-0.5">
+                              <span className="inline-block text-sm font-bold text-amber-300 mt-0.5">
                                 🛍️ {idea.sourceStore}
                               </span>
                             )}
-                            <p className="text-xs sm:text-sm font-semibold text-slate-200 mt-0.5">
+                            <p className="text-sm font-semibold text-slate-200 mt-0.5">
                               {idea.description}
                             </p>
-                            <p className="text-xs font-bold text-emerald-300 mt-1.5">
+                            <p className="text-sm font-bold text-emerald-300 mt-1.5">
                               💡 Чому підійде: {idea.whyItFits}
                             </p>
                           </div>
                         </div>
                         <span
-                          className={`text-xs sm:text-sm font-black px-2.5 py-1 rounded-lg shrink-0 tabular-nums ${tokens.pricePillClass}`}
+                          className={`text-sm font-black px-2.5 py-1 rounded-lg shrink-0 tabular-nums ${tokens.pricePillClass}`}
                         >
                           {idea.isMonoJarContribution ? 'Внесок ' : '~'}
                           {idea.estimatedPrice.toLocaleString('uk-UA')} ₴
@@ -511,7 +511,7 @@ export function AiGiftAssistantWidget({
                               setIsOpen(false);
                               onSelectWishlistItem?.(idea.wishlistItemId!);
                             }}
-                            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
+                            className={`py-2.5 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
                           >
                             <Gift className="w-4 h-4" />
                             <span>
@@ -526,7 +526,7 @@ export function AiGiftAssistantWidget({
                               href={idea.affiliateSearchUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="py-2 px-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 inline-flex items-center gap-1.5"
+                              className="py-2 px-3 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 inline-flex items-center gap-1.5"
                             >
                               <span>Знайти в магазині</span>
                               <ExternalLink className="w-3.5 h-3.5" />
@@ -534,7 +534,7 @@ export function AiGiftAssistantWidget({
                             <button
                               type="button"
                               onClick={() => setSelectedIdea(idea)}
-                              className={`py-2 px-3.5 rounded-xl text-xs font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
+                              className={`py-2 px-3.5 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white inline-flex items-center gap-1.5`}
                             >
                               <Gift className="w-3.5 h-3.5" />
                               <span>✨ Зафіксувати як таємний сюрприз</span>
@@ -561,12 +561,12 @@ export function AiGiftAssistantWidget({
                   <button
                     type="button"
                     onClick={() => setSelectedIdea(null)}
-                    className="text-xs font-bold text-slate-200 underline"
+                    className="text-sm font-bold text-slate-200 underline"
                   >
                     Назад до ідей
                   </button>
                 </div>
-                <p className="text-xs font-semibold text-slate-200">
+                <p className="text-sm font-semibold text-slate-200">
                   Інші гості побачать, що цей сюрприз уже зайнятий вами, але іменинник у своєму кабінеті НЕ побачить цей лот до свята!
                 </p>
 
@@ -577,7 +577,7 @@ export function AiGiftAssistantWidget({
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     placeholder="Ваше ім'я або нікнейм"
-                    className="rounded-xl bg-black/40 border border-white/20 px-3.5 py-2 text-xs font-semibold text-white placeholder:text-slate-300"
+                    className="rounded-xl bg-black/40 border border-white/20 px-3.5 py-2 text-sm font-semibold text-white placeholder:text-slate-300"
                   />
                   <input
                     type="email"
@@ -585,14 +585,14 @@ export function AiGiftAssistantWidget({
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
                     placeholder="Ваш email (для керування бронню)"
-                    className="rounded-xl bg-black/40 border border-white/20 px-3.5 py-2 text-xs font-semibold text-white placeholder:text-slate-300"
+                    className="rounded-xl bg-black/40 border border-white/20 px-3.5 py-2 text-sm font-semibold text-white placeholder:text-slate-300"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-xl text-xs font-extrabold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/30 spring-transition"
+                  className="w-full py-2.5 px-4 rounded-xl text-sm font-extrabold bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/30 spring-transition"
                 >
                   💎 Підтвердити та додати таємний сюрприз
                 </button>

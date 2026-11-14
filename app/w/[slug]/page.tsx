@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { getWishlistBySlug, type GuestGiftItemDTO } from '@/actions/wishlist';
 import { DEMO_WISHLISTS } from '@/lib/theme-data';
+import { hashVisitor, recordBioVisitDetection, trackEvent } from '@/lib/analytics';
 import { GuestWishlistClient } from '@/components/GuestWishlistClient';
 import type { UnifiedGiftCardItem } from '@/components/SmokedGiftCard';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 async function resolveWishlistData(slug: string) {
@@ -14,6 +17,7 @@ async function resolveWishlistData(slug: string) {
   // Перевірка живих демо-слагів або запит у MongoDB
   if (cleanSlug === 'max-cyber' || cleanSlug.includes('cyber') || cleanSlug.includes('max')) {
     return {
+      wishlistId: undefined,
       slug: cleanSlug,
       title: DEMO_WISHLISTS.cyber_titanium.title,
       themePreset: 'cyber_titanium' as const,
@@ -28,6 +32,7 @@ async function resolveWishlistData(slug: string) {
     const dbWishlist = await getWishlistBySlug(cleanSlug);
     if (dbWishlist) {
       return {
+        wishlistId: dbWishlist.id,
         slug: dbWishlist.slug,
         title: dbWishlist.title,
         themePreset: dbWishlist.themePreset,
@@ -44,6 +49,7 @@ async function resolveWishlistData(slug: string) {
   }
 
   return {
+    wishlistId: undefined,
     slug: cleanSlug,
     title: DEMO_WISHLISTS.rose_luxury.title,
     themePreset: 'rose_luxury' as const,
@@ -72,9 +78,45 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function PublicWishlistPage({ params }: PageProps) {
+export default async function PublicWishlistPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const resolvedSearch = searchParams ? await searchParams : {};
   const data = await resolveWishlistData(slug);
+
+  // Server-side non-blocking analytics (AdBlock-proof, без PII)
+  try {
+    const headerList = await headers();
+    const ip =
+      headerList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      headerList.get('x-real-ip') ||
+      'unknown-ip';
+    const ua = headerList.get('user-agent') || 'unknown-ua';
+    const referer = (headerList.get('referer') || '').toLowerCase();
+    const refParam = typeof resolvedSearch.ref === 'string' ? resolvedSearch.ref.toLowerCase() : '';
+    const utmParam =
+      typeof resolvedSearch.utm_source === 'string' ? resolvedSearch.utm_source.toLowerCase() : '';
+
+    const utmSource: 'ig_bio' | 'tg_chat' | 'direct' =
+      refParam === 'bio' || utmParam === 'ig_bio' || referer.includes('instagram.com')
+        ? 'ig_bio'
+        : utmParam.includes('tg') || referer.includes('t.me')
+        ? 'tg_chat'
+        : 'direct';
+
+    const visitorHash = hashVisitor(ip, ua);
+    void trackEvent({
+      eventType: 'wishlist_viewed',
+      wishlistId: data.wishlistId,
+      wishlistSlug: data.slug,
+      visitorHash,
+      metadata: {
+        utmSource,
+        themePreset: data.themePreset,
+      },
+    }).then(() => recordBioVisitDetection(data.slug, utmSource));
+  } catch {
+    // Ignore header read errors during static generation
+  }
 
   return (
     <GuestWishlistClient
