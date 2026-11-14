@@ -767,6 +767,210 @@
       showToast('✨ «' + title + '» додано у ваш список!');
     }
 
+
+    let aiInterest = "all";
+    let aiBudget = 3000;
+
+    const AI_INTEREST_CHIPS = [
+      { id: "all", label: "✨ Усі інтереси", kw: "" },
+      { id: "coffee", label: "☕ Кава", kw: "кава" },
+      { id: "beauty", label: "💄 Б'юті", kw: "dyson" },
+      { id: "gadgets", label: "🎧 Гаджети", kw: "airpods" },
+      { id: "flowers", label: "🌸 Квіти", kw: "квіти" },
+      { id: "travel", label: "✈️ Подорожі", kw: "подорож" },
+    ];
+
+    const AI_WEB_CARDS = {
+      rose_luxury: [
+        { title: "Шовкова наволочка Mulberry Silk 22 Momme", emoji: "✨", price: 2800, store: "Rozetka.ua", why: "Доповнює beauty-ритуали та дбайливо доглядає за волоссям.", url: "https://rozetka.com.ua" },
+        { title: "Аромадифузор Rituals Private Collection", emoji: "🕯️", price: 2450, store: "Aromateque.ua", why: "Створює атмосферу SPA та відповідає інтересу до нішевих ароматів.", url: "https://rozetka.com.ua" },
+        { title: "MagSafe павербанк Anker Nano 5000 mAh Pink", emoji: "🔋", price: 1999, store: "Rozetka.ua", why: "Стильний аксесуар у Rose Gold для подорожей та зйомок.", url: "https://rozetka.com.ua" }
+      ],
+      cyber_titanium: [
+        { title: "Набір для specialty-кави Hario V60", emoji: "☕", price: 1450, store: "Rozetka.ua", why: "Точне влучання у захоплення альтернативною кавою.", url: "https://rozetka.com.ua" },
+        { title: "Док-станція Ugreen MagFlow Qi2 3-в-1", emoji: "⚡", price: 2699, store: "Rozetka.ua", why: "Мінімалістичний сетап на робочому столі Apple Pro Titanium.", url: "https://rozetka.com.ua" },
+        { title: "Килимок Wool Felt Desk Mat Anthracite", emoji: "🖥️", price: 1290, store: "Comfy.ua", why: "Покращує акустику механічної клавіатури та вигляд столу.", url: "https://comfy.ua" }
+      ]
+    };
+
+    function setAiMode(nextMode) {
+      aiMode = nextMode;
+      renderGuestAiSection();
+    }
+
+    function setAiInterest(nextInterest) {
+      aiInterest = nextInterest;
+      renderGuestAiSection();
+    }
+
+    function renderGuestAiSection() {
+      const container = document.getElementById("guest-ai-section");
+      if (!container) return;
+      const d = DATA[currentTheme];
+      const isCyber = currentTheme === "cyber_titanium";
+      const grad = isCyber ? "from-indigo-600 to-emerald-500" : "from-pink-600 to-amber-500";
+      const chipKw = (AI_INTEREST_CHIPS.find((c) => c.id === aiInterest) || {}).kw || "";
+
+      let cards = [];
+      if (aiMode === "from_wishlist") {
+        const sorted = [...d.items].sort((a, b) => {
+          const aMatch = chipKw && (a.title + " " + a.comment).toLowerCase().includes(chipKw) ? 0 : 1;
+          const bMatch = chipKw && (b.title + " " + b.comment).toLowerCase().includes(chipKw) ? 0 : 1;
+          return aMatch - bMatch;
+        });
+        cards = sorted.slice(0, 3).map((it) => ({
+          id: it.id,
+          title: it.title,
+          emoji: it.jarTarget ? "🫙" : it.instagramHandle ? "🌸" : "🎁",
+          price: it.jarTarget ? Math.min(aiBudget, it.price) : it.price,
+          store: it.jarTarget ? "Монобанка" : "Зі списку",
+          why: it.jarTarget ? "Можна докинути комфортну суму в спільну Монобанку." : "100% збіг із бажанням іменинника зі списку.",
+          isJar: Boolean(it.jarTarget),
+          fromList: true
+        }));
+      } else {
+        cards = AI_WEB_CARDS[currentTheme].map((c) => ({ ...c, fromList: false }));
+      }
+
+      container.innerHTML = `
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <div class="text-sm font-extrabold uppercase tracking-wider text-purple-300">✨ Gemini 2.5 Flash • Google Search Grounding</div>
+            <h3 class="text-xl sm:text-2xl font-black text-white mt-1">ШІ-Помічник подарунків</h3>
+            <p class="text-sm font-semibold text-emerald-300 mt-1">🧠 Враховує інтереси та табу іменинника (приховані від сторонніх)</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/45 border border-white/15">
+            <button onclick="setAiMode('from_wishlist')" class="min-h-[48px] px-4 rounded-xl text-sm font-extrabold ${aiMode === 'from_wishlist' ? 'bg-gradient-to-r ' + grad + ' text-white shadow-lg' : 'text-slate-200 hover:text-white'}">📋 Обрати з вішліста</button>
+            <button onclick="setAiMode('web_search')" class="min-h-[48px] px-4 rounded-xl text-sm font-extrabold ${aiMode === 'web_search' ? 'bg-gradient-to-r ' + grad + ' text-white shadow-lg' : 'text-slate-200 hover:text-white'}">🌐 Знайти в інтернеті</button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          ${AI_INTEREST_CHIPS.map((ch) => `
+            <button onclick="setAiInterest('${ch.id}')" class="min-h-[48px] px-4 rounded-2xl text-sm font-extrabold border spring ${aiInterest === ch.id ? 'bg-gradient-to-r ' + grad + ' text-white border-white/40' : 'bg-white/10 text-slate-200 border-white/15 hover:bg-white/20'}">${ch.label}</button>
+          `).join("")}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ${cards.map((card) => `
+            <div class="rounded-2xl bg-white/10 border border-white/20 p-5 flex flex-col justify-between gap-4">
+              <div class="space-y-3">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-3xl">${card.emoji}</div>
+                  <span class="px-3 py-1 rounded-xl text-sm font-black bg-amber-400/20 text-amber-300 border border-amber-400/40 tabular-nums">${card.price.toLocaleString("uk-UA")} ₴</span>
+                </div>
+                <div class="text-sm font-extrabold text-amber-300">🛍️ ${card.store}</div>
+                <h4 class="text-base font-extrabold text-white leading-snug">${card.title}</h4>
+                <p class="text-sm font-medium text-slate-200">💡 ${card.why}</p>
+              </div>
+              <div class="flex flex-col gap-2 pt-2 border-t border-white/15">
+                ${card.fromList ? `
+                  <button onclick="${card.isJar ? 'donateJar(\'' + card.id + '\')' : 'showToast(\'💎 Подарунок заброньовано!\')'}" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-gradient-to-r ${grad} text-white shadow spring active:scale-95">${card.isJar ? "🫙 Скинутися на Банку" : "🎁 Забронювати цей подарунок"}</button>
+                ` : `
+                  <button onclick="showToast('🤫 Таємний сюрприз зафіксовано! Іменинник не побачить його до свята.')" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-gradient-to-r ${grad} text-white shadow spring active:scale-95">🤫 Забронювати як сюрприз</button>
+                  <a href="${card.url}" target="_blank" rel="noopener noreferrer" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 flex items-center justify-center">🛒 Відкрити в магазині ↗</a>
+                `}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderMetricsScreen() {
+      const container = document.getElementById("screen-metrics");
+      if (!container) return;
+      container.innerHTML = `
+        <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/20 rounded-3xl p-6 sm:p-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="px-3 py-1 rounded-full text-sm font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">📈 Unit Economics &amp; 30-Creator CRM</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-white mt-2">Дашборд Юніт-Економіки Mriyii (Run-Rate на 100 власників)</h2>
+          </div>
+          <span class="px-4 py-2 rounded-2xl text-sm font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40">🧪 Симуляція 100 власників</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/20 rounded-3xl p-6 space-y-1">
+            <div class="text-sm font-bold text-slate-200">Run-Rate Дохід / міс</div>
+            <div class="text-3xl font-black text-emerald-300 tabular-nums">8 754 ₴</div>
+            <div class="text-sm font-semibold text-slate-200">Ціль Базового MVP: 6 453 ₴</div>
+          </div>
+          <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/20 rounded-3xl p-6 space-y-1">
+            <div class="text-sm font-bold text-slate-200">Run-Rate Дохід / рік</div>
+            <div class="text-3xl font-black text-white tabular-nums">105 056 ₴</div>
+            <div class="text-sm font-semibold text-cyan-300">Take Rate: 2.44%</div>
+          </div>
+          <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/20 rounded-3xl p-6 space-y-1">
+            <div class="text-sm font-bold text-slate-200">Потенціал Етапу 2 / міс</div>
+            <div class="text-3xl font-black text-pink-300 tabular-nums">23 322 ₴</div>
+            <div class="text-sm font-semibold text-slate-200">Квіти 12% + Гейт 5%</div>
+          </div>
+          <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/20 rounded-3xl p-6 space-y-1">
+            <div class="text-sm font-bold text-slate-200">Віральний K-factor</div>
+            <div class="text-3xl font-black text-cyan-300 tabular-nums">1.24</div>
+            <div class="text-sm font-semibold text-slate-200">Експеримент Bio: 3 / 30 (ціль ≥ 6/30)</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-rose-400/40 rounded-3xl p-6 space-y-2">
+            <span class="px-3 py-1 rounded-full text-sm font-extrabold bg-rose-500/20 text-rose-200">RULE-03 · CRITICAL</span>
+            <h3 class="text-lg font-extrabold text-white">Активація інфлюенсерок у Bio: 3 / 30 (Ціль ≥ 6 / 30)</h3>
+            <p class="text-sm font-medium text-slate-200">Дія: Concierge Onboarding — менеджер сам збирає Rose Luxury вітрину з 5 хітовими лотами та наголошує на 100% прихованій домашній адресі.</p>
+          </div>
+          <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-emerald-400/40 rounded-3xl p-6 space-y-2">
+            <span class="px-3 py-1 rounded-full text-sm font-extrabold bg-emerald-500/20 text-emerald-200">RULE-06 · OPPORTUNITY</span>
+            <h3 class="text-lg font-extrabold text-white">28 замовлень/міс у Instagram Direct — час вмикати B2B 12%!</h3>
+            <p class="text-sm font-medium text-slate-200">Дія: Підписати пряму партнерську комісію 12% із топ-5 квітковими бутіками (@flower.bar.kyiv, @peony.house.lviv).</p>
+          </div>
+        </div>
+
+        <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/20 rounded-3xl p-6 overflow-x-auto space-y-4">
+          <h3 class="text-xl font-black text-white">Таблиця «Сценарій vs Факт» (на 100 власників)</h3>
+          <table class="w-full text-left text-sm min-w-[680px]">
+            <thead>
+              <tr class="border-b border-white/20 text-slate-200 font-extrabold">
+                <th class="py-2.5">Метрика</th>
+                <th class="py-2.5">🔴 Песимістичний</th>
+                <th class="py-2.5">🟡 Базовий</th>
+                <th class="py-2.5">🟢 Оптимістичний</th>
+                <th class="py-2.5 text-right">📊 ФАКТ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10">
+              <tr><td class="py-2.5 font-bold">Частка Creator / Bio</td><td>5%</td><td class="text-amber-200 font-bold">15%</td><td>25–30%</td><td class="text-right font-black text-emerald-300">18.0%</td></tr>
+              <tr><td class="py-2.5 font-bold">Середній чек (AOV)</td><td>1 800 ₴</td><td class="text-amber-200 font-bold">3 200 ₴</td><td>5 500 ₴</td><td class="text-right font-black text-emerald-300">3 450 ₴</td></tr>
+              <tr><td class="py-2.5 font-bold">Конверсія Бронь → Магазин</td><td>40%</td><td class="text-amber-200 font-bold">65%</td><td>80%+</td><td class="text-right font-black text-emerald-300">68.4%</td></tr>
+              <tr><td class="py-2.5 font-bold">Дохід / міс (Етап 1)</td><td>472 ₴</td><td class="text-amber-200 font-bold">6 453 ₴</td><td>46 320 ₴</td><td class="text-right font-black text-emerald-300">8 754 ₴</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/20 rounded-3xl p-6 overflow-x-auto space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 class="text-xl font-black text-white">Трекер 30 мікроінфлюенсерок (Вішліст у Bio • 14 днів)</h3>
+            <span class="px-3.5 py-1.5 rounded-full text-sm font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">Успіх: 3 / 30 (Ціль: ≥ 6 / 30)</span>
+          </div>
+          <table class="w-full text-left text-sm min-w-[680px]">
+            <thead>
+              <tr class="border-b border-white/20 text-slate-200 font-extrabold">
+                <th class="py-2.5">Instagram</th>
+                <th class="py-2.5">Підписники</th>
+                <th class="py-2.5">Статус воронки</th>
+                <th class="py-2.5">Кліки Bio</th>
+                <th class="py-2.5 text-right">GMV (₴)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10">
+              <tr><td class="py-2.5 font-extrabold">@alina.luxury.kyiv</td><td>24.5k</td><td class="text-emerald-300 font-bold">🟢 Активна (Є подарунки)</td><td>142</td><td class="text-right font-black text-emerald-300">19 200 ₴</td></tr>
+              <tr><td class="py-2.5 font-extrabold">@daria.beauty.lviv</td><td>18.9k</td><td class="text-emerald-300 font-bold">🟢 Активна (Є подарунки)</td><td>96</td><td class="text-right font-black text-emerald-300">12 450 ₴</td></tr>
+              <tr><td class="py-2.5 font-extrabold">@kateryna.muse</td><td>12.8k</td><td class="text-amber-300 font-bold">🟡 У Bio (Чекає 1-й донат)</td><td>38</td><td class="text-right font-bold text-slate-200">0 ₴</td></tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
     renderAll();
   </script>
 </body>
