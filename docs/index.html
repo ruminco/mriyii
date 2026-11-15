@@ -44,9 +44,102 @@
       color: #0f172a;
       box-shadow: 0 20px 38px -10px rgba(0, 0, 0, 0.42);
     }
+
+    /* Issue #20: Hybrid 21st.dev Motion + 3 CSS Versions */
+    .aurora-bg {
+      position: absolute;
+      inset: -35%;
+      background:
+        radial-gradient(circle at 25% 30%, var(--aurora-accent, rgba(251, 113, 133, 0.22)), transparent 45%),
+        radial-gradient(circle at 75% 60%, rgba(56, 189, 248, 0.14), transparent 50%);
+      filter: blur(48px);
+      animation: auroraDrift 14s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes auroraDrift {
+      0% { transform: translate3d(-2%, -2%, 0) scale(1); }
+      100% { transform: translate3d(3%, 2%, 0) scale(1.06); }
+    }
+    .spotlight-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 30%), var(--spotlight-accent, rgba(251, 113, 133, 0.14)), transparent 60%);
+      transition: opacity 0.3s ease;
+    }
+    .border-beam-wrap {
+      position: relative;
+      border-radius: 26px;
+      padding: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .border-beam-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -120%;
+      background: conic-gradient(from 0deg, transparent 0deg, transparent 280deg, var(--beam-color, #fb7185) 330deg, var(--beam-soft, #fda4af) 360deg);
+      animation: borderBeamSpin 4.5s linear infinite;
+      pointer-events: none;
+    }
+    .border-beam-inner {
+      position: relative;
+      z-index: 1;
+      border-radius: 24px;
+      height: 100%;
+    }
+    @keyframes borderBeamSpin { to { transform: rotate(360deg); } }
+    .beam-path-pulse {
+      stroke-dasharray: 24 48;
+      animation: beamTravel 1.6s linear infinite;
+    }
+    @keyframes beamTravel {
+      from { stroke-dashoffset: 72; }
+      to { stroke-dashoffset: 0; }
+    }
+    .marquee-wrap {
+      overflow: hidden;
+      mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    }
+    .marquee-track {
+      display: flex;
+      gap: 14px;
+      width: max-content;
+      animation: marqueeScroll 28s linear infinite;
+    }
+    .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
+    @keyframes marqueeScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    [data-style="smoked"] .aurora-bg { opacity: 0.35; }
+    [data-style="smoked"] .style-surface {
+      background: rgba(15, 17, 26, 0.78) !important;
+      backdrop-filter: blur(26px) saturate(180%);
+      -webkit-backdrop-filter: blur(26px) saturate(180%);
+      border-color: rgba(255, 255, 255, 0.22) !important;
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.22) !important;
+    }
+    [data-style="editorial"] .aurora-bg,
+    [data-style="editorial"] .spotlight-layer { opacity: 0 !important; }
+    [data-style="editorial"] .border-beam-wrap::before { animation: none !important; opacity: 0.35; }
+    [data-style="editorial"] .style-surface {
+      background: #0f172a !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border-color: rgba(255, 255, 255, 0.22) !important;
+      border-radius: 16px !important;
+      box-shadow: none !important;
+    }
+    @media (pointer: coarse) { .spotlight-layer { display: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .aurora-bg, .border-beam-wrap::before, .beam-path-pulse, .marquee-track { animation: none !important; }
+    }
   </style>
 </head>
-<body id="app-body" class="canvas-rose text-white antialiased m-0 p-0 min-h-screen spring">
+<body id="app-body" data-style="aurora" class="canvas-rose text-white antialiased m-0 p-0 min-h-screen spring">
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50" aria-hidden="true"></canvas>
 
   <!-- Спрощений Sticky Header (64px, чистий на 390px) -->
   <header class="sticky top-0 z-30 h-16 border-b border-white/10 bg-[#0E1324]/85 backdrop-blur-xl">
@@ -90,9 +183,17 @@
   <!-- ======================================================================= -->
   <main id="screen-landing" class="w-full pb-24">
 
-    <!-- СЕКЦІЯ 1: HERO (MESH GRADIENT BAND) -->
-    <section class="w-full py-12 sm:py-20 px-4">
-      <div class="max-w-3xl mx-auto text-center space-y-5 sm:space-y-6">
+    <!-- СЕКЦІЯ 1: HERO (AURORA + SPOTLIGHT + 3 CSS VERSIONS + PILL) -->
+    <section id="hero-band" class="relative w-full py-10 sm:py-16 px-4 overflow-hidden">
+      <div class="aurora-bg" aria-hidden="true"></div>
+      <div id="hero-spotlight" class="spotlight-layer" aria-hidden="true"></div>
+      <div class="relative z-10 max-w-3xl mx-auto text-center space-y-5 sm:space-y-6">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <span class="text-sm font-semibold text-slate-300 mr-1">Стиль:</span>
+          <button type="button" onclick="setCssVersion('aurora')" id="css-ver-aurora" class="min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border bg-rose-400 text-slate-950 border-rose-300 shadow-lg spring">✨ Aurora</button>
+          <button type="button" onclick="setCssVersion('smoked')" id="css-ver-smoked" class="min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border bg-white/10 text-slate-200 border-white/15 hover:bg-white/15 spring">🪟 Smoked Glass</button>
+          <button type="button" onclick="setCssVersion('editorial')" id="css-ver-editorial" class="min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border bg-white/10 text-slate-200 border-white/15 hover:bg-white/15 spring">📰 Editorial</button>
+        </div>
         <div class="h-11 sm:h-12 overflow-hidden flex items-center justify-center">
           <button onclick="toggleHeroPill()" id="hero-morph-pill" class="inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 bg-rose-500/15 border border-rose-400/35 text-rose-200">
             <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0"></span>
@@ -291,11 +392,11 @@
               </div>
               <div class="bg-slate-100 rounded-2xl p-4 space-y-2.5">
                 <div class="flex items-center justify-between text-sm font-extrabold tabular-nums">
-                  <span id="landing-jar-amount" class="text-emerald-800">Зібрано: 19 500 ₴</span>
-                  <span id="landing-jar-pct" class="text-emerald-700">75%</span>
+                  <span id="landing-jar-amount" class="text-emerald-800">Зібрано: 23 000 ₴</span>
+                  <span id="landing-jar-pct" class="text-emerald-700">88%</span>
                 </div>
                 <div class="w-full h-3 rounded-full bg-slate-200 overflow-hidden">
-                  <div id="landing-jar-bar" class="h-full rounded-full bg-emerald-500 spring" style="width: 75%"></div>
+                  <div id="landing-jar-bar" class="h-full rounded-full bg-emerald-500 spring" style="width: 88%"></div>
                 </div>
                 <button onclick="addLandingDemoJar()" class="w-full min-h-[48px] px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-sm font-bold spring active:scale-95">
                   + Закинути 1 500 ₴ (демо)
@@ -497,6 +598,20 @@
               <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80" alt="Максим, Дніпро" class="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0" />
               <div><div class="text-sm font-black text-slate-950">Максим</div><div class="text-sm font-bold text-indigo-700">@max.dev • Дніпро</div></div>
             </div>
+          </div>
+        </div>
+        <div class="marquee-wrap py-2" aria-label="Живі події спільноти Mriyii">
+          <div class="marquee-track">
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">🎂 Оля, Київ • Зібрали 26 000 ₴ на Dyson Airwrap</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">🌸 Софія, Львів • Анонімний букет півоній 🕶️</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">🎮 Ігор, Дніпро • Спільний збір на PS5 Pro</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">☕ Марина, Одеса • Кавоварка DeLonghi за 2 дні</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">💎 Аліна • Вішліст у Instagram Bio без адреси</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">🎂 Оля, Київ • Зібрали 26 000 ₴ на Dyson Airwrap</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">🌸 Софія, Львів • Анонімний букет півоній 🕶️</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">🎮 Ігор, Дніпро • Спільний збір на PS5 Pro</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">☕ Марина, Одеса • Кавоварка DeLonghi за 2 дні</span>
+            <span class="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap">💎 Аліна • Вішліст у Instagram Bio без адреси</span>
           </div>
         </div>
         <div class="text-center">
@@ -1064,11 +1179,11 @@
       }
       if (gridEl) {
         const btnCls = isCyber ? 'bg-emerald-400 hover:bg-emerald-500 text-slate-950' : 'bg-rose-400 hover:bg-rose-500 text-slate-950';
-        gridEl.innerHTML = d.items.slice(0, 2).map((it) => {
+        gridEl.innerHTML = d.items.slice(0, 2).map((it, idx) => {
           const imgUrl = it.image || getDefaultGiftImage(it.title);
           const pct = it.jarTarget ? Math.min(100, Math.round((it.jarCurrent / it.jarTarget) * 100)) : 0;
-          return `
-            <div class="solid-white-card rounded-3xl overflow-hidden shadow-xl flex flex-col">
+          const cardHtml = `
+            <div class="solid-white-card rounded-3xl overflow-hidden shadow-xl flex flex-col h-full">
               <div class="relative h-44 w-full overflow-hidden bg-slate-100">
                 <img src="${imgUrl}" alt="${it.title}" loading="eager" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
                 <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-slate-950/85 text-white text-sm font-black tabular-nums">${it.price.toLocaleString('uk-UA')} ₴</span>
@@ -1089,22 +1204,132 @@
               </div>
             </div>
           `;
+          return idx === 0 ? `<div class="border-beam-wrap"><div class="border-beam-inner">${cardHtml}</div></div>` : cardHtml;
         }).join('');
       }
     }
 
-    let landingJarAmount = 19500;
+    let currentCssVersion = 'aurora';
+    function setCssVersion(ver) {
+      currentCssVersion = ver;
+      const body = document.getElementById('app-body');
+      if (body) body.setAttribute('data-style', ver);
+      const isCyber = currentTheme === 'cyber_titanium';
+      const activeCls = isCyber
+        ? 'min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border bg-emerald-400 text-slate-950 border-emerald-300 shadow-lg spring'
+        : 'min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border bg-rose-400 text-slate-950 border-rose-300 shadow-lg spring';
+      const idleCls = 'min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border bg-white/10 text-slate-200 border-white/15 hover:bg-white/15 spring';
+      ['aurora', 'smoked', 'editorial'].forEach((id) => {
+        const b = document.getElementById('css-ver-' + id);
+        if (b) b.className = id === ver ? activeCls : idleCls;
+      });
+    }
+
+    function updateCompareSlider(val) {
+      const pct = Math.max(10, Math.min(90, Number(val)));
+      const pane = document.getElementById('compare-before-pane');
+      const handle = document.getElementById('compare-handle');
+      const label = document.getElementById('compare-pct-label');
+      if (pane) pane.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+      if (handle) handle.style.left = pct + '%';
+      if (label) label.textContent = pct + '%';
+    }
+
+    function fireLandingConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const accent = currentTheme === 'cyber_titanium' ? '#34D399' : '#FB7185';
+      const colors = [accent, '#FFFFFF', '#FDE047', '#38BDF8'];
+      const parts = Array.from({ length: 55 }, () => ({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 14,
+        vy: (Math.random() - 0.8) * 14,
+        size: Math.random() * 6 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1
+      }));
+      function frame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        parts.forEach((p) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35;
+          p.alpha -= 0.018;
+          if (p.alpha > 0) {
+            alive = true;
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+          }
+        });
+        if (alive) requestAnimationFrame(frame);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function animateJarNumber(el, from, to) {
+      const start = performance.now();
+      function step(now) {
+        const p = Math.min((now - start) / 480, 1);
+        const val = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+        el.textContent = `Зібрано: ${val.toLocaleString('uk-UA')} ₴`;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    let landingJarAmount = 23000;
     function addLandingDemoJar() {
-      landingJarAmount = Math.min(26000, landingJarAmount + 1500);
+      const prev = landingJarAmount;
+      if (landingJarAmount >= 26000) {
+        landingJarAmount = 23000;
+      } else {
+        landingJarAmount = Math.min(26000, landingJarAmount + 1500);
+      }
       const pct = Math.min(100, Math.round((landingJarAmount / 26000) * 100));
       const amtEl = document.getElementById('landing-jar-amount');
       const pctEl = document.getElementById('landing-jar-pct');
       const barEl = document.getElementById('landing-jar-bar');
-      if (amtEl) amtEl.textContent = `Зібрано: ${landingJarAmount.toLocaleString('uk-UA')} ₴`;
+      if (amtEl) animateJarNumber(amtEl, prev, landingJarAmount);
       if (pctEl) pctEl.textContent = `${pct}%`;
       if (barEl) barEl.style.width = `${pct}%`;
-      showToast('🐈‍⬛ +1 500 ₴ додано у Монобанку (0% комісії)!');
+      if (landingJarAmount >= 26000) {
+        fireLandingConfetti();
+        showToast('🎉 Банка зібрана на 100%! Мрія здійснилась!');
+      } else {
+        showToast('🐈‍⬛ +1 500 ₴ додано у Монобанку (0% комісії)!');
+      }
     }
+
+    (function initIssue20Motion() {
+      const heroBand = document.getElementById('hero-band');
+      const spotlight = document.getElementById('hero-spotlight');
+      if (heroBand && spotlight) {
+        heroBand.addEventListener('mousemove', (e) => {
+          const r = heroBand.getBoundingClientRect();
+          spotlight.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          spotlight.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+      }
+      const placeholders = [
+        'Встав посилання з rozetka.com.ua або @instagram-шоурум...',
+        'Або з apple.com / brocard.ua / sephora...',
+        'Або просто напиши: «Хочу Dyson Airwrap» ✨'
+      ];
+      let pIdx = 0;
+      setInterval(() => {
+        pIdx = (pIdx + 1) % placeholders.length;
+        const inp = document.getElementById('capsule-input');
+        if (inp) inp.placeholder = placeholders[pIdx];
+      }, 3500);
+    })();
 
     const LANDING_AI_SAMPLES = {
       beauty: { title: 'Стайлер Dyson Airwrap i.d. Rose Gold', price: '25 999 ₴', shop: 'Brocard / Rozetka', img: 'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&w=700&q=80' },
@@ -1196,7 +1421,15 @@
     function setThemeExplicit(nextTheme) {
       currentTheme = nextTheme;
       const isCyber = nextTheme === 'cyber_titanium';
-      document.getElementById('app-body').className = (isCyber ? 'canvas-cyber' : 'canvas-rose') + ' text-white antialiased m-0 p-0 min-h-screen spring';
+      const body = document.getElementById('app-body');
+      body.className = (isCyber ? 'canvas-cyber' : 'canvas-rose') + ' text-white antialiased m-0 p-0 min-h-screen spring';
+      body.style.setProperty('--aurora-accent', isCyber ? 'rgba(52, 211, 153, 0.2)' : 'rgba(251, 113, 133, 0.22)');
+      body.style.setProperty('--spotlight-accent', isCyber ? 'rgba(52, 211, 153, 0.14)' : 'rgba(251, 113, 133, 0.14)');
+      body.style.setProperty('--beam-color', isCyber ? '#34D399' : '#FB7185');
+      body.style.setProperty('--beam-soft', isCyber ? '#6EE7B7' : '#FDA4AF');
+      const stepBeam = document.getElementById('step-beam-pulse');
+      if (stepBeam) stepBeam.setAttribute('stroke', isCyber ? '#34D399' : '#FB7185');
+      if (typeof setCssVersion === 'function') setCssVersion(currentCssVersion);
       const solidBtn = isCyber ? 'bg-emerald-400 hover:bg-emerald-500 text-slate-950' : 'bg-rose-400 hover:bg-rose-500 text-slate-950';
       document.getElementById('header-cta').className = `min-h-[44px] px-5 rounded-xl text-sm font-extrabold ${solidBtn} spring active:scale-95`;
       document.getElementById('capsule-btn').className = `w-full sm:w-auto min-h-[48px] sm:h-14 px-6 rounded-xl text-base font-extrabold ${solidBtn} shrink-0 spring active:scale-95`;

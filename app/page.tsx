@@ -44,6 +44,18 @@ export default function LandingPage() {
   const [heroPillIndex, setHeroPillIndex] = useState<number>(0);
   const [claimSlug, setClaimSlug] = useState<string>('olena-vip');
   const [aiChip, setAiChip] = useState<'beauty' | 'coffee' | 'gadgets' | 'flowers'>('beauty');
+  const [cssVersion, setCssVersion] = useState<'aurora' | 'smoked' | 'editorial'>('aurora');
+  const [placeholderIndex, setPlaceholderIndex] = useState<number>(0);
+  const [comparePos, setComparePos] = useState<number>(52);
+  const heroSectionRef = useRef<HTMLElement | null>(null);
+  const spotlightRef = useRef<HTMLDivElement | null>(null);
+  const confettiCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const HERO_PLACEHOLDERS = [
+    'Встав посилання з rozetka.com.ua або @instagram-шоурум...',
+    'Або з apple.com / brocard.ua / sephora...',
+    'Або просто напиши: «Хочу Dyson Airwrap» ✨',
+  ];
 
   const HERO_PILL_CASES = [
     {
@@ -103,15 +115,77 @@ export default function LandingPage() {
   useEffect(() => {
     const timer = setInterval(() => {
       setHeroPillIndex((prev) => (prev + 1) % 3);
+      setPlaceholderIndex((prev) => (prev + 1) % 3);
     }, 3500);
     return () => clearInterval(timer);
   }, []);
 
-  // Живий інтерактивний стан Монобанки у Секції 3
+  // Живий інтерактивний стан Монобанки у Секції 5 + Number Ticker + Confetti
   const [demoJarAmount, setDemoJarAmount] = useState<Record<ThemePreset, number>>({
-    rose_luxury: 19500,
+    rose_luxury: 23000,
     cyber_titanium: 24500,
   });
+  const [displayJarAmount, setDisplayJarAmount] = useState<number>(23000);
+  const displayJarRef = useRef<number>(23000);
+
+  useEffect(() => {
+    const target = demoJarAmount[themePreset];
+    const startVal = displayJarRef.current;
+    if (startVal === target) return;
+    const startTime = performance.now();
+    let rafId = 0;
+    const step = (now: number) => {
+      const p = Math.min((now - startTime) / 480, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = Math.round(startVal + (target - startVal) * eased);
+      displayJarRef.current = val;
+      setDisplayJarAmount(val);
+      if (p < 1) {
+        rafId = requestAnimationFrame(step);
+      }
+    };
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [demoJarAmount, themePreset]);
+
+  const fireConfetti = () => {
+    const canvas = confettiCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const accent = themePreset === 'rose_luxury' ? '#FB7185' : '#34D399';
+    const colors = [accent, '#FFFFFF', '#FDE047', '#38BDF8'];
+    const parts = Array.from({ length: 55 }, () => ({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 14,
+      vy: (Math.random() - 0.8) * 14,
+      size: Math.random() * 6 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)]!,
+      alpha: 1,
+    }));
+    const frame = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+      for (const p of parts) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.35;
+        p.alpha -= 0.018;
+        if (p.alpha > 0) {
+          alive = true;
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        }
+      }
+      if (alive) requestAnimationFrame(frame);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+    requestAnimationFrame(frame);
+  };
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
@@ -270,8 +344,26 @@ export default function LandingPage() {
 
   const activePill = HERO_PILL_CASES[heroPillIndex] ?? HERO_PILL_CASES[0]!;
 
+  const isRose = themePreset === 'rose_luxury';
+  const styleVars = {
+    '--aurora-accent': isRose ? 'rgba(251, 113, 133, 0.22)' : 'rgba(52, 211, 153, 0.2)',
+    '--spotlight-accent': isRose ? 'rgba(251, 113, 133, 0.14)' : 'rgba(52, 211, 153, 0.14)',
+    '--beam-color': isRose ? '#FB7185' : '#34D399',
+    '--beam-soft': isRose ? '#FDA4AF' : '#6EE7B7',
+  } as React.CSSProperties;
+
   return (
-    <div className={`min-h-screen ${tokens.meshClass} text-white spring-transition`}>
+    <div
+      data-style={cssVersion}
+      style={styleVars}
+      className={`min-h-screen ${tokens.meshClass} text-white spring-transition`}
+    >
+      <canvas
+        ref={confettiCanvasRef}
+        className="fixed inset-0 pointer-events-none z-50"
+        aria-hidden="true"
+      />
+
       {/* Toast */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#171D30]/95 backdrop-blur-xl rounded-2xl px-5 py-3.5 border border-emerald-400/50 shadow-2xl flex items-center gap-2.5 text-sm font-bold text-emerald-300">
@@ -349,10 +441,50 @@ export default function LandingPage() {
 
       <main className="w-full">
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 1: HERO (GRADIENT + 3-CASE ANIMATED PILL + CLAIM LINK)     */}
+        {/* СЕКЦІЯ 1: HERO (AURORA + SPOTLIGHT + 3 CSS VERSIONS + PILL)       */}
         {/* ================================================================= */}
-        <section id="section-1-hero" className="w-full py-12 sm:py-20">
-          <div className="max-w-3xl mx-auto px-4 text-center space-y-5 sm:space-y-6">
+        <section
+          id="section-1-hero"
+          ref={heroSectionRef}
+          onMouseMove={(e) => {
+            if (!heroSectionRef.current || !spotlightRef.current) return;
+            const rect = heroSectionRef.current.getBoundingClientRect();
+            spotlightRef.current.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+            spotlightRef.current.style.setProperty('--my', `${e.clientY - rect.top}px`);
+          }}
+          className="relative w-full py-10 sm:py-16 overflow-hidden"
+        >
+          <div className="aurora-bg" aria-hidden="true" />
+          <div ref={spotlightRef} className="spotlight-layer" aria-hidden="true" />
+
+          <div className="relative z-10 max-w-3xl mx-auto px-4 text-center space-y-5 sm:space-y-6">
+            {/* 3-кліковий перемикач CSS-версій (Issue #20) */}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <span className="text-sm font-semibold text-slate-300 mr-1">Стиль:</span>
+              {(
+                [
+                  { id: 'aurora', label: '✨ Aurora' },
+                  { id: 'smoked', label: '🪟 Smoked Glass' },
+                  { id: 'editorial', label: '📰 Editorial' },
+                ] as const
+              ).map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setCssVersion(v.id)}
+                  className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border spring-transition ${
+                    cssVersion === v.id
+                      ? isRose
+                        ? 'bg-rose-400 text-slate-950 border-rose-300 shadow-lg'
+                        : 'bg-emerald-400 text-slate-950 border-emerald-300 shadow-lg'
+                      : 'bg-white/10 text-slate-200 border-white/15 hover:bg-white/15 hover:text-white'
+                  }`}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+
             <div className="min-h-[48px] flex items-center justify-center">
               <button
                 type="button"
@@ -415,7 +547,7 @@ export default function LandingPage() {
                 type="text"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="Встав посилання або @instagram-шоурум..."
+                placeholder={HERO_PLACEHOLDERS[placeholderIndex]}
                 className="flex-1 px-4 py-3 text-base font-semibold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none"
               />
               <button
@@ -587,7 +719,7 @@ export default function LandingPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-rose-400/30 space-y-4">
+              <div className="style-surface rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-rose-400/30 space-y-4">
                 <div className="flex items-center gap-3.5">
                   <div className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-400/35 flex items-center justify-center text-3xl shrink-0">
                     💬
@@ -606,7 +738,7 @@ export default function LandingPage() {
                 </ul>
               </div>
 
-              <div className="rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-emerald-400/35 space-y-4">
+              <div className="style-surface rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-emerald-400/35 space-y-4">
                 <div className="flex items-center gap-3.5">
                   <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-400/35 flex items-center justify-center text-3xl shrink-0">
                     🎁
@@ -625,11 +757,65 @@ export default function LandingPage() {
                 </ul>
               </div>
             </div>
+
+            {/* Інтерактивний Compare Slider (21st.dev Compare) */}
+            <div className="max-w-3xl mx-auto space-y-3 pt-2">
+              <div className="flex items-center justify-between text-sm font-bold text-slate-300 px-1">
+                <span>↔ Потягни слайдер: Хаос у чаті vs Вітрина Mriyii</span>
+                <span className="tabular-nums text-white">{comparePos}%</span>
+              </div>
+              <div className="relative h-52 sm:h-44 rounded-3xl overflow-hidden border border-white/15 bg-[#0B1120] select-none">
+                {/* Right layer: After */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-center bg-gradient-to-br from-[#0F172A] to-[#0E242C]">
+                  <span className="inline-flex w-fit px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-bold mb-2">
+                    ✅ Стало: Mriyii Вітрина
+                  </span>
+                  <p className="text-lg sm:text-xl font-black text-white">
+                    1 посилання • Бронь за 5 сек • Монобанка 0% • Сюрприз 🕶️
+                  </p>
+                  <p className="text-sm text-slate-200 mt-1">
+                    Жодних дублів і незручних питань у Direct.
+                  </p>
+                </div>
+                {/* Left layer: Before (clipped) */}
+                <div
+                  className="absolute inset-0 p-6 flex flex-col justify-center bg-[#1F1221] border-r-2 border-white"
+                  style={{ clipPath: `inset(0 ${100 - comparePos}% 0 0)` }}
+                >
+                  <span className="inline-flex w-fit px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 text-sm font-bold mb-2">
+                    ❌ Було: «То що даруємо?» у Telegram
+                  </span>
+                  <p className="text-lg sm:text-xl font-black text-white">
+                    48 повідомлень • 2 однакові подарунки • Зіпсований сюрприз
+                  </p>
+                  <p className="text-sm text-rose-100 mt-1">
+                    Гола картка Монобанку без фото й контексту.
+                  </p>
+                </div>
+                <input
+                  type="range"
+                  min={10}
+                  max={90}
+                  value={comparePos}
+                  onChange={(e) => setComparePos(Number(e.target.value))}
+                  aria-label="Порівняння До і Після"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
+                />
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none z-10"
+                  style={{ left: `${comparePos}%` }}
+                >
+                  <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white text-slate-950 font-black text-sm flex items-center justify-center shadow-2xl">
+                    ↔
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 3: ЯК ЦЕ ПРАЦЮЄ ЗА 3 КРОКИ — GRADIENT BAND                 */}
+        {/* СЕКЦІЯ 3: ЯК ЦЕ ПРАЦЮЄ ЗА 3 КРОКИ — GRADIENT BAND + ANIMATED BEAM */}
         {/* ================================================================= */}
         <section
           id="section-2-how-it-works"
@@ -652,7 +838,27 @@ export default function LandingPage() {
             </div>
 
             <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
-              <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-[2px] bg-white/15" />
+              {/* SVG Animated Beam між 3 кроками */}
+              <svg
+                className="hidden md:block absolute top-6 left-[18%] w-[64%] h-6 pointer-events-none"
+                viewBox="0 0 600 24"
+                fill="none"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M0 12 L600 12"
+                  stroke="rgba(255,255,255,0.14)"
+                  strokeWidth="3"
+                />
+                <path
+                  d="M0 12 L600 12"
+                  stroke={isRose ? '#FB7185' : '#34D399'}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  className="beam-path-pulse"
+                />
+              </svg>
 
               <div className="relative flex flex-col items-center text-center space-y-3">
                 <div className="w-16 h-16 rounded-2xl bg-[#171D30] border-2 border-rose-400/50 flex items-center justify-center text-2xl font-black text-rose-300 shadow-lg z-10">
@@ -706,7 +912,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="max-w-4xl mx-auto rounded-[28px] bg-[#171D30] border border-white/15 p-5 sm:p-8 shadow-2xl space-y-5">
+            <div className="style-surface max-w-4xl mx-auto rounded-[28px] bg-[#171D30] border border-white/15 p-5 sm:p-8 shadow-2xl space-y-5">
               {/* 1. Міні-хедер профілю */}
               <div className="flex flex-col sm:flex-row items-center gap-4 pb-5 border-b border-white/10 text-center sm:text-left">
                 <div className={`w-16 h-16 rounded-full ${tokens.avatarRingClass} p-[2px] shrink-0`}>
@@ -752,21 +958,38 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              {/* 4. Міні-лоти (білі картки) */}
+              {/* 4. Міні-лоти (білі картки, 1-й лот із Border Beam) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentDemoWishlist.items.slice(0, 2).map((item) => (
-                  <SmokedGiftCard
-                    key={`showcase-${item.id}`}
-                    item={item}
-                    themePreset={themePreset}
-                    viewMode="guest"
-                    ownerInstagramHandle={currentDemoWishlist.ownerInstagramHandle}
-                    onInstagramOrderToast={triggerToast}
-                    onBookClick={() =>
-                      triggerToast('💎 Подарунок заброньовано у прев’ю! Спробуй на /w/olena-vip.')
-                    }
-                  />
-                ))}
+                {currentDemoWishlist.items.slice(0, 2).map((item, idx) =>
+                  idx === 0 ? (
+                    <div key={`showcase-${item.id}`} className="border-beam-wrap">
+                      <div className="border-beam-inner">
+                        <SmokedGiftCard
+                          item={item}
+                          themePreset={themePreset}
+                          viewMode="guest"
+                          ownerInstagramHandle={currentDemoWishlist.ownerInstagramHandle}
+                          onInstagramOrderToast={triggerToast}
+                          onBookClick={() =>
+                            triggerToast('💎 Подарунок заброньовано у прев’ю! Спробуй на /w/olena-vip.')
+                          }
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <SmokedGiftCard
+                      key={`showcase-${item.id}`}
+                      item={item}
+                      themePreset={themePreset}
+                      viewMode="guest"
+                      ownerInstagramHandle={currentDemoWishlist.ownerInstagramHandle}
+                      onInstagramOrderToast={triggerToast}
+                      onBookClick={() =>
+                        triggerToast('💎 Подарунок заброньовано у прев’ю! Спробуй на /w/olena-vip.')
+                      }
+                    />
+                  )
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
@@ -886,7 +1109,7 @@ export default function LandingPage() {
                   <div className="bg-slate-100 rounded-2xl p-4 space-y-2.5">
                     <div className="flex items-center justify-between text-sm font-extrabold tabular-nums">
                       <span className="text-emerald-800">
-                        Зібрано: {demoJarAmount[themePreset].toLocaleString('uk-UA')} ₴
+                        Зібрано: {displayJarAmount.toLocaleString('uk-UA')} ₴
                       </span>
                       <span className="text-emerald-700">
                         {Math.min(100, Math.round((demoJarAmount[themePreset] / 26000) * 100))}%
@@ -900,19 +1123,41 @@ export default function LandingPage() {
                         }}
                       />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDemoJarAmount((prev) => ({
-                          ...prev,
-                          [themePreset]: Math.min(26000, prev[themePreset] + 1500),
-                        }));
-                        triggerToast('🐈‍⬛ +1 500 ₴ додано у Монобанку (0% комісії)!');
-                      }}
-                      className="w-full min-h-[48px] px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-sm font-bold spring-transition active:scale-95"
-                    >
-                      + Закинути 1 500 ₴ (демо)
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextVal = Math.min(26000, demoJarAmount[themePreset] + 1500);
+                          setDemoJarAmount((prev) => ({
+                            ...prev,
+                            [themePreset]: nextVal,
+                          }));
+                          if (nextVal >= 26000) {
+                            fireConfetti();
+                            triggerToast('🎉 Банка зібрана на 100%! Мрія здійснилась!');
+                          } else {
+                            triggerToast('🐈‍⬛ +1 500 ₴ додано у Монобанку (0% комісії)!');
+                          }
+                        }}
+                        className="flex-1 min-h-[48px] px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-sm font-bold spring-transition active:scale-95"
+                      >
+                        + Закинути 1 500 ₴ (демо)
+                      </button>
+                      {demoJarAmount[themePreset] >= 26000 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDemoJarAmount((prev) => ({
+                              ...prev,
+                              [themePreset]: 23000,
+                            }))
+                          }
+                          className="min-h-[48px] px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-900 text-sm font-bold spring-transition"
+                        >
+                          ↺
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1338,6 +1583,31 @@ export default function LandingPage() {
                     <div className="text-sm font-bold text-indigo-700">@max.dev • Дніпро</div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Marquee (21st.dev) — живі події спільноти (пауза при наведенні) */}
+            <div className="marquee-wrap py-2" aria-label="Живі події спільноти Mriyii">
+              <div className="marquee-track">
+                {[
+                  '🎂 Оля, Київ • Зібрали 26 000 ₴ на Dyson Airwrap',
+                  '🌸 Софія, Львів • Анонімний букет півоній 🕶️',
+                  '🎮 Ігор, Дніпро • Спільний збір на PS5 Pro',
+                  '☕ Марина, Одеса • Кавоварка DeLonghi за 2 дні',
+                  '💎 Аліна • Вішліст у Instagram Bio без адреси',
+                  '🎂 Оля, Київ • Зібрали 26 000 ₴ на Dyson Airwrap',
+                  '🌸 Софія, Львів • Анонімний букет півоній 🕶️',
+                  '🎮 Ігор, Дніпро • Спільний збір на PS5 Pro',
+                  '☕ Марина, Одеса • Кавоварка DeLonghi за 2 дні',
+                  '💎 Аліна • Вішліст у Instagram Bio без адреси',
+                ].map((story, idx) => (
+                  <span
+                    key={`mq-${idx}`}
+                    className="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap"
+                  >
+                    {story}
+                  </span>
+                ))}
               </div>
             </div>
 
