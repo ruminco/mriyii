@@ -1107,6 +1107,14 @@
       showToast('🐈‍⬛ +2 000 ₴ додано у Монобанку!');
     }
 
+    function markPurchasedElsewhere(id) {
+      const it = DATA[currentTheme].items.find((x) => x.id === id);
+      if (!it) return;
+      it.isBooked = true;
+      renderAll();
+      showToast('✅ Позначено як куплене деінде! Інші друзі бачитимуть, що подарунок уже зайнятий.');
+    }
+
     async function orderIgDirect(shop, title) {
       const ownerIg = DATA[currentTheme].ownerIg;
       const msg = `Привіт! Хочу оплатити подарунок із вішліста для @${ownerIg}: ${title}. Напишіть у Direct після оплати для узгодження доставки 🌸`;

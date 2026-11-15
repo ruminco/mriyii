@@ -288,7 +288,7 @@ export function SmokedGiftCard({
           {/* Кольорова бульбашка коментаря іменинника (💬) з бічною смужкою border-l-4 */}
           {item.description && (
             <div
-              className={`mt-2 text-xs font-bold ${tokens.commentBubbleClass} rounded-r-xl px-3 py-1.5`}
+              className={`mt-2 text-sm font-bold ${tokens.commentBubbleClass} rounded-r-xl px-3 py-1.5`}
             >
               💬 «{item.description}»
             </div>
@@ -306,7 +306,7 @@ export function SmokedGiftCard({
                   <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shrink-0">
                     🔒
                   </span>
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <div className="font-extrabold text-indigo-950">
                       Сюрприз-захист активний! ✨
                     </div>
@@ -318,7 +318,7 @@ export function SmokedGiftCard({
               </div>
             ) : (
               <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
-                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                <span className="text-sm font-bold text-emerald-700 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   {cleanShopHandle
                     ? `Доступно в @${cleanShopHandle} (без домашньої адреси)`
@@ -330,7 +330,7 @@ export function SmokedGiftCard({
                       href={storeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="py-1.5 px-3 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 inline-flex items-center gap-1"
+                      className="py-1.5 px-3 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 inline-flex items-center gap-1"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       Магазин
@@ -340,7 +340,7 @@ export function SmokedGiftCard({
                     <button
                       type="button"
                       onClick={() => onDeleteClick(item)}
-                      className="py-1.5 px-2.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 inline-flex items-center gap-1"
+                      className="py-1.5 px-2.5 rounded-xl text-sm font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 inline-flex items-center gap-1"
                       title="Видалити бажання"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -356,7 +356,7 @@ export function SmokedGiftCard({
             {/* Смарагдово-бірюзовий акцентний бокс Монобанки збору */}
             {hasJar && targetAmount > 0 && (
               <div className="bg-gradient-to-br from-emerald-50/95 via-teal-50/70 to-indigo-50/60 border border-emerald-200 rounded-2xl p-3 space-y-2">
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center justify-between text-sm">
                   <span className="font-extrabold text-emerald-950 flex items-center gap-1.5">
                     <span>
                       {isPrivat24
@@ -392,7 +392,7 @@ export function SmokedGiftCard({
                       <button
                         type="button"
                         onClick={() => onDonateSimulateClick(item)}
-                        className={`flex-1 ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl spring-transition active:scale-95`}
+                        className={`flex-1 ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95`}
                       >
                         {tokens.primaryJarBtnText} (+2 000 ₴)
                       </button>
@@ -409,7 +409,7 @@ export function SmokedGiftCard({
                             jarCurrentUah: currentAmount,
                           })
                         }
-                        className={`flex-1 ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl spring-transition active:scale-95 inline-flex items-center justify-center gap-1.5`}
+                        className={`flex-1 ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95 inline-flex items-center justify-center gap-1.5`}
                       >
                         <span>{tokens.primaryJarBtnText}</span>
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -421,7 +421,7 @@ export function SmokedGiftCard({
                         type="button"
                         onClick={handleSync}
                         disabled={isSyncing}
-                        className="py-2.5 px-2.5 rounded-xl text-xs font-bold bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-200 spring-transition"
+                        className="py-2.5 px-2.5 rounded-xl text-sm font-bold bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-200 spring-transition"
                         title="Оновити баланс Банки (кеш 60с)"
                       >
                         <RefreshCw
@@ -434,7 +434,7 @@ export function SmokedGiftCard({
                       <button
                         type="button"
                         onClick={() => onCloseJar100SimulateClick(item)}
-                        className="bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-xs py-2.5 px-3 rounded-xl spring-transition active:scale-95"
+                        className="bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
                       >
                         👑 Закрити 100%
                       </button>
@@ -443,7 +443,7 @@ export function SmokedGiftCard({
                         <button
                           type="button"
                           onClick={() => onBookClick(item)}
-                          className="bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-xs py-2.5 px-3 rounded-xl spring-transition active:scale-95"
+                          className="bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
                         >
                           👑 Закрити 100%
                         </button>
@@ -460,7 +460,7 @@ export function SmokedGiftCard({
                 <button
                   type="button"
                   onClick={handleInstagramOrderClick}
-                  className="w-full py-2.5 px-3.5 rounded-xl text-xs font-extrabold bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 hover:brightness-110 text-white shadow-md shadow-pink-500/20 spring-transition active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-3.5 rounded-xl text-sm font-extrabold bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 hover:brightness-110 text-white shadow-md shadow-pink-500/20 spring-transition active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Camera className="w-4 h-4 shrink-0" />
                   <span>Замовити в Instagram @{cleanShopHandle} 📸</span>
@@ -476,7 +476,7 @@ export function SmokedGiftCard({
             {/* Якщо лот вже заброньовано або Банку зібрано на 100% */}
             {item.isBooked || isGoalReached ? (
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-extrabold">
+                <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm font-extrabold">
                   <span>💎</span>
                   <span>
                     {isGoalReached
@@ -493,7 +493,7 @@ export function SmokedGiftCard({
                       href={outUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="py-2 px-3 rounded-xl text-xs font-extrabold bg-slate-950 hover:bg-slate-800 text-amber-300 shadow spring-transition active:scale-95 inline-flex items-center gap-1.5"
+                      className="py-2 px-3 rounded-xl text-sm font-extrabold bg-slate-950 hover:bg-slate-800 text-amber-300 shadow spring-transition active:scale-95 inline-flex items-center gap-1.5"
                     >
                       <ShoppingCart className="w-3.5 h-3.5" />
                       Купити в магазині
@@ -518,14 +518,14 @@ export function SmokedGiftCard({
                           );
                         }
                       }}
-                      className="py-2 px-2.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 spring-transition inline-flex items-center gap-1"
+                      className="py-2 px-2.5 rounded-xl text-sm font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 spring-transition inline-flex items-center gap-1"
                     >
                       {locale === 'en' ? '✅ Purchased elsewhere' : '✅ Купив деінде'}
                     </button>
                   )}
 
                   {purchasedElsewhere && (
-                    <span className="py-2 px-2.5 rounded-xl text-xs font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                    <span className="py-2 px-2.5 rounded-xl text-sm font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
                       {locale === 'en' ? '✅ Purchased' : '✅ Куплено'}
                     </span>
                   )}
@@ -534,7 +534,7 @@ export function SmokedGiftCard({
                     <button
                       type="button"
                       onClick={() => onCancelBookingClick(item)}
-                      className="py-2 px-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 spring-transition inline-flex items-center gap-1"
+                      className="py-2 px-2.5 rounded-xl text-sm font-bold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 spring-transition inline-flex items-center gap-1"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       {locale === 'en' ? 'Cancel' : 'Скасувати'}
@@ -550,7 +550,7 @@ export function SmokedGiftCard({
                     <button
                       type="button"
                       onClick={() => onBookClick(item)}
-                      className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold ${tokens.primaryCtaGradient} hover:brightness-110 text-white spring-transition active:scale-95 flex items-center justify-center gap-1.5`}
+                      className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} hover:brightness-110 text-white spring-transition active:scale-95 flex items-center justify-center gap-1.5`}
                     >
                       <span>{locale === 'en' ? '🎁 Reserve gift' : tokens.primaryBookBtnText}</span>
                     </button>
@@ -560,7 +560,7 @@ export function SmokedGiftCard({
                     <button
                       type="button"
                       onClick={() => onAttachJarClick(item)}
-                      className="py-2.5 px-3 rounded-xl text-xs font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 spring-transition active:scale-95"
+                      className="py-2.5 px-3 rounded-xl text-sm font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 spring-transition active:scale-95"
                     >
                       {locale === 'en' ? '🫙 Group Jar / P24' : '🫙 Банка / Приват24'}
                     </button>
