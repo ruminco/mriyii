@@ -176,6 +176,8 @@ export function SmokedGiftCard({
             <img
               src={item.imageUrl}
               alt={item.title}
+              loading="eager"
+              referrerPolicy="no-referrer"
               onError={() => setImgError(true)}
               className="w-full h-full object-cover spring-transition hover:scale-105"
             />

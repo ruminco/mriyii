@@ -29,6 +29,7 @@ interface GuestWishlistClientProps {
   ownerInstagramHandle?: string;
   flowerAndGiftNotes?: string;
   initialItems: UnifiedGiftCardItem[];
+  isDemoMode?: boolean;
 }
 
 export function GuestWishlistClient({
@@ -39,6 +40,7 @@ export function GuestWishlistClient({
   ownerInstagramHandle,
   flowerAndGiftNotes,
   initialItems,
+  isDemoMode = false,
 }: GuestWishlistClientProps) {
   const [themePreset, setThemePreset] = useState<ThemePreset>(initialThemePreset);
   const [locale, setLocale] = useState<'ua' | 'en'>('ua');
@@ -300,55 +302,66 @@ export function GuestWishlistClient({
             <span className="text-sm font-black text-white">mriyii.app/{slug}</span>
           </Link>
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            <div className="inline-flex items-center rounded-xl bg-white/10 border border-white/15 p-0.5">
-              <button
-                type="button"
-                onClick={() => setLocale('ua')}
-                className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
-                  locale === 'ua' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
-                }`}
-              >
-                UA
-              </button>
-              <button
-                type="button"
-                onClick={() => setLocale('en')}
-                className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
-                  locale === 'en' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
-                }`}
-              >
-                EN
-              </button>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {!isDemoMode && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-sm font-bold text-slate-200 tabular-nums">
+                🎁 {items.filter((i) => !i.isBooked).length} вільні мрії •{' '}
+                {items.filter((i) => i.hasMonoJar || i.monoJarUrl).length} збір на Банку
+              </span>
+            )}
 
-            <button
-              type="button"
-              onClick={() => setForceFallbackPoster((p) => !p)}
-              className="py-1.5 px-2.5 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15 flex items-center gap-1"
-            >
-              <ImageIcon className="w-3.5 h-3.5 text-amber-300" />
-              <span>{forceFallbackPoster ? '✨ Smart Постер' : '🖼️ З фото'}</span>
-            </button>
+            {isDemoMode && (
+              <>
+                <div className="inline-flex items-center rounded-xl bg-white/10 border border-white/15 p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setLocale('ua')}
+                    className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
+                      locale === 'ua' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                    }`}
+                  >
+                    UA
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLocale('en')}
+                    className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
+                      locale === 'en' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                    }`}
+                  >
+                    EN
+                  </button>
+                </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                const next =
-                  themePreset === 'rose_luxury' ? 'cyber_titanium' : 'rose_luxury';
-                setThemePreset(next);
-                setItems(DEMO_WISHLISTS[next].items);
-              }}
-              className="py-1.5 px-2.5 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15"
-            >
-              {tokens.label}
-            </button>
+                <button
+                  type="button"
+                  onClick={() => setForceFallbackPoster((p) => !p)}
+                  className="py-1.5 px-2.5 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15 flex items-center gap-1"
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{forceFallbackPoster ? '✨ Smart Постер' : '🖼️ З фото'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next =
+                      themePreset === 'rose_luxury' ? 'cyber_titanium' : 'rose_luxury';
+                    setThemePreset(next);
+                    setItems(DEMO_WISHLISTS[next].items);
+                  }}
+                  className="py-1.5 px-2.5 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15"
+                >
+                  {tokens.label}
+                </button>
+              </>
+            )}
 
             <Link
               href="/"
-              className="py-1.5 px-3 rounded-xl text-sm font-extrabold bg-white text-slate-950 shadow"
+              className="py-1.5 px-3.5 rounded-xl text-sm font-extrabold bg-white text-slate-950 shadow"
             >
-              {locale === 'en' ? '✨ Create wishlist' : '✨ Створити свій вішліст'}
+              {locale === 'en' ? '✨ Create wishlist' : '✨ Створити свій'}
             </Link>
           </div>
         </div>
@@ -429,7 +442,7 @@ export function GuestWishlistClient({
               </div>
               <div>
                 <div className="text-sm sm:text-base font-extrabold text-white">
-                  ✨ Хочеш, допоможу з ідеєю на основі інтересів?
+                  🤖 Не знаєш, що обрати? Підберу подарунок для {ownerName}
                 </div>
                 <div className="text-sm font-semibold text-slate-300">
                   ШІ підбере подарунки зі списку або в магазинах під твій бюджет
@@ -480,8 +493,10 @@ export function GuestWishlistClient({
         {/* 3. FREE APP NOTE                                                    */}
         {/* =================================================================== */}
         <section className="rounded-2xl bg-[#171D30]/85 border border-white/10 px-4 py-3 flex items-center justify-center sm:justify-start gap-2.5 text-sm font-semibold text-amber-200">
-          <span>💡</span>
-          <span>Користуйся посиланнями — застосунок безкоштовний</span>
+          <span>✨</span>
+          <span>
+            Mriyii безкоштовний для тебе і гостей — магазини платять нам невеликий % партнерської винагороди за перехід.
+          </span>
         </section>
 
         {/* =================================================================== */}
@@ -579,7 +594,9 @@ export function GuestWishlistClient({
               } shadow-lg shrink-0 flex items-center gap-2`}
             >
               <Camera className="w-4 h-4" />
-              <span>Замовити в Instagram @{featuredFlowerShop} 📸</span>
+              <span>
+                📸 Написати @{featuredFlowerShop} (текст для @{resolvedOwnerIg} скопіюється сам)
+              </span>
             </button>
           </section>
         )}
@@ -633,11 +650,10 @@ export function GuestWishlistClient({
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">
-                  Ваш Email (для можливості скасувати бронь):
+                  Ваш Email (необов&apos;язково — лише щоб скасувати бронь з іншого пристрою):
                 </label>
                 <input
                   type="email"
-                  required
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
                   placeholder="alex@example.com"
@@ -645,9 +661,9 @@ export function GuestWishlistClient({
                 />
               </div>
 
-              <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-sm font-semibold text-amber-900 flex items-center gap-2">
-                <span>💡</span>
-                <span>Користуйся посиланнями — застосунок безкоштовний</span>
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm font-semibold text-emerald-900 flex items-center gap-2">
+                <span>🔒</span>
+                <span>{ownerName} не дізнається, хто забронював подарунок, до дня свята.</span>
               </div>
 
               <button

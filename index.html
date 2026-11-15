@@ -66,8 +66,11 @@
         <button onclick="switchScreen('guest')" class="hidden sm:inline-block text-sm font-bold text-slate-200 hover:text-white spring">
           Приклад
         </button>
-        <button onclick="switchScreen('dashboard')" id="header-cta" class="min-h-[44px] px-5 rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 spring active:scale-95">
-          Мій кабінет →
+        <button onclick="switchScreen('dashboard')" class="hidden sm:inline-block text-sm font-bold text-slate-200 hover:text-white spring">
+          Мій кабінет
+        </button>
+        <button onclick="focusSandboxInput('')" id="header-cta" class="sec-cta min-h-[44px] px-5 rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 spring active:scale-95">
+          ✨ Створити вішліст
         </button>
       </div>
     </div>
@@ -80,7 +83,7 @@
   </div>
 
   <!-- ======================================================================= -->
-  <!-- SCREEN 1: CLEAN LANDING PAGE (SECRET.GIFT HERO + 7 AIRY SECTIONS)       -->
+  <!-- SCREEN 1: CLEAN LANDING PAGE (DS V2 + BEFORE/AFTER + 10 SECTIONS)       -->
   <!-- ======================================================================= -->
   <main id="screen-landing" class="mx-auto max-w-5xl px-4 pb-24">
 
@@ -89,7 +92,7 @@
       <div class="h-11 sm:h-12 overflow-hidden flex items-center justify-center">
         <button onclick="toggleHeroPill()" id="hero-morph-pill" class="inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 bg-rose-500/15 border border-rose-400/35 text-rose-200">
           <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0"></span>
-          <span>🤫 Таємний чат у Telegram «То що даруємо?»</span>
+          <span>💬 Ще один чат у Telegram і зіпсована інтрига?</span>
           <span>➔</span>
         </button>
       </div>
@@ -97,13 +100,13 @@
         Твої мрії <span id="hero-accent" class="accent-rose">варті того,</span> щоб збутися
       </h1>
       <p class="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
-        Більше жодних таємних чатів у Telegram і незручних натяків. Додай лінк на подарунок — отримай стильну вітрину за <strong class="text-white font-bold">30 секунд</strong>.
+        Більше жодного зайвого чату в Telegram і руйнування інтриги. Додай лінк на подарунок — отримай стильну вітрину за <strong class="text-white font-bold">30 секунд</strong>.
       </p>
       <div class="max-w-xs mx-auto grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-[#171D30] border border-white/15">
         <button onclick="setThemeExplicit('rose_luxury')" id="hero-sw-rose" class="min-h-[48px] rounded-xl text-sm font-extrabold bg-amber-500 text-slate-950 shadow-lg spring">👩 Для неї</button>
         <button onclick="setThemeExplicit('cyber_titanium')" id="hero-sw-cyber" class="min-h-[48px] rounded-xl text-sm font-extrabold text-slate-200 hover:text-white spring">👨 Для нього</button>
       </div>
-      <form onsubmit="handleCapsuleSubmit(event)" class="max-w-2xl mx-auto bg-white rounded-2xl p-2 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      <form onsubmit="event.preventDefault(); addFromCapsule('capsule-input');" class="max-w-2xl mx-auto bg-white rounded-2xl p-2 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <input id="capsule-input" type="text" placeholder="Встав посилання або @instagram-шоурум..." class="flex-1 px-4 py-3 text-base font-semibold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none" />
         <button id="capsule-btn" type="submit" class="w-full sm:w-auto min-h-[48px] sm:h-14 px-6 rounded-xl text-base font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shrink-0 spring active:scale-95">✨ Створити вішліст</button>
       </form>
@@ -113,6 +116,46 @@
         <button onclick="quickAddDemo('Букет білих півоній @kamelia_flowers_kyiv', 2800)" class="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">💐 Півонії</button>
       </div>
       <p class="text-sm font-medium text-slate-200">Безкоштовно • Без реєстрації для старту • 0% комісії • Тільки ₴ UAH</p>
+    </section>
+
+    <!-- ДО / ПІСЛЯ: TELEGRAM ЧАТ VS ОДНЕ ПОСИЛАННЯ MRIYII (#12) -->
+    <section class="py-12 sm:py-16 space-y-8">
+      <div class="max-w-3xl mx-auto text-center space-y-3">
+        <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+          Досить <span class="sec-accent accent-rose">здогадок</span> у месенджерах
+        </h2>
+        <p class="text-base sm:text-lg text-slate-200">Порівняй, як свято виглядає в чатах і як — із твоїм посиланням Mriyii.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-rose-400/30 space-y-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-400/35 flex items-center justify-center text-3xl shrink-0">💬</div>
+            <div>
+              <div class="text-sm font-extrabold text-rose-300">До Mriyii</div>
+              <h3 class="text-xl font-black text-white">Ще один чат у Telegram і руйнування інтриги</h3>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-base text-slate-200">
+            <li>• Друзі створюють окремий чат і все одно губляться в ідеях</li>
+            <li>• Хтось дарує два однакові сертифікати чи не той колір</li>
+            <li>• Хтось збирає гроші на картку вручну й плутається в сумах</li>
+          </ul>
+        </div>
+        <div class="rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-emerald-400/35 space-y-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-400/35 flex items-center justify-center text-3xl shrink-0">🎁</div>
+            <div>
+              <div class="text-sm font-extrabold text-emerald-300">З Mriyii</div>
+              <h3 class="text-xl font-black text-white">Одне посилання без зайвих чатів і спойлерів</h3>
+            </div>
+          </div>
+          <ul class="space-y-2.5 text-base text-slate-200">
+            <li>• Бронювання подарунка в 1 клік без реєстрації для гостей</li>
+            <li>• Спільний збір на Банку Monobank або Приват24 з 0% комісії</li>
+            <li>• Сюрприз-режим: ти не бачиш, хто що обрав, до самого свята</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <!-- СЕКЦІЯ 2: ЯК ЦЕ ПРАЦЮЄ ЗА 3 КРОКИ -->
@@ -158,41 +201,16 @@
         </h2>
       </div>
       <div class="max-w-4xl mx-auto rounded-[28px] bg-[#171D30] border border-white/15 p-6 sm:p-8 shadow-2xl space-y-5">
-        <div class="flex flex-col sm:flex-row items-center gap-4 pb-5 border-b border-white/10 text-center sm:text-left">
-          <div class="w-16 h-16 rounded-full avatar-ring-rose p-[2px] shrink-0">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Олена" class="w-full h-full rounded-full object-cover border-2 border-[#171D30]" />
-          </div>
-          <div class="space-y-1">
-            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm font-bold">
-              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">🎂 До свята 12 днів</span>
-              <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-200">@olena.muse</span>
-            </div>
-            <h3 class="text-xl font-black text-white">Олена Ковальчук • Мої 25 рочків 🥂</h3>
-            <p class="text-sm text-slate-200">Зібрала речі, про які справді мрію. Можна бронювати у 1 клік або скидатися на Банку!</p>
-          </div>
-        </div>
+        <div id="landing-showcase-profile"></div>
         <button onclick="switchScreen('guest')" class="w-full min-h-[52px] rounded-2xl bg-[#0E1324]/80 hover:bg-[#0E1324] border border-amber-400/35 px-4 py-3 flex items-center justify-between gap-3 text-left spring">
-          <span class="text-sm sm:text-base font-bold text-white">✨ Хочеш, допоможу з ідеєю на основі інтересів?</span>
+          <span class="text-sm sm:text-base font-bold text-white">🤖 Не знаєш, що обрати? Підберу подарунок на основі інтересів</span>
           <span class="px-3 py-1 rounded-xl bg-amber-400 text-slate-950 text-sm font-black shrink-0">Підібрати ▾</span>
         </button>
         <div class="rounded-xl bg-[#0E1324]/60 border border-white/10 px-4 py-2.5 text-sm font-semibold text-amber-200 flex items-center gap-2">
-          <span>💡</span>
-          <span>Користуйся посиланнями — застосунок безкоштовний</span>
+          <span>✨</span>
+          <span>Mriyii безкоштовний для тебе і гостей — магазини платять нам невеликий % партнерської винагороди за перехід.</span>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="solid-white-card rounded-3xl p-5 space-y-3">
-            <div class="text-xl font-black text-slate-950 tabular-nums">26 000 ₴</div>
-            <div class="text-base font-black text-slate-950">Стайлер Dyson Airwrap i.d.™</div>
-            <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:75%"></div></div>
-            <button onclick="switchScreen('guest')" class="sec-cta w-full min-h-[48px] rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950">🐈 Поповнити Банку</button>
-          </div>
-          <div class="solid-white-card rounded-3xl p-5 space-y-3">
-            <div class="text-xl font-black text-slate-950 tabular-nums">4 200 ₴</div>
-            <div class="text-base font-black text-slate-950">Букет 25 білих півоній 🌸</div>
-            <div class="text-sm font-semibold text-emerald-700">🔒 Доставка через Direct без адреси</div>
-            <button onclick="switchScreen('guest')" class="sec-cta w-full min-h-[48px] rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950">📸 Замовити в Direct</button>
-          </div>
-        </div>
+        <div id="landing-showcase-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </section>
 
@@ -207,6 +225,9 @@
         </h2>
         <p class="text-base sm:text-lg text-slate-200 leading-relaxed">
           Для компанії з 10 друзів дорогий подарунок перетворюється на комфортний комплімент через Apple Pay прямо на твою Банку або Конверт Приват24.
+        </p>
+        <p class="text-sm font-bold text-emerald-300">
+          🔒 Просто встав публічне посилання на свою Банку (send.monobank.ua/jar/...) — без паролів, токенів і доступу до картки.
         </p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -271,7 +292,7 @@
     <section class="py-16 sm:py-24 space-y-10">
       <div class="max-w-3xl mx-auto text-center space-y-4">
         <span class="sec-badge inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-amber-500/15 border border-amber-400/35 text-amber-200">
-          🤖 Powered by Gemini 2.5
+          🤖 Персональний ШІ-стиліст подарунків
         </span>
         <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
           ШІ-помічник підбере <span class="sec-accent accent-rose">сюрприз</span> за 10 секунд
@@ -336,6 +357,14 @@
           <div class="text-base font-bold text-white">на перший лінк</div>
         </div>
       </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rounded-2xl px-5 py-4 bg-[#171D30]/80 border border-white/10 text-base text-slate-200">
+          «Кинула лінк у сторіс за тиждень до ДР — друзі самі закрили Банку на AirPods Max!» <strong class="text-amber-300">@alina.kyiv</strong>
+        </div>
+        <div class="rounded-2xl px-5 py-4 bg-[#171D30]/80 border border-white/10 text-base text-slate-200">
+          «Нарешті жодних 5 однакових свічок і незручних питань про адресу.» <strong class="text-emerald-300">Оля, Київ</strong>
+        </div>
+      </div>
     </section>
 
     <!-- СЕКЦІЯ 9: FAQ -->
@@ -361,6 +390,14 @@
         <div class="rounded-3xl p-6 bg-[#171D30] border border-white/10 space-y-2">
           <h3 class="text-lg font-black text-white">📲 Чи потрібен Telegram або реєстрація?</h3>
           <p class="text-base text-slate-200 leading-relaxed">Гостям реєстрація не потрібна. Додайте перші мрії зараз, а увійдіть лише при збереженні лінку.</p>
+        </div>
+        <div class="rounded-3xl p-6 bg-[#171D30] border border-white/10 space-y-2">
+          <h3 class="text-lg font-black text-white">🔄 А якщо гість передумає або захоче скасувати бронь?</h3>
+          <p class="text-base text-slate-200 leading-relaxed">Бронь скасовується в 1 клік, і діє анти-спам ліміт — не більше 2 активних бронювань на одного гостя.</p>
+        </div>
+        <div class="rounded-3xl p-6 bg-[#171D30] border border-white/10 space-y-2">
+          <h3 class="text-lg font-black text-white">✈️ Чи можна додати бажання без посилання — подорож або сертифікат?</h3>
+          <p class="text-base text-slate-200 leading-relaxed">Звісно! Додайте будь-яку мрію текстом — квитки, враження чи спільний збір на Монобанку.</p>
         </div>
       </div>
     </section>
@@ -664,9 +701,33 @@
       setTimeout(() => box.classList.add('hidden'), 3800);
     }
 
+    let currentLocale = 'ua';
+    function setLocale(lang) {
+      currentLocale = lang === 'en' ? 'en' : 'ua';
+      const uaBtn = document.getElementById('lang-ua');
+      const enBtn = document.getElementById('lang-en');
+      const active = 'px-2.5 py-1 rounded-lg text-sm font-extrabold bg-white text-slate-950 spring';
+      const idle = 'px-2.5 py-1 rounded-lg text-sm font-extrabold text-slate-200 hover:text-white spring';
+      if (uaBtn) uaBtn.className = currentLocale === 'ua' ? active : idle;
+      if (enBtn) enBtn.className = currentLocale === 'en' ? active : idle;
+      const capBtn = document.getElementById('capsule-btn');
+      if (capBtn) capBtn.textContent = currentLocale === 'en' ? '✨ Create wishlist' : '✨ Створити вішліст';
+      showToast(currentLocale === 'en' ? '🌐 Language: English' : '🌐 Мова: Українська');
+    }
+
+    function getDefaultGiftImage(title) {
+      const t = (title || '').toLowerCase();
+      if (t.includes('dyson') || t.includes('стайл')) return 'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&w=800&q=80';
+      if (t.includes('airpods') || t.includes('навуш') || t.includes('sony')) return 'https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?auto=format&fit=crop&w=800&q=80';
+      if (t.includes('півон') || t.includes('букет') || t.includes('квіт')) return 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80';
+      if (t.includes('кав') || t.includes('coffee')) return 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80';
+      return 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80';
+    }
+
     function focusSandboxInput(prefill) {
       switchScreen('landing');
-      const inp = document.getElementById('landing-input');
+      const inp = document.getElementById('capsule-input');
+      if (!inp) return;
       if (prefill) inp.value = prefill;
       inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => inp.focus(), 300);
@@ -822,8 +883,62 @@
       `;
     }
 
+    function renderLandingShowcase() {
+      const d = DATA[currentTheme];
+      const isCyber = currentTheme === 'cyber_titanium';
+      const profEl = document.getElementById('landing-showcase-profile');
+      const gridEl = document.getElementById('landing-showcase-grid');
+      if (profEl) {
+        profEl.innerHTML = `
+          <div class="flex flex-col sm:flex-row items-center gap-4 pb-5 border-b border-white/10 text-center sm:text-left">
+            <div class="w-16 h-16 rounded-full ${isCyber ? 'avatar-ring-cyber' : 'avatar-ring-rose'} p-[2px] shrink-0">
+              <img src="${d.avatar}" alt="${d.ownerName}" loading="eager" referrerpolicy="no-referrer" class="w-full h-full rounded-full object-cover border-2 border-[#171D30]" />
+            </div>
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm font-bold">
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">🎂 До свята 12 днів</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-200">@${d.ownerIg}</span>
+              </div>
+              <h3 class="text-xl font-black text-white">${d.ownerName}</h3>
+              <p class="text-sm text-slate-200">${d.bio}</p>
+            </div>
+          </div>
+        `;
+      }
+      if (gridEl) {
+        const btnCls = isCyber ? 'bg-emerald-400 hover:bg-emerald-500 text-slate-950' : 'bg-amber-500 hover:bg-amber-600 text-slate-950';
+        gridEl.innerHTML = d.items.slice(0, 2).map((it) => {
+          const imgUrl = it.image || getDefaultGiftImage(it.title);
+          const pct = it.jarTarget ? Math.min(100, Math.round((it.jarCurrent / it.jarTarget) * 100)) : 0;
+          return `
+            <div class="solid-white-card rounded-3xl overflow-hidden shadow-xl flex flex-col">
+              <div class="relative h-44 w-full overflow-hidden bg-slate-100">
+                <img src="${imgUrl}" alt="${it.title}" loading="eager" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
+                <span class="absolute top-3 right-3 px-3 py-1 rounded-full bg-slate-950/85 text-white text-sm font-black tabular-nums">${it.price.toLocaleString('uk-UA')} ₴</span>
+              </div>
+              <div class="p-5 space-y-3 flex-1 flex flex-col justify-between">
+                <div class="space-y-2">
+                  <div class="text-base font-black text-slate-950 leading-snug">${it.title}</div>
+                  ${it.hasJar ? `
+                    <div class="space-y-1">
+                      <div class="flex justify-between text-sm font-bold text-emerald-700 tabular-nums"><span>Зібрано ${it.jarCurrent.toLocaleString('uk-UA')} ₴</span><span>${pct}%</span></div>
+                      <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:${pct}%"></div></div>
+                    </div>
+                  ` : `<div class="text-sm font-semibold text-slate-600">${it.comment || '✨ Доступно для бронювання'}</div>`}
+                </div>
+                <button onclick="switchScreen('guest')" class="sec-cta w-full min-h-[48px] rounded-xl text-sm font-extrabold ${btnCls}">
+                  ${it.hasJar ? '🐈 Поповнити Банку' : it.instagramHandle ? '📸 Замовити в Direct' : '🎁 Забронювати'}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
     function renderAll() {
       const d = DATA[currentTheme];
+      renderLandingShowcase();
       document.getElementById('guest-profile-header').innerHTML = renderMiniProfileHtml();
       renderGuestAiSection();
       renderMetricsScreen();
@@ -897,11 +1012,12 @@
       const input = document.getElementById(inputId);
       const val = input.value.trim();
       if (!val) { input.focus(); return; }
+      const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '');
       DATA[currentTheme].items.unshift({
         id: 'new-' + Date.now(),
-        title: val.replace(/^https?:\/\/(www\.)?/i, ''),
+        title: cleanTitle,
         price: 4900,
-        image: '',
+        image: getDefaultGiftImage(cleanTitle),
         comment: 'Додано через капсулу швидкого старту ✨',
         hasJar: false,
         jarCurrent: 0,
@@ -919,7 +1035,7 @@
         id: 'quick-' + Date.now(),
         title: title,
         price: price,
-        image: '',
+        image: getDefaultGiftImage(title),
         comment: 'Додано в 1 клік ✨',
         hasJar: price >= 10000,
         jarCurrent: price >= 10000 ? Math.round(price * 0.65) : 0,
@@ -1152,10 +1268,10 @@
       if (!pill) return;
       if (heroPillState === "before") {
         pill.className = "inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 bg-rose-500/15 border border-rose-400/35 text-rose-200";
-        pill.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0"></span><span>🤫 Таємний чат у Telegram «То що даруємо?»</span><span>➔</span>';
+        pill.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0"></span><span>💬 Ще один чат у Telegram і зіпсована інтрига?</span><span>➔</span>';
       } else {
         pill.className = "inline-flex items-center justify-center gap-2.5 min-h-[44px] px-4 sm:px-5 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 bg-emerald-500/15 border border-emerald-400/40 text-emerald-200";
-        pill.innerHTML = '<span>✨ 1 лінк Mriyii без спойлерів і натяків</span><span class="font-black text-emerald-300">✓</span>';
+        pill.innerHTML = '<span>🎁 Одне посилання: бронь у 1 клік, Монобанка 0% і сюрприз</span><span class="font-black text-emerald-300">✓</span>';
       }
     }
     setInterval(() => toggleHeroPill(), 3200);
@@ -1191,10 +1307,12 @@
       const inp = document.getElementById('dash-add-input');
       const val = (inp && inp.value || '').trim();
       if (!val) return;
+      const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 60);
       DATA[currentTheme].items.unshift({
         id: 'dash-new-' + Date.now(),
-        title: val.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 60),
+        title: cleanTitle,
         price: 3500,
+        image: getDefaultGiftImage(cleanTitle),
         comment: 'Додано через редактор Mriyii ✨',
         isBooked: false
       });
@@ -1272,6 +1390,7 @@
           id: 'tpl-' + key + '-' + Date.now() + '-' + i,
           title: it.title,
           price: it.price,
+          image: getDefaultGiftImage(it.title),
           comment: it.comment,
           isBooked: false
         });

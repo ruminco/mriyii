@@ -263,10 +263,20 @@ export default function LandingPage() {
             </Link>
             <Link
               href={`/dashboard?theme=${themePreset}`}
+              className="hidden sm:inline-block text-sm font-bold text-slate-200 hover:text-white spring-transition"
+            >
+              {locale === 'en' ? 'My Dashboard' : 'Мій кабінет'}
+            </Link>
+            <a
+              href="#section-1-hero"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('capsule-input')?.focus();
+              }}
               className={`min-h-[48px] px-5 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} inline-flex items-center spring-transition active:scale-95`}
             >
-              {locale === 'en' ? 'Dashboard →' : 'Мій кабінет →'}
-            </Link>
+              {locale === 'en' ? '✨ Create wishlist' : '✨ Створити вішліст'}
+            </a>
           </nav>
         </div>
       </header>
@@ -295,12 +305,12 @@ export default function LandingPage() {
               {heroPillState === 'before' ? (
                 <>
                   <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0" />
-                  <span>🤫 Таємний чат у Telegram «То що даруємо?»</span>
+                  <span>💬 Ще один чат у Telegram і зіпсована інтрига?</span>
                   <span aria-hidden="true">➔</span>
                 </>
               ) : (
                 <>
-                  <span>✨ 1 лінк Mriyii без спойлерів і натяків</span>
+                  <span>🎁 Одне посилання: бронь у 1 клік, Монобанка 0% і сюрприз</span>
                   <span className="font-black text-emerald-300" aria-hidden="true">
                     ✓
                   </span>
@@ -314,7 +324,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
-            Більше жодних таємних чатів у Telegram і незручних натяків. Додай лінк на подарунок —
+            Більше жодного зайвого чату в Telegram і руйнування інтриги. Додай лінк на подарунок —
             отримай стильну вітрину за <strong className="text-white font-bold">30 секунд</strong>.
           </p>
 
@@ -473,6 +483,60 @@ export default function LandingPage() {
         )}
 
         {/* ================================================================= */}
+        {/* ДО / ПІСЛЯ: TELEGRAM ЧАТ VS ОДНЕ ПОСИЛАННЯ MRIYII (#12)           */}
+        {/* ================================================================= */}
+        <section id="section-before-after" className="py-12 sm:py-16 space-y-8">
+          <div className="max-w-3xl mx-auto text-center space-y-3">
+            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+              Досить <span className={accentTextClass}>здогадок</span> у месенджерах
+            </h2>
+            <p className="text-base sm:text-lg text-slate-200">
+              Порівняй, як свято виглядає в чатах і як — із твоїм посиланням Mriyii.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-rose-400/30 space-y-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-400/35 flex items-center justify-center text-3xl shrink-0">
+                  💬
+                </div>
+                <div>
+                  <div className="text-sm font-extrabold text-rose-300">До Mriyii</div>
+                  <h3 className="text-xl font-black text-white">
+                    Ще один чат у Telegram і руйнування інтриги
+                  </h3>
+                </div>
+              </div>
+              <ul className="space-y-2.5 text-base text-slate-200">
+                <li>• Друзі створюють окремий чат і все одно губляться в ідеях</li>
+                <li>• Хтось дарує два однакові сертифікати чи не той колір</li>
+                <li>• Хтось збирає гроші на картку вручну й плутається в сумах</li>
+              </ul>
+            </div>
+
+            <div className="rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-emerald-400/35 space-y-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-400/35 flex items-center justify-center text-3xl shrink-0">
+                  🎁
+                </div>
+                <div>
+                  <div className="text-sm font-extrabold text-emerald-300">З Mriyii</div>
+                  <h3 className="text-xl font-black text-white">
+                    Одне посилання без зайвих чатів і спойлерів
+                  </h3>
+                </div>
+              </div>
+              <ul className="space-y-2.5 text-base text-slate-200">
+                <li>• Бронювання подарунка в 1 клік без реєстрації для гостей</li>
+                <li>• Спільний збір на Банку Monobank або Приват24 з 0% комісії</li>
+                <li>• Сюрприз-режим: ти не бачиш, хто що обрав, до самого свята</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================= */}
         {/* СЕКЦІЯ 2: ЯК ЦЕ ПРАЦЮЄ ЗА 3 КРОКИ                                 */}
         {/* ================================================================= */}
         <section id="section-2-how-it-works" className="py-16 sm:py-24 space-y-10">
@@ -584,8 +648,10 @@ export default function LandingPage() {
 
             {/* 3. Free App Note */}
             <div className="rounded-xl bg-[#0E1324]/60 border border-white/10 px-4 py-2.5 text-sm font-semibold text-amber-200 flex items-center gap-2">
-              <span>💡</span>
-              <span>Користуйся посиланнями — застосунок безкоштовний</span>
+              <span>✨</span>
+              <span>
+                Mriyii безкоштовний для тебе і гостей — магазини платять нам невеликий % партнерської винагороди за перехід.
+              </span>
             </div>
 
             {/* 4. Міні-лоти (білі картки) */}
@@ -631,6 +697,9 @@ export default function LandingPage() {
             </h2>
             <p className="text-base sm:text-lg text-slate-200 leading-relaxed">
               Для компанії з 10 друзів дорогий подарунок перетворюється на комфортний комплімент через Apple Pay прямо на твою Банку або Конверт Приват24.
+            </p>
+            <p className="text-sm font-bold text-emerald-300">
+              🔒 Просто встав публічне посилання на свою Банку (send.monobank.ua/jar/...) — без паролів, токенів і доступу до картки.
             </p>
           </div>
 
@@ -811,7 +880,7 @@ export default function LandingPage() {
             <span
               className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${sectionBadgeClass}`}
             >
-              🤖 Powered by Gemini 2.5
+              🤖 Персональний ШІ-стиліст подарунків
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
               ШІ-помічник підбере <span className={accentTextClass}>сюрприз</span> за 10 секунд
@@ -939,6 +1008,17 @@ export default function LandingPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-2xl px-5 py-4 bg-[#171D30]/80 border border-white/10 text-base text-slate-200">
+              «Кинула лінк у сторіс за тиждень до ДР — друзі самі закрили Банку на AirPods Max!»{' '}
+              <strong className="text-amber-300">@alina.kyiv</strong>
+            </div>
+            <div className="rounded-2xl px-5 py-4 bg-[#171D30]/80 border border-white/10 text-base text-slate-200">
+              «Нарешті жодних 5 однакових свічок і незручних питань про адресу.»{' '}
+              <strong className="text-emerald-300">Оля, Київ</strong>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="rounded-3xl p-6 bg-[#171D30] border border-white/10 space-y-3">
               <p className="text-base text-slate-200 leading-relaxed">
@@ -994,6 +1074,18 @@ export default function LandingPage() {
               <h3 className="text-lg font-black text-white">📲 Чи потрібен Telegram або реєстрація?</h3>
               <p className="text-base text-slate-200 leading-relaxed">
                 Гостям реєстрація не потрібна взагалі. Ви можете додати перші мрії прямо зараз, а увійти через Google/Apple лише при збереженні свого посилання.
+              </p>
+            </div>
+            <div className="rounded-3xl p-6 bg-[#171D30] border border-white/10 space-y-2">
+              <h3 className="text-lg font-black text-white">🔄 А якщо гість передумає або захоче скасувати бронь?</h3>
+              <p className="text-base text-slate-200 leading-relaxed">
+                Бронь скасовується в 1 клік, і подарунок одразу стає вільним. Діє анти-спам ліміт: не більше 2 активних бронювань на одного гостя, щоб ніхто не заблокував увесь список.
+              </p>
+            </div>
+            <div className="rounded-3xl p-6 bg-[#171D30] border border-white/10 space-y-2">
+              <h3 className="text-lg font-black text-white">✈️ Чи можна додати бажання без посилання — подорож або сертифікат?</h3>
+              <p className="text-base text-slate-200 leading-relaxed">
+                Звісно! Можна додати будь-яку мрію текстом — квитки, враження, благодійний донат чи просто спільний збір на Монобанку без конкретного магазину.
               </p>
             </div>
           </div>
