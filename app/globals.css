@@ -21,16 +21,16 @@
   transition: all 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* DS V2 Option 2: Midnight Velvet & Champagne Aurora */
+/* DS V2.1: Rose Aurora on Midnight Gradient */
 .mesh-luxury,
 .canvas-rose {
-  background-color: #0e1324;
+  background-color: #0b1120;
   background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(245, 158, 11, 0.11) 0px, transparent 60%),
-    linear-gradient(180deg, #0e1324 0%, #161b33 38%, #11222e 72%, #0e1324 100%);
+    radial-gradient(ellipse at 50% 0%, rgba(251, 113, 133, 0.13) 0px, transparent 60%),
+    linear-gradient(180deg, #0b1120 0%, #111c33 38%, #0e242c 72%, #0b1120 100%);
 }
 
-/* DS V2 Option 2: Cyber Titanium Aurora */
+/* DS V2.1: Cyber Titanium Emerald Mint */
 .mesh-cyber,
 .canvas-cyber {
   background-color: #0b1120;
@@ -46,7 +46,7 @@
 
 /* Градієнтні кільця аватарки Linktree-профілю */
 .avatar-ring-rose {
-  background: linear-gradient(135deg, #f472b6, #fbbf24, #c084fc);
+  background: linear-gradient(135deg, #fb7185, #f472b6, #818cf8);
 }
 
 .avatar-ring-cyber {

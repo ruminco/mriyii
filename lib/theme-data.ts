@@ -26,27 +26,27 @@ export const THEME_TOKENS: Record<ThemePreset, ThemeVisualTokens> = {
   rose_luxury: {
     preset: 'rose_luxury',
     gender: 'female',
-    label: '👩 Для неї • Midnight Velvet',
+    label: '👩 Для неї • Rose Aurora',
     meshClass: 'canvas-rose',
     avatarRingClass: 'avatar-ring-rose',
     fallbackPosterClass: 'fallback-poster-rose',
-    aiBannerGradient: 'bg-[#171D30] border border-amber-400/30',
+    aiBannerGradient: 'bg-[#171D30] border border-rose-400/35',
     commentBubbleClass:
-      'bg-amber-50 border-l-4 border-amber-500 text-slate-950',
+      'bg-rose-50 border-l-4 border-rose-500 text-slate-950',
     emojiFrameGradient:
-      'from-amber-400 via-amber-500 to-indigo-500 shadow-lg shadow-amber-500/20',
-    priorityBadgeClass: 'bg-amber-500 text-slate-950',
+      'from-rose-400 via-pink-400 to-indigo-500 shadow-lg shadow-rose-500/20',
+    priorityBadgeClass: 'bg-rose-400 text-slate-950',
     priorityBadgeText: '🔥 Мрія #1',
     pricePillClass:
-      'text-amber-200 bg-amber-500/20 border border-amber-400/40',
+      'text-rose-200 bg-rose-500/20 border border-rose-400/40',
     shimmerBarClass: 'bg-emerald-500',
     primaryCtaGradient:
-      'bg-amber-500 hover:bg-amber-600 !text-slate-950 shadow-lg shadow-amber-500/20',
+      'bg-rose-400 hover:bg-rose-500 !text-slate-950 shadow-lg shadow-rose-500/20',
     primaryJarBtnText: '🐈 Поповнити Банку',
     primaryBookBtnText: '👑 Подарувати все',
     donorsBadgeClass: 'bg-emerald-200/80 text-emerald-900',
     surpriseBoxGradient:
-      'from-indigo-50 via-slate-50 to-amber-50 border-indigo-200',
+      'from-indigo-50 via-slate-50 to-rose-50 border-indigo-200',
   },
   cyber_titanium: {
     preset: 'cyber_titanium',
