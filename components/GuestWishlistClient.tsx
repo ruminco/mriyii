@@ -12,6 +12,7 @@ import {
 } from '@/components/SmokedGiftCard';
 import { AiGiftAssistantWidget } from '@/components/AiGiftAssistantWidget';
 import { AffiliateDisclosureBadge } from '@/components/AffiliateDisclosureBadge';
+import { LikeBurst } from '@/components/LikeBurst';
 import {
   bookGiftItem,
   cancelGiftBooking,
@@ -20,6 +21,13 @@ import {
 } from '@/actions/booking';
 
 const GUEST_TOKENS_STORAGE_KEY = 'mriyii_guest_booking_tokens_v1';
+
+interface BookedTicketData {
+  title: string;
+  emoji: string;
+  price?: number;
+  isAnonymous: boolean;
+}
 
 interface GuestWishlistClientProps {
   slug: string;
@@ -63,8 +71,12 @@ export function GuestWishlistClient({
   const [activeJarItem, setActiveJarItem] = useState<UnifiedGiftCardItem | null>(null);
   const [monoJarUrlInput, setMonoJarUrlInput] = useState('');
 
-  // Віральний Growth Loop поп-ап після бронювання
+  // Віральний Growth Loop поп-ап + Issue #21 Booking Ticket & Like Burst
   const [showGrowthModal, setShowGrowthModal] = useState(false);
+  const [lastBookedTicket, setLastBookedTicket] = useState<BookedTicketData | null>(null);
+  const [likeBurstKey, setLikeBurstKey] = useState(0);
+  const [ticketTilt, setTicketTilt] = useState<{ rx: number; ry: number }>({ rx: 0, ry: 0 });
+  const [showStoriesPreview, setShowStoriesPreview] = useState(false);
 
   // COPY-08: Fan Suggestions (ідея подарунка від друга, прихована Сюрприз-режимом від власника)
   const [showFanSuggestModal, setShowFanSuggestModal] = useState(false);
@@ -140,6 +152,13 @@ export function GuestWishlistClient({
     setIsSubmitting(true);
     setModalError(null);
 
+    const ticketPayload: BookedTicketData = {
+      title: activeBookingItem.title,
+      emoji: activeBookingItem.emoji || '🎁',
+      price: activeBookingItem.price,
+      isAnonymous: isAnonymousBooking,
+    };
+
     try {
       const res = await bookGiftItem(
         activeBookingItem.id,
@@ -156,8 +175,11 @@ export function GuestWishlistClient({
             : it
         )
       );
+      setLastBookedTicket(ticketPayload);
+      setShowStoriesPreview(false);
+      setLikeBurstKey((k) => k + 1);
       setActiveBookingItem(null);
-      setTimeout(() => setShowGrowthModal(true), 1200);
+      setTimeout(() => setShowGrowthModal(true), 450);
     } catch (err) {
       if (err instanceof Error && err.message.includes('не більше 2')) {
         setModalError(err.message);
@@ -171,8 +193,11 @@ export function GuestWishlistClient({
               : it
           )
         );
+        setLastBookedTicket(ticketPayload);
+        setShowStoriesPreview(false);
+        setLikeBurstKey((k) => k + 1);
         setActiveBookingItem(null);
-        setTimeout(() => setShowGrowthModal(true), 1200);
+        setTimeout(() => setShowGrowthModal(true), 450);
       }
     } finally {
       setIsSubmitting(false);
@@ -219,9 +244,17 @@ export function GuestWishlistClient({
             : it
         )
       );
+      setLastBookedTicket({
+        title: activeJarItem.title,
+        emoji: activeJarItem.emoji || '🫙',
+        price: activeJarItem.price,
+        isAnonymous: false,
+      });
+      setShowStoriesPreview(false);
+      setLikeBurstKey((k) => k + 1);
       setActiveJarItem(null);
       setMonoJarUrlInput('');
-      setTimeout(() => setShowGrowthModal(true), 1200);
+      setTimeout(() => setShowGrowthModal(true), 450);
     } catch (err) {
       if (
         err instanceof Error &&
@@ -264,6 +297,7 @@ export function GuestWishlistClient({
             : it
         )
       );
+      setLikeBurstKey((k) => k + 1);
     } catch {
       const step = 2000;
       setItems((prev) =>
@@ -278,6 +312,7 @@ export function GuestWishlistClient({
           };
         })
       );
+      setLikeBurstKey((k) => k + 1);
       triggerToast('🐈‍⬛ Баланс Монобанки оновлено (+2 000 ₴ у демо)!');
     }
   };
@@ -489,7 +524,15 @@ export function GuestWishlistClient({
                   },
                   ...prev,
                 ]);
-                setTimeout(() => setShowGrowthModal(true), 1200);
+                setLastBookedTicket({
+                  title: surprise.title,
+                  emoji: surprise.emoji || '✨',
+                  price: surprise.price,
+                  isAnonymous: true,
+                });
+                setShowStoriesPreview(false);
+                setLikeBurstKey((k) => k + 1);
+                setTimeout(() => setShowGrowthModal(true), 450);
               }}
             />
           )}
@@ -754,23 +797,154 @@ export function GuestWishlistClient({
         </div>
       )}
 
-      {/* Віральний Growth Loop поп-ап після бронювання */}
+      {/* Віральний Growth Loop поп-ап + Booking Ticket («Квиток на подарунок») після бронювання */}
       {showGrowthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-          <div className="solid-white-card rounded-[28px] w-full max-w-md p-6 text-center space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto text-emerald-700">
+          <div className="solid-white-card rounded-[28px] w-full max-w-md p-6 text-center space-y-4 max-h-[92vh] overflow-y-auto">
+            <div className="relative w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto text-emerald-700 overflow-visible">
+              <LikeBurst burstKey={likeBurstKey} themePreset={themePreset} />
               <CheckCircle2 className="w-7 h-7" />
             </div>
             <h3 className="text-xl font-black text-slate-950">
               💎 Вау! Ваш внесок у мрію зафіксовано.
             </h3>
+
+            {lastBookedTicket && (
+              <div
+                onMouseMove={(e) => {
+                  if (
+                    typeof window !== 'undefined' &&
+                    (window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+                      window.matchMedia('(pointer: coarse)').matches)
+                  ) {
+                    return;
+                  }
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = (e.clientX - rect.left) / rect.width - 0.5;
+                  const y = (e.clientY - rect.top) / rect.height - 0.5;
+                  setTicketTilt({ rx: -y * 8, ry: x * 8 });
+                }}
+                onMouseLeave={() => setTicketTilt({ rx: 0, ry: 0 })}
+                style={{
+                  transform: `perspective(800px) rotateX(${ticketTilt.rx}deg) rotateY(${ticketTilt.ry}deg)`,
+                }}
+                className="relative rounded-2xl bg-[#0F172A] text-white text-left border border-white/15 shadow-xl transition-transform duration-150 overflow-hidden"
+              >
+                <div className="p-4 flex items-center gap-3.5">
+                  <div
+                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tokens.emojiFrameGradient} p-[2px] shrink-0`}
+                  >
+                    <div className="w-full h-full bg-[#171D30] rounded-[14px] flex items-center justify-center text-3xl">
+                      {lastBookedTicket.emoji}
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-sm font-extrabold text-emerald-300">
+                        🎫 Квиток на подарунок
+                      </span>
+                      {lastBookedTicket.isAnonymous && (
+                        <span className="px-2 py-0.5 rounded-full bg-white/15 text-amber-200 text-sm font-bold">
+                          🕶️ анонімно
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-base font-black text-white leading-snug truncate">
+                      {lastBookedTicket.title}
+                    </div>
+                    {typeof lastBookedTicket.price === 'number' &&
+                      lastBookedTicket.price > 0 && (
+                        <div className="text-base font-black text-amber-300 tabular-nums">
+                          {lastBookedTicket.price.toLocaleString('uk-UA')} ₴
+                        </div>
+                      )}
+                  </div>
+                </div>
+
+                {/* Перфорований розділювач квитка */}
+                <div className="relative h-4 flex items-center">
+                  <span
+                    aria-hidden="true"
+                    className="absolute -left-2 w-4 h-4 rounded-full bg-white"
+                  />
+                  <div className="w-full border-t-2 border-dashed border-white/25 mx-3" />
+                  <span
+                    aria-hidden="true"
+                    className="absolute -right-2 w-4 h-4 rounded-full bg-white"
+                  />
+                </div>
+
+                <div className="px-4 pb-3.5 pt-1 flex items-center justify-between gap-2 text-sm">
+                  <span className="font-semibold text-slate-300">
+                    Для {ownerName} • Сюрприз 🔒
+                  </span>
+                  <span className="font-bold text-slate-200">mriyii.app/w/{slug}</span>
+                </div>
+              </div>
+            )}
+
+            {lastBookedTicket && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const next = !showStoriesPreview;
+                  setShowStoriesPreview(next);
+                  const storyText = `🎫 Забронював подарунок «${lastBookedTicket.title}» у вішлісті mriyii.app/w/${slug} ${lastBookedTicket.isAnonymous ? '🕶️' : '🎁'}`;
+                  try {
+                    if (navigator.clipboard) {
+                      await navigator.clipboard.writeText(storyText);
+                    }
+                  } catch {
+                    // Ігноруємо
+                  }
+                  triggerToast('📸 Картку 9:16 для IG Stories підготовлено й скопійовано!');
+                }}
+                className="w-full min-h-[48px] py-2.5 px-4 rounded-xl text-sm font-extrabold bg-slate-950 hover:bg-slate-800 text-white shadow-md flex items-center justify-center gap-2 spring-transition active:scale-95"
+              >
+                <Camera className="w-4 h-4" />
+                <span>
+                  {showStoriesPreview
+                    ? 'Сховати формат 9:16 ▴'
+                    : '📸 Поділитися в Stories (9:16)'}
+                </span>
+              </button>
+            )}
+
+            {showStoriesPreview && lastBookedTicket && (
+              <div className="mx-auto w-[220px] aspect-[9/16] rounded-[24px] bg-gradient-to-b from-[#1E1433] via-[#111C33] to-[#0B1120] border-2 border-slate-900 p-4 text-white flex flex-col justify-between shadow-2xl">
+                <div className="text-sm font-extrabold text-rose-300">✨ Mriyii Stories 9:16</div>
+                <div className="space-y-2.5">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-3xl">
+                    {lastBookedTicket.emoji}
+                  </div>
+                  <div className="text-base font-black leading-snug">
+                    {lastBookedTicket.title}
+                  </div>
+                  {typeof lastBookedTicket.price === 'number' &&
+                    lastBookedTicket.price > 0 && (
+                      <div className="text-lg font-black text-amber-300 tabular-nums">
+                        {lastBookedTicket.price.toLocaleString('uk-UA')} ₴
+                      </div>
+                    )}
+                  {lastBookedTicket.isAnonymous && (
+                    <div className="inline-block px-2.5 py-0.5 rounded-full bg-white/15 text-sm font-bold text-amber-200">
+                      🕶️ Таємний дарунок
+                    </div>
+                  )}
+                </div>
+                <div className="rounded-xl bg-white text-slate-950 py-2 px-3 text-sm font-black">
+                  🔗 mriyii.app/w/{slug}
+                </div>
+              </div>
+            )}
+
             <p className="text-sm font-semibold text-slate-600 leading-relaxed">
               Хочете такий самий Linktree-вішліст із Монобанкою та ШІ для свого свята? Створіть його безкоштовно за 30 секунд!
             </p>
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
               <Link
                 href="/"
-                className={`flex-1 py-3 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white flex items-center justify-center gap-1.5`}
+                className={`flex-1 min-h-[48px] py-3 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white flex items-center justify-center gap-1.5`}
               >
                 <Sparkles className="w-4 h-4" />
                 <span>✨ Створити мій вішліст</span>
@@ -778,7 +952,7 @@ export function GuestWishlistClient({
               <button
                 type="button"
                 onClick={() => setShowGrowthModal(false)}
-                className="py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700"
+                className="min-h-[48px] py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700"
               >
                 Закрити
               </button>

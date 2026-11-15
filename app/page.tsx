@@ -10,11 +10,13 @@ import {
   CheckCircle2,
   X,
   Copy,
+  Check,
 } from 'lucide-react';
 import type { ThemePreset, UserGender } from '@/models/User';
 import { THEME_TOKENS, DEMO_WISHLISTS } from '@/lib/theme-data';
 import { SmokedGiftCard, type UnifiedGiftCardItem } from '@/components/SmokedGiftCard';
 import { AffiliateDisclosureBadge } from '@/components/AffiliateDisclosureBadge';
+import { LikeBurst } from '@/components/LikeBurst';
 import { parseProductUrlAction } from '@/actions/wishlist';
 
 const DRAFT_STORAGE_KEY = 'mriyii_delayed_auth_draft_v1';
@@ -33,9 +35,11 @@ export default function LandingPage() {
   const [themePreset, setThemePreset] = useState<ThemePreset>('rose_luxury');
   const [rolePreview, setRolePreview] = useState<'guest' | 'owner'>('guest');
 
-  // Поля Delayed Auth капсули (додавання бажань без логіну)
+  // Поля Delayed Auth капсули (додавання бажань без логіну) + Issue #21 states
   const [urlInput, setUrlInput] = useState('');
-  const [isParsing, setIsParsing] = useState(false);
+  const [capsuleState, setCapsuleState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [jarBurstKey, setJarBurstKey] = useState(0);
+  const [bioLinkCopied, setBioLinkCopied] = useState(false);
   const [draftItems, setDraftItems] = useState<UnifiedGiftCardItem[]>([]);
   const [wishlistTitle, setWishlistTitle] = useState(DEMO_WISHLISTS.rose_luxury.title);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -259,11 +263,13 @@ export default function LandingPage() {
     e.preventDefault();
     const raw = urlInput.trim();
     if (!raw) {
+      setCapsuleState('error');
       sandboxInputRef.current?.focus();
+      setTimeout(() => setCapsuleState('idle'), 1600);
       return;
     }
 
-    setIsParsing(true);
+    setCapsuleState('loading');
     try {
       let candidateUrl = raw;
       const igMatch = raw.match(/@([a-zA-Z0-9._]{2,30})/);
@@ -310,10 +316,19 @@ export default function LandingPage() {
         };
       }
 
-      addDraftItemDirect(newItem);
+      const updated = [newItem, ...draftItems];
+      setDraftItems(updated);
+      saveDraftToStorage(themePreset, wishlistTitle, updated);
       setUrlInput('');
-    } finally {
-      setIsParsing(false);
+      setCapsuleState('success');
+      triggerToast('✓ Додано! Відкриваємо редактор з Live Preview...');
+      setTimeout(() => {
+        setCapsuleState('idle');
+        router.push(`/dashboard?theme=${themePreset}&added=1`);
+      }, 1100);
+    } catch {
+      setCapsuleState('error');
+      setTimeout(() => setCapsuleState('idle'), 1600);
     }
   };
 
@@ -552,17 +567,31 @@ export default function LandingPage() {
               />
               <button
                 type="submit"
-                disabled={isParsing}
-                className={`w-full sm:w-auto min-h-[48px] sm:h-14 px-6 rounded-xl text-base font-bold ${tokens.primaryCtaGradient} shrink-0 spring-transition active:scale-95 flex items-center justify-center gap-2`}
+                disabled={capsuleState === 'loading'}
+                aria-live="polite"
+                className={`w-full sm:w-[244px] min-h-[48px] sm:h-14 px-5 rounded-xl text-base font-bold shrink-0 spring-transition active:scale-95 flex items-center justify-center gap-2 ${
+                  capsuleState === 'success'
+                    ? 'bg-emerald-400 text-slate-950'
+                    : capsuleState === 'error'
+                    ? 'bg-rose-500 text-white shake-2px'
+                    : tokens.primaryCtaGradient
+                }`}
               >
-                {isParsing ? (
+                {capsuleState === 'loading' ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin shrink-0" />
                     <span>Додаємо...</span>
                   </>
+                ) : capsuleState === 'success' ? (
+                  <>
+                    <Check className="w-5 h-5 shrink-0" />
+                    <span>✓ Додано</span>
+                  </>
+                ) : capsuleState === 'error' ? (
+                  <span className="text-sm font-extrabold">Не вдалося, спробуй ще</span>
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-5 h-5 shrink-0" />
                     <span>✨ Створити вішліст</span>
                   </>
                 )}
@@ -1123,10 +1152,12 @@ export default function LandingPage() {
                         }}
                       />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="relative flex gap-2">
+                      <LikeBurst burstKey={jarBurstKey} themePreset={themePreset} />
                       <button
                         type="button"
                         onClick={() => {
+                          setJarBurstKey((k) => k + 1);
                           const nextVal = Math.min(26000, demoJarAmount[themePreset] + 1500);
                           setDemoJarAmount((prev) => ({
                             ...prev,
@@ -1614,17 +1645,33 @@ export default function LandingPage() {
             <div className="text-center pt-2">
               <button
                 type="button"
+                aria-live="polite"
                 onClick={() => {
                   const link = `https://mriyii.app/w/${claimSlug || currentDemoWishlist.slug}`;
                   if (typeof navigator !== 'undefined' && navigator.clipboard) {
                     navigator.clipboard.writeText(link).catch(() => {});
                   }
+                  setBioLinkCopied(true);
+                  setTimeout(() => setBioLinkCopied(false), 1500);
                   triggerToast(`🔗 Скопійовано ${link} — додавай в Instagram Bio!`);
                 }}
-                className="min-h-[48px] px-7 py-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 text-white text-base font-extrabold shadow-xl inline-flex items-center gap-2 spring-transition active:scale-95"
+                className={`min-h-[48px] min-w-[272px] px-7 py-3.5 rounded-2xl text-base font-extrabold shadow-xl inline-flex items-center justify-center gap-2 spring-transition active:scale-95 ${
+                  bioLinkCopied
+                    ? 'bg-emerald-400 text-slate-950'
+                    : 'bg-slate-950 hover:bg-slate-800 text-white'
+                }`}
               >
-                <Copy className="w-5 h-5" />
-                <span>Скопіювати мій лінк у Bio</span>
+                {bioLinkCopied ? (
+                  <>
+                    <Check className="w-5 h-5 shrink-0" />
+                    <span>✓ Скопійовано</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-5 h-5 shrink-0" />
+                    <span>🔗 Скопіювати мій лінк у Bio</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

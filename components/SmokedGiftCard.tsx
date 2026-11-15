@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ExternalLink,
   Trash2,
@@ -12,6 +12,7 @@ import {
 import type { ThemePreset } from '@/models/User';
 import { THEME_TOKENS } from '@/lib/theme-data';
 import { trackClientInteraction } from '@/actions/analytics';
+import { LikeBurst } from '@/components/LikeBurst';
 
 export interface UnifiedGiftCardItem {
   id: string;
@@ -107,7 +108,49 @@ export function SmokedGiftCard({
   const [imgError, setImgError] = useState(false);
   const [igCopiedLocal, setIgCopiedLocal] = useState(false);
   const [purchasedElsewhere, setPurchasedElsewhere] = useState(false);
+  const [isHoldingBook, setIsHoldingBook] = useState(false);
+  const [jarBurstKey, setJarBurstKey] = useState(0);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdCompletedRef = useRef(false);
+  const hadPointerDownRef = useRef(false);
   const tokens = THEME_TOKENS[themePreset];
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    };
+  }, []);
+
+  const prefersReducedMotion = () =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const cancelHoldBook = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    setIsHoldingBook(false);
+  };
+
+  const startHoldBook = () => {
+    if (!onBookClick) return;
+    hadPointerDownRef.current = true;
+    if (prefersReducedMotion()) {
+      holdCompletedRef.current = true;
+      onBookClick(item);
+      return;
+    }
+    cancelHoldBook();
+    holdCompletedRef.current = false;
+    setIsHoldingBook(true);
+    holdTimerRef.current = setTimeout(() => {
+      holdTimerRef.current = null;
+      holdCompletedRef.current = true;
+      setIsHoldingBook(false);
+      onBookClick(item);
+    }, 900);
+  };
 
   const hasJar = Boolean(item.monoJarUrl || item.hasMonoJar);
   const isPrivat24 = Boolean(item.monoJarUrl?.includes('privat24.ua'));
@@ -130,6 +173,7 @@ export function SmokedGiftCard({
     setIsSyncing(true);
     try {
       await onSyncJarClick(item);
+      setJarBurstKey((k) => k + 1);
     } finally {
       setIsSyncing(false);
     }
@@ -387,12 +431,16 @@ export function SmokedGiftCard({
                 </div>
 
                 {!item.isBooked && !isGoalReached && (
-                  <div className="flex items-center gap-2 pt-0.5">
+                  <div className="relative flex items-center gap-2 pt-0.5">
+                    <LikeBurst burstKey={jarBurstKey} themePreset={themePreset} />
                     {onDonateSimulateClick ? (
                       <button
                         type="button"
-                        onClick={() => onDonateSimulateClick(item)}
-                        className={`flex-1 ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95`}
+                        onClick={() => {
+                          setJarBurstKey((k) => k + 1);
+                          onDonateSimulateClick(item);
+                        }}
+                        className={`flex-1 min-h-[48px] ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95`}
                       >
                         {tokens.primaryJarBtnText} (+2 000 ₴)
                       </button>
@@ -401,15 +449,16 @@ export function SmokedGiftCard({
                         href={item.monoJarUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={() =>
+                        onClick={() => {
+                          setJarBurstKey((k) => k + 1);
                           void trackClientInteraction({
                             eventType: 'jar_clicked',
                             itemId: item.id,
                             jarGoalUah: targetAmount,
                             jarCurrentUah: currentAmount,
-                          })
-                        }
-                        className={`flex-1 ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95 inline-flex items-center justify-center gap-1.5`}
+                          });
+                        }}
+                        className={`flex-1 min-h-[48px] ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95 inline-flex items-center justify-center gap-1.5`}
                       >
                         <span>{tokens.primaryJarBtnText}</span>
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -421,11 +470,11 @@ export function SmokedGiftCard({
                         type="button"
                         onClick={handleSync}
                         disabled={isSyncing}
-                        className="py-2.5 px-2.5 rounded-xl text-sm font-bold bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-200 spring-transition"
+                        className="min-h-[48px] py-2.5 px-3 rounded-xl text-sm font-bold bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-200 spring-transition"
                         title="Оновити баланс Банки (кеш 60с)"
                       >
                         <RefreshCw
-                          className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`}
+                          className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`}
                         />
                       </button>
                     )}
@@ -433,8 +482,11 @@ export function SmokedGiftCard({
                     {onCloseJar100SimulateClick ? (
                       <button
                         type="button"
-                        onClick={() => onCloseJar100SimulateClick(item)}
-                        className="bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
+                        onClick={() => {
+                          setJarBurstKey((k) => k + 1);
+                          onCloseJar100SimulateClick(item);
+                        }}
+                        className="min-h-[48px] bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
                       >
                         👑 Закрити 100%
                       </button>
@@ -443,7 +495,7 @@ export function SmokedGiftCard({
                         <button
                           type="button"
                           onClick={() => onBookClick(item)}
-                          className="bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
+                          className="min-h-[48px] bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
                         >
                           👑 Закрити 100%
                         </button>
@@ -543,16 +595,62 @@ export function SmokedGiftCard({
                 </div>
               </div>
             ) : (
-              /* Якщо лот без Банки — кнопки прямого бронювання та відкриття Банки */
+              /* Якщо лот без Банки — кнопки прямого бронювання (Hold-to-book 900мс) та відкриття Банки */
               !hasJar && (
                 <div className="flex items-center gap-2 pt-0.5">
                   {onBookClick && (
                     <button
                       type="button"
-                      onClick={() => onBookClick(item)}
-                      className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} hover:brightness-110 text-white spring-transition active:scale-95 flex items-center justify-center gap-1.5`}
+                      onPointerDown={startHoldBook}
+                      onPointerUp={() => cancelHoldBook()}
+                      onPointerLeave={() => cancelHoldBook()}
+                      onPointerCancel={() => cancelHoldBook()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onBookClick(item);
+                        }
+                      }}
+                      onClick={() => {
+                        if (holdCompletedRef.current) {
+                          holdCompletedRef.current = false;
+                          return;
+                        }
+                        if (!hadPointerDownRef.current || prefersReducedMotion()) {
+                          onBookClick(item);
+                        }
+                        hadPointerDownRef.current = false;
+                      }}
+                      title={
+                        locale === 'en'
+                          ? 'Press and hold 0.9s to reserve (or press Enter)'
+                          : 'Затисни 0.9 сек, щоб забронювати (або натисни Enter)'
+                      }
+                      className={`relative overflow-hidden select-none touch-none flex-1 min-h-[48px] py-2.5 px-3 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} hover:brightness-110 text-white spring-transition flex items-center justify-center gap-1.5`}
                     >
-                      <span>{locale === 'en' ? '🎁 Reserve gift' : tokens.primaryBookBtnText}</span>
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-y-0 left-0 pointer-events-none"
+                        style={{
+                          width: isHoldingBook ? '100%' : '0%',
+                          backgroundColor:
+                            themePreset === 'rose_luxury'
+                              ? 'rgba(251, 113, 133, 0.55)'
+                              : 'rgba(52, 211, 153, 0.5)',
+                          transition: isHoldingBook
+                            ? 'width 900ms linear'
+                            : 'width 140ms ease-out',
+                        }}
+                      />
+                      <span className="relative z-10">
+                        {isHoldingBook
+                          ? locale === 'en'
+                            ? 'Hold…'
+                            : 'Тримай…'
+                          : locale === 'en'
+                          ? '🎁 Reserve gift'
+                          : tokens.primaryBookBtnText}
+                      </span>
                     </button>
                   )}
 
@@ -560,7 +658,7 @@ export function SmokedGiftCard({
                     <button
                       type="button"
                       onClick={() => onAttachJarClick(item)}
-                      className="py-2.5 px-3 rounded-xl text-sm font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 spring-transition active:scale-95"
+                      className="min-h-[48px] py-2.5 px-3 rounded-xl text-sm font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-200 spring-transition active:scale-95"
                     >
                       {locale === 'en' ? '🫙 Group Jar / P24' : '🫙 Банка / Приват24'}
                     </button>

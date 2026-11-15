@@ -154,9 +154,9 @@ function DashboardContent() {
   const [editTitle, setEditTitle] = useState('');
   const [editPrice, setEditPrice] = useState('');
 
-  // Швидке додавання бажання за URL у Суцільній Білій Капсулі
+  // Швидке додавання бажання за URL у Суцільній Білій Капсулі (Loading -> Success -> Error)
   const [urlInput, setUrlInput] = useState('');
-  const [isParsing, setIsParsing] = useState(false);
+  const [addBtnState, setAddBtnState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [previewItem, setPreviewItem] = useState<{
     title: string;
     emoji: string;
@@ -257,15 +257,19 @@ function DashboardContent() {
       // Fallback
     }
     setCopiedToast(true);
-    setTimeout(() => setCopiedToast(false), 3000);
+    setTimeout(() => setCopiedToast(false), 1500);
   };
 
   const handleParseUrl = async (e: React.FormEvent) => {
     e.preventDefault();
     const raw = urlInput.trim();
-    if (!raw) return;
+    if (!raw) {
+      setAddBtnState('error');
+      setTimeout(() => setAddBtnState('idle'), 1600);
+      return;
+    }
 
-    setIsParsing(true);
+    setAddBtnState('loading');
     try {
       let candidateUrl = raw;
       const igMatch = raw.match(/@([a-zA-Z0-9._]{2,30})/);
@@ -303,8 +307,11 @@ function DashboardContent() {
         });
       }
       setUrlInput('');
-    } finally {
-      setIsParsing(false);
+      setAddBtnState('success');
+      setTimeout(() => setAddBtnState('idle'), 1200);
+    } catch {
+      setAddBtnState('error');
+      setTimeout(() => setAddBtnState('idle'), 1600);
     }
   };
 
@@ -508,16 +515,17 @@ function DashboardContent() {
             <button
               type="button"
               onClick={handleCopyShareLink}
-              className="min-h-[44px] px-4 rounded-xl text-sm font-extrabold bg-[#171D30] hover:bg-[#1E2640] text-white border border-white/15 inline-flex items-center gap-2 spring-transition"
+              aria-live="polite"
+              className="min-h-[48px] min-w-[172px] justify-center px-4 rounded-xl text-sm font-extrabold bg-[#171D30] hover:bg-[#1E2640] text-white border border-white/15 inline-flex items-center gap-2 spring-transition"
             >
               {copiedToast ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span>Скопійовано!</span>
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>✓ Скопійовано</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4 text-amber-300" />
+                  <Copy className="w-4 h-4 text-amber-300 shrink-0" />
                   <span>Скопіювати лінк</span>
                 </>
               )}
@@ -626,17 +634,31 @@ function DashboardContent() {
                     />
                     <button
                       type="submit"
-                      disabled={isParsing}
-                      className={`min-h-[48px] px-5 rounded-xl text-sm font-extrabold ${solidBtnClass} spring-transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0`}
+                      disabled={addBtnState === 'loading'}
+                      aria-live="polite"
+                      className={`w-full sm:w-[196px] min-h-[48px] px-4 rounded-xl text-sm font-extrabold spring-transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0 ${
+                        addBtnState === 'success'
+                          ? 'bg-emerald-400 text-slate-950'
+                          : addBtnState === 'error'
+                          ? 'bg-rose-500 text-white shake-2px'
+                          : solidBtnClass
+                      }`}
                     >
-                      {isParsing ? (
+                      {addBtnState === 'loading' ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                           <span>Додаємо...</span>
                         </>
+                      ) : addBtnState === 'success' ? (
+                        <>
+                          <Check className="w-4 h-4 shrink-0" />
+                          <span>✓ Додано</span>
+                        </>
+                      ) : addBtnState === 'error' ? (
+                        <span>Не вдалося, спробуй ще</span>
                       ) : (
                         <>
-                          <Plus className="w-4 h-4" />
+                          <Plus className="w-4 h-4 shrink-0" />
                           <span>Додати</span>
                         </>
                       )}

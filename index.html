@@ -136,6 +136,75 @@
     @media (prefers-reduced-motion: reduce) {
       .aurora-bg, .border-beam-wrap::before, .beam-path-pulse, .marquee-track { animation: none !important; }
     }
+
+    /* Issue #21: Micro-interactions Pack (P0 + P1) */
+    @keyframes shake2px {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-2px); }
+      40% { transform: translateX(2px); }
+      60% { transform: translateX(-2px); }
+      80% { transform: translateX(2px); }
+    }
+    .shake-2px {
+      animation: shake2px 0.34s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes likeBurstFloat {
+      0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(0.55) rotate(0deg);
+      }
+      70% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--bx, 0px), var(--by, -48px), 0) scale(1.15) rotate(var(--br, 14deg));
+      }
+    }
+    .like-burst-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 90;
+      font-size: 18px;
+      line-height: 1;
+      animation: likeBurstFloat 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      will-change: transform, opacity;
+    }
+
+    @keyframes gooBounce {
+      0%, 80%, 100% { transform: translateY(0) scale(0.8); opacity: 0.45; }
+      40% { transform: translateY(-5px) scale(1.15); opacity: 1; }
+    }
+    .goo-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      animation: gooBounce 0.9s infinite ease-in-out;
+    }
+    .goo-dot:nth-child(2) { animation-delay: 0.15s; }
+    .goo-dot:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes staggerIn {
+      0% { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.98); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+    .stagger-card {
+      opacity: 0;
+      animation: staggerIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .shake-2px,
+      .like-burst-particle,
+      .goo-dot,
+      .stagger-card {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
   </style>
 </head>
 <body id="app-body" data-style="aurora" class="canvas-rose text-white antialiased m-0 p-0 min-h-screen spring">
@@ -214,12 +283,12 @@
         </div>
         <form onsubmit="event.preventDefault(); addFromCapsule('capsule-input');" class="max-w-2xl mx-auto bg-white rounded-2xl p-2 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <input id="capsule-input" type="text" placeholder="Встав посилання або @instagram-шоурум..." class="flex-1 px-4 py-3 text-base font-semibold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none" />
-          <button id="capsule-btn" type="submit" class="w-full sm:w-auto min-h-[48px] sm:h-14 px-6 rounded-xl text-base font-extrabold bg-rose-400 hover:bg-rose-500 text-slate-950 shrink-0 spring active:scale-95">✨ Створити вішліст</button>
+          <button id="capsule-btn" type="submit" aria-live="polite" class="w-full sm:w-[244px] min-h-[48px] sm:h-14 px-5 rounded-xl text-base font-extrabold bg-rose-400 hover:bg-rose-500 text-slate-950 shrink-0 spring active:scale-95 inline-flex items-center justify-center gap-2">✨ Створити вішліст</button>
         </form>
         <div class="max-w-md mx-auto flex items-center gap-2 rounded-xl bg-[#171D30]/90 border border-white/15 px-3.5 py-2 text-sm">
           <span class="font-bold text-slate-300 shrink-0">🔗 mriyii.app/w/</span>
           <input id="hero-claim-slug" type="text" value="olena-vip" oninput="syncClaimSlug(this.value)" placeholder="твій-нік" class="flex-1 bg-transparent font-extrabold text-amber-300 focus:outline-none min-w-0" />
-          <button type="button" onclick="copyClaimSlug()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold shrink-0">Копіювати</button>
+          <button id="hero-copy-slug-btn" type="button" onclick="copyClaimSlug(this)" aria-live="polite" class="min-w-[138px] px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold shrink-0">Копіювати</button>
         </div>
         <div class="flex flex-wrap items-center justify-center gap-2.5">
           <button onclick="quickAddDemo('Dyson Airwrap i.d. Rose Gold', 24999)" class="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring">✨ Dyson</button>
@@ -398,7 +467,7 @@
                 <div class="w-full h-3 rounded-full bg-slate-200 overflow-hidden">
                   <div id="landing-jar-bar" class="h-full rounded-full bg-emerald-500 spring" style="width: 88%"></div>
                 </div>
-                <button onclick="addLandingDemoJar()" class="w-full min-h-[48px] px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-sm font-bold spring active:scale-95">
+                <button onclick="addLandingDemoJar(this)" class="w-full min-h-[48px] px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-sm font-bold spring active:scale-95">
                   + Закинути 1 500 ₴ (демо)
                 </button>
               </div>
@@ -615,7 +684,7 @@
           </div>
         </div>
         <div class="text-center">
-          <button onclick="copyClaimSlug()" class="min-h-[48px] px-7 py-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 text-white text-base font-extrabold shadow-xl spring active:scale-95">
+          <button id="hero-copy-bio-btn" type="button" onclick="copyClaimSlug(this)" aria-live="polite" class="min-h-[48px] min-w-[272px] px-7 py-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 text-white text-base font-extrabold shadow-xl spring active:scale-95 inline-flex items-center justify-center gap-2">
             🔗 Скопіювати мій лінк у Bio
           </button>
         </div>
@@ -763,7 +832,7 @@
             </div>
             <form onsubmit="dashAddFromInput(event)" class="bg-white rounded-2xl p-2 flex flex-col sm:flex-row gap-2">
               <input id="dash-add-input" type="text" placeholder="Вставте лінк або @instagram_shop..." class="flex-1 px-3.5 py-2.5 text-sm font-bold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none" />
-              <button type="submit" class="sec-cta min-h-[48px] px-5 rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shrink-0">Додати</button>
+              <button id="dash-add-btn" type="submit" aria-live="polite" class="sec-cta w-full sm:w-[196px] min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shrink-0 inline-flex items-center justify-center gap-1.5 spring active:scale-95">Додати</button>
             </form>
             <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
               <div class="flex flex-wrap items-center gap-2">
@@ -873,6 +942,66 @@
   <!-- SCREEN 5: SEO GIFT IDEAS HUB (/ideas)                                   -->
   <!-- ======================================================================= -->
   <main id="screen-ideas" class="hidden mx-auto max-w-6xl px-4 py-10 pb-28 space-y-8"></main>
+
+  <!-- ======================================================================= -->
+  <!-- ISSUE #21 P1: GUEST BOOKING TICKET MODAL + IG STORIES 9:16              -->
+  <!-- ======================================================================= -->
+  <div id="booking-ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="ticket-title">
+    <div id="ticket-tilt-card" class="relative w-full max-w-md rounded-3xl bg-[#171D30] border border-white/20 text-white shadow-2xl overflow-hidden spring" style="transform-style: preserve-3d;">
+      <div class="p-6 space-y-4">
+        <div class="flex items-center justify-between gap-3">
+          <span class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-sm font-extrabold">🎟️ Квиток на подарунок</span>
+          <button type="button" onclick="closeBookingTicket()" aria-label="Закрити квиток" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center justify-center">✕</button>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div id="ticket-emoji-box" class="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-400/45 flex items-center justify-center text-3xl shrink-0">🎁</div>
+          <div class="min-w-0 flex-1">
+            <h3 id="ticket-title" class="text-lg font-black text-white leading-snug">Подарунок заброньовано</h3>
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+              <span id="ticket-price" class="text-base font-black text-amber-300 tabular-nums">4 900 ₴</span>
+              <span id="ticket-anon-badge" class="hidden px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-sm font-bold text-slate-200">🕶️ анонімно</span>
+            </div>
+          </div>
+        </div>
+
+        <label class="flex items-center justify-between gap-3 rounded-2xl bg-[#0E1324] border border-white/15 px-4 py-3 cursor-pointer select-none">
+          <span class="text-sm font-bold text-slate-200">🕶️ Подарувати анонімно</span>
+          <input id="ticket-anon-chk" type="checkbox" onchange="toggleTicketAnon(this.checked)" class="w-5 h-5 accent-rose-400 rounded" />
+        </label>
+      </div>
+
+      <!-- Перфорація-розділювач -->
+      <div class="relative flex items-center px-4">
+        <div class="w-5 h-5 rounded-full bg-[#090e1a] -ml-6 shrink-0 border border-white/15"></div>
+        <div class="flex-1 border-t-2 border-dashed border-white/25 mx-2"></div>
+        <div class="w-5 h-5 rounded-full bg-[#090e1a] -mr-6 shrink-0 border border-white/15"></div>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <p class="text-sm font-semibold text-slate-200">🔒 Власник вішліста не побачить цей квиток до самого свята (Сюрприз-режим).</p>
+
+        <div id="ticket-stories-preview" class="hidden rounded-2xl bg-gradient-to-b from-[#1E1433] to-[#0E1324] border border-white/20 p-4 mx-auto w-[220px] aspect-[9/16] flex flex-col justify-between text-center shadow-xl">
+          <div class="text-sm font-extrabold text-amber-300">Mriyii • Сюрприз 🤫</div>
+          <div class="space-y-2">
+            <div id="ticket-story-emoji" class="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-3xl mx-auto">🎁</div>
+            <div id="ticket-story-title" class="text-base font-black text-white leading-snug">Подарунок</div>
+            <div id="ticket-story-price" class="text-base font-black text-emerald-300 tabular-nums">4 900 ₴</div>
+          </div>
+          <div class="rounded-xl bg-white text-slate-950 px-3 py-2 text-sm font-black">mriyii.app/w/<span id="ticket-story-slug">olena-vip</span></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button type="button" onclick="toggleTicketStoryPreview()" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-rose-400 hover:bg-rose-500 text-slate-950 shadow-lg spring active:scale-95">
+            📸 Поділитися в Stories
+          </button>
+          <button type="button" onclick="copyBookingTicketStory(this)" aria-live="polite" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring">
+            🔗 Скопіювати для 9:16
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Компактний нижній перемикач екранів (не перевантажує липкий хедер на 390px) -->
   <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-[#090e1a]/90 backdrop-blur-xl border border-white/20 rounded-2xl p-1.5 shadow-2xl flex items-center gap-1 overflow-x-auto max-w-[95vw]">
@@ -1109,6 +1238,194 @@
       document.getElementById('ai-price').textContent = price + (aiMode === 'from_wishlist' ? ' • Зі списку' : ' • Google Search');
     }
 
+    function prefersReducedMotion() {
+      return typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function triggerLikeBurst(anchorEl) {
+      if (prefersReducedMotion()) return;
+      const rect = anchorEl && anchorEl.getBoundingClientRect
+        ? anchorEl.getBoundingClientRect()
+        : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const color = currentTheme === 'cyber_titanium' ? '#34D399' : '#FB7185';
+      const icons = ['❤️', '✨', '💖', '💎'];
+      for (let i = 0; i < 10; i++) {
+        const p = document.createElement('span');
+        p.className = 'like-burst-particle';
+        p.textContent = icons[i % icons.length];
+        const angle = (Math.PI * 2 * i) / 10 + (Math.random() - 0.5) * 0.3;
+        const dist = 36 + Math.random() * 40;
+        p.style.left = (cx - 9) + 'px';
+        p.style.top = (cy - 9) + 'px';
+        p.style.color = color;
+        p.style.filter = `drop-shadow(0 0 8px ${color})`;
+        p.style.setProperty('--bx', Math.round(Math.cos(angle) * dist) + 'px');
+        p.style.setProperty('--by', Math.round(Math.sin(angle) * dist - 14) + 'px');
+        p.style.setProperty('--br', Math.round((Math.random() - 0.5) * 48) + 'deg');
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 700);
+      }
+    }
+
+    let holdState = { timer: null, btn: null, itemId: null, pointerDown: false, completed: false };
+    let currentTicketData = null;
+
+    function completeHoldBook(btn, itemId) {
+      const it = DATA[currentTheme].items.find((x) => x.id === itemId);
+      const itemTitle = it ? it.title : 'Таємний подарунок';
+      const itemPrice = it ? it.price : 4900;
+      const itemEmoji = it && it.instagramHandle ? '🌸' : (itemTitle.match(/^[\p{Emoji}\u2600-\u27BF]/u) || ['🎁'])[0];
+      if (it) it.isBooked = true;
+      triggerLikeBurst(btn);
+      renderAll();
+      setTimeout(() => {
+        openBookingTicket({ title: itemTitle, price: itemPrice, emoji: itemEmoji, anon: false });
+      }, 360);
+    }
+
+    function startHoldBook(btn, itemId) {
+      if (!btn || btn.disabled) return;
+      if (prefersReducedMotion()) {
+        holdState = { timer: null, btn, itemId, pointerDown: true, completed: true };
+        completeHoldBook(btn, itemId);
+        return;
+      }
+      cancelHoldBook(holdState.btn);
+      holdState = { timer: null, btn, itemId, pointerDown: true, completed: false };
+      const fill = btn.querySelector('.hold-fill');
+      const label = btn.querySelector('.hold-label');
+      if (fill) {
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+        void fill.offsetWidth;
+        fill.style.transition = 'width 900ms linear';
+        fill.style.width = '100%';
+      }
+      if (label) label.textContent = 'Тримай…';
+      holdState.timer = setTimeout(() => {
+        holdState.completed = true;
+        holdState.timer = null;
+        completeHoldBook(btn, itemId);
+      }, 900);
+    }
+
+    function cancelHoldBook(btn) {
+      if (holdState.timer) {
+        clearTimeout(holdState.timer);
+        holdState.timer = null;
+      }
+      const target = btn || holdState.btn;
+      if (target) {
+        const fill = target.querySelector('.hold-fill');
+        const label = target.querySelector('.hold-label');
+        if (fill) {
+          fill.style.transition = 'width 180ms ease-out';
+          fill.style.width = '0%';
+        }
+        if (label && !holdState.completed) {
+          label.textContent = currentLocale === 'en' ? '🎁 Hold to reserve' : '🎁 Забронювати';
+        }
+      }
+    }
+
+    function handleHoldBookKey(e, itemId, btn) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        completeHoldBook(btn, itemId);
+      }
+    }
+
+    function handleHoldBookClick(e, btn, itemId) {
+      if (holdState.pointerDown) {
+        holdState.pointerDown = false;
+        if (!holdState.completed) {
+          e.preventDefault();
+          return;
+        }
+        holdState.completed = false;
+        return;
+      }
+      completeHoldBook(btn, itemId);
+    }
+
+    function openBookingTicket(data) {
+      if (currentScreen === 'dashboard') return;
+      currentTicketData = {
+        title: data.title || 'Подарунок зі списку',
+        price: Number(data.price) || 4900,
+        emoji: data.emoji || '🎁',
+        anon: Boolean(data.anon)
+      };
+      const modal = document.getElementById('booking-ticket-modal');
+      if (!modal) return;
+      const isCyber = currentTheme === 'cyber_titanium';
+      const emojiBox = document.getElementById('ticket-emoji-box');
+      if (emojiBox) {
+        emojiBox.className = 'w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0 ' +
+          (isCyber ? 'bg-emerald-500/15 border border-emerald-400/45' : 'bg-rose-500/15 border border-rose-400/45');
+        emojiBox.textContent = currentTicketData.emoji;
+      }
+      document.getElementById('ticket-title').textContent = currentTicketData.title;
+      document.getElementById('ticket-price').textContent = currentTicketData.price.toLocaleString('uk-UA') + ' ₴';
+      document.getElementById('ticket-story-emoji').textContent = currentTicketData.emoji;
+      document.getElementById('ticket-story-title').textContent = currentTicketData.title;
+      document.getElementById('ticket-story-price').textContent = currentTicketData.price.toLocaleString('uk-UA') + ' ₴';
+      document.getElementById('ticket-story-slug').textContent = DATA[currentTheme].slug || 'olena-vip';
+      const chk = document.getElementById('ticket-anon-chk');
+      if (chk) chk.checked = currentTicketData.anon;
+      toggleTicketAnon(currentTicketData.anon);
+      const preview = document.getElementById('ticket-stories-preview');
+      if (preview) preview.classList.add('hidden');
+      modal.classList.remove('hidden');
+    }
+
+    function closeBookingTicket() {
+      const modal = document.getElementById('booking-ticket-modal');
+      const card = document.getElementById('ticket-tilt-card');
+      if (card) card.style.transform = '';
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleTicketAnon(checked) {
+      if (currentTicketData) currentTicketData.anon = Boolean(checked);
+      const badge = document.getElementById('ticket-anon-badge');
+      if (badge) badge.classList.toggle('hidden', !checked);
+    }
+
+    function toggleTicketStoryPreview() {
+      const preview = document.getElementById('ticket-stories-preview');
+      if (preview) preview.classList.toggle('hidden');
+    }
+
+    async function copyBookingTicketStory(btn) {
+      const slug = DATA[currentTheme].slug || 'olena-vip';
+      const title = (currentTicketData && currentTicketData.title) || 'Подарунок';
+      const text = `🎁 Забронював(-ла) мрію «${title}» ${currentTicketData && currentTicketData.anon ? '🕶️ анонімно ' : ''}на mriyii.app/w/${slug}`;
+      try { if (navigator.clipboard) await navigator.clipboard.writeText(text); } catch (e) {}
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.textContent = '✓ Скопійовано';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+      }
+      showToast('📸 Текст для Stories 9:16 скопійовано!');
+    }
+
+    (function initTicketTilt() {
+      const modal = document.getElementById('booking-ticket-modal');
+      const card = document.getElementById('ticket-tilt-card');
+      if (!modal || !card) return;
+      modal.addEventListener('mousemove', (e) => {
+        if (prefersReducedMotion() || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) return;
+        const r = card.getBoundingClientRect();
+        const dx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+        const dy = ((e.clientY - r.top) / r.height - 0.5) * 2;
+        card.style.transform = `perspective(900px) rotateX(${(-dy * 4).toFixed(2)}deg) rotateY(${(dx * 4).toFixed(2)}deg)`;
+      });
+      modal.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    })();
+
     function renderRichPhotoCard(item, roleMode) {
       const pct = item.hasJar && item.jarTarget > 0 ? Math.min(100, Math.round((item.jarCurrent / item.jarTarget) * 100)) : 0;
       const ctaClass = currentTheme === 'cyber_titanium' ? 'bg-gradient-to-r from-indigo-600 to-emerald-500' : 'bg-gradient-to-r from-pink-600 to-amber-500';
@@ -1126,15 +1443,33 @@
             <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
               <div class="h-full bg-emerald-500 rounded-full spring" style="width: ${pct}%"></div>
             </div>
-            <button onclick="donateJar('${item.id}')" class="w-full min-h-[48px] ${ctaClass} text-white font-bold text-base rounded-xl shadow spring active:scale-95">💸 Поповнити Банку (+2 000 ₴)</button>
+            <button onclick="donateJar('${item.id}', this)" class="w-full min-h-[48px] ${ctaClass} text-white font-bold text-base rounded-xl shadow spring active:scale-95">💸 Поповнити Банку (+2 000 ₴)</button>
           </div>
         `;
       } else if (item.instagramHandle) {
         bottomControls = `<button onclick="orderIgDirect('${item.instagramHandle}', '${item.title.replace(/'/g, '')}')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-gradient-to-r from-pink-600 to-amber-500 text-white shadow spring active:scale-95">${currentLocale === 'en' ? '📸 Order in Direct @' + item.instagramHandle : '📸 Замовити в @' + item.instagramHandle}</button>`;
+      } else if (item.isBooked) {
+        bottomControls = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div class="w-full min-h-[48px] px-4 rounded-xl text-base font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center justify-center">✅ Заброньовано</div>
+            <button type="button" onclick="openBookingTicket({ title: '${item.title.replace(/'/g, '')}', price: ${item.price || 4900}, emoji: '🎁', anon: false })" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-slate-950 hover:bg-slate-800 text-white spring active:scale-95">🎟️ Квиток</button>
+          </div>
+        `;
       } else {
         bottomControls = `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <button onclick="showToast(currentLocale === 'en' ? '💎 Gift reserved!' : '💎 Подарунок заброньовано!')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold ${ctaClass} text-white shadow spring active:scale-95">${currentLocale === 'en' ? '🎁 Reserve gift' : '🎁 Забронювати'}</button>
+            <button type="button"
+              onpointerdown="startHoldBook(this, '${item.id}')"
+              onpointerup="cancelHoldBook(this)"
+              onpointerleave="cancelHoldBook(this)"
+              onpointercancel="cancelHoldBook(this)"
+              onkeydown="handleHoldBookKey(event, '${item.id}', this)"
+              onclick="handleHoldBookClick(event, this, '${item.id}')"
+              aria-label="${currentLocale === 'en' ? 'Hold 900ms to reserve gift' : 'Утримуйте 0.9 с щоб забронювати подарунок'}"
+              class="relative overflow-hidden select-none touch-none w-full min-h-[48px] px-4 rounded-xl text-base font-bold ${ctaClass} text-white shadow spring active:scale-95">
+              <span class="hold-fill pointer-events-none absolute inset-y-0 left-0 w-0 bg-white/30"></span>
+              <span class="hold-label relative z-10">${currentLocale === 'en' ? '🎁 Reserve gift' : '🎁 Забронювати'}</span>
+            </button>
             <button onclick="markPurchasedElsewhere('${item.id}')" class="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 spring active:scale-95">${currentLocale === 'en' ? '✅ Purchased elsewhere' : '✅ Купив деінде'}</button>
           </div>
         `;
@@ -1286,7 +1621,7 @@
     }
 
     let landingJarAmount = 23000;
-    function addLandingDemoJar() {
+    function addLandingDemoJar(btn) {
       const prev = landingJarAmount;
       if (landingJarAmount >= 26000) {
         landingJarAmount = 23000;
@@ -1300,6 +1635,7 @@
       if (amtEl) animateJarNumber(amtEl, prev, landingJarAmount);
       if (pctEl) pctEl.textContent = `${pct}%`;
       if (barEl) barEl.style.width = `${pct}%`;
+      triggerLikeBurst(btn);
       if (landingJarAmount >= 26000) {
         fireLandingConfetti();
         showToast('🎉 Банка зібрана на 100%! Мрія здійснилась!');
@@ -1410,11 +1746,19 @@
       if (dp) dp.textContent = 'mriyii.app/w/' + clean;
     }
 
-    async function copyClaimSlug() {
+    async function copyClaimSlug(btn) {
       const inp = document.getElementById('hero-claim-slug');
       const slug = (inp && inp.value.trim()) || DATA[currentTheme].slug || 'olena-vip';
       const url = 'https://mriyii.app/w/' + slug;
       try { if (navigator.clipboard) await navigator.clipboard.writeText(url); } catch (e) {}
+      if (btn) {
+        if (!btn.dataset.origHtml) btn.dataset.origHtml = btn.innerHTML;
+        btn.textContent = '✓ Скопійовано';
+        clearTimeout(btn._copyTimer);
+        btn._copyTimer = setTimeout(() => {
+          btn.innerHTML = btn.dataset.origHtml;
+        }, 1500);
+      }
       showToast('🔗 Скопійовано ' + url + ' — додавай в Instagram Bio!');
     }
 
@@ -1432,7 +1776,7 @@
       if (typeof setCssVersion === 'function') setCssVersion(currentCssVersion);
       const solidBtn = isCyber ? 'bg-emerald-400 hover:bg-emerald-500 text-slate-950' : 'bg-rose-400 hover:bg-rose-500 text-slate-950';
       document.getElementById('header-cta').className = `min-h-[44px] px-5 rounded-xl text-sm font-extrabold ${solidBtn} spring active:scale-95`;
-      document.getElementById('capsule-btn').className = `w-full sm:w-auto min-h-[48px] sm:h-14 px-6 rounded-xl text-base font-extrabold ${solidBtn} shrink-0 spring active:scale-95`;
+      document.getElementById('capsule-btn').className = `w-full sm:w-[244px] min-h-[48px] sm:h-14 px-5 rounded-xl text-base font-extrabold ${solidBtn} shrink-0 spring active:scale-95 inline-flex items-center justify-center gap-2`;
       document.getElementById('hero-accent').className = isCyber ? 'accent-cyber' : 'accent-rose';
       document.querySelectorAll('.sec-accent').forEach((el) => { el.className = 'sec-accent ' + (isCyber ? 'accent-cyber' : 'accent-rose'); });
       document.querySelectorAll('.sec-badge').forEach((el) => {
@@ -1451,11 +1795,13 @@
       renderAll();
     }
 
-    function donateJar(id) {
+    function donateJar(id, btn) {
       const it = DATA[currentTheme].items.find((x) => x.id === id);
       if (!it) return;
       it.jarCurrent = Math.min(it.jarTarget, it.jarCurrent + 2000);
+      triggerLikeBurst(btn);
       renderAll();
+      if (it.jarCurrent >= it.jarTarget) fireLandingConfetti();
       showToast('🐈‍⬛ +2 000 ₴ додано у Монобанку!');
     }
 
@@ -1475,26 +1821,63 @@
       window.open('https://ig.me/m/' + encodeURIComponent(shop) + '?ref=mriyii', '_blank', 'noopener,noreferrer');
     }
 
+    let capsuleBusy = false;
     function addFromCapsule(inputId) {
+      if (capsuleBusy) return;
       const input = document.getElementById(inputId);
-      const val = input.value.trim();
-      if (!val) { input.focus(); return; }
-      const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '');
-      DATA[currentTheme].items.unshift({
-        id: 'new-' + Date.now(),
-        title: cleanTitle,
-        price: 4900,
-        image: getDefaultGiftImage(cleanTitle),
-        comment: 'Додано через капсулу швидкого старту ✨',
-        hasJar: false,
-        jarCurrent: 0,
-        jarTarget: 0,
-        instagramHandle: '',
-        isBooked: false
-      });
-      input.value = '';
-      switchScreen('dashboard');
-      showToast('✨ Мрію додано! Налаштуй прев’ю та скопіюй свій лінк.');
+      const btn = document.getElementById('capsule-btn');
+      const val = (input && input.value || '').trim();
+      const idleLabel = currentLocale === 'en' ? '✨ Create wishlist' : '✨ Створити вішліст';
+      if (!val) {
+        if (input) input.focus();
+        if (btn) {
+          btn.classList.remove('shake-2px');
+          void btn.offsetWidth;
+          btn.classList.add('shake-2px');
+          btn.textContent = 'Не вдалося, спробуй ще';
+          setTimeout(() => {
+            btn.classList.remove('shake-2px');
+            btn.textContent = idleLabel;
+          }, 1500);
+        }
+        return;
+      }
+
+      capsuleBusy = true;
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin"></span><span>Аналізуємо…</span>';
+      }
+
+      const delay = prefersReducedMotion() ? 120 : 420;
+      setTimeout(() => {
+        const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '');
+        DATA[currentTheme].items.unshift({
+          id: 'new-' + Date.now(),
+          title: cleanTitle,
+          price: 4900,
+          image: getDefaultGiftImage(cleanTitle),
+          comment: 'Додано через капсулу швидкого старту ✨',
+          hasJar: false,
+          jarCurrent: 0,
+          jarTarget: 0,
+          instagramHandle: '',
+          isBooked: false
+        });
+        if (input) input.value = '';
+        if (btn) {
+          btn.textContent = '✓ Додано';
+        }
+        setTimeout(() => {
+          capsuleBusy = false;
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = idleLabel;
+          }
+          switchScreen('dashboard');
+          showToast('✨ Мрію додано! Налаштуй прев’ю та скопіюй свій лінк.');
+        }, prefersReducedMotion() ? 150 : 750);
+      }, delay);
     }
 
     function quickAddDemo(title, price) {
@@ -1540,14 +1923,32 @@
       ]
     };
 
+    let aiThinking = false;
+    let aiThinkingTimer = null;
+
+    function triggerAiThinkAndRender() {
+      clearTimeout(aiThinkingTimer);
+      if (prefersReducedMotion()) {
+        aiThinking = false;
+        renderGuestAiSection();
+        return;
+      }
+      aiThinking = true;
+      renderGuestAiSection();
+      aiThinkingTimer = setTimeout(() => {
+        aiThinking = false;
+        renderGuestAiSection();
+      }, 420);
+    }
+
     function setAiMode(nextMode) {
       aiMode = nextMode;
-      renderGuestAiSection();
+      triggerAiThinkAndRender();
     }
 
     function setAiInterest(nextInterest) {
       aiInterest = nextInterest;
-      renderGuestAiSection();
+      triggerAiThinkAndRender();
     }
 
     let guestAiExpanded = false;
@@ -1559,12 +1960,20 @@
       if (pill) pill.textContent = guestAiExpanded ? "Згорнути ▴" : "Підібрати ▾";
     }
 
+    function bookAiSurprise(title, price, emoji, btn) {
+      triggerLikeBurst(btn);
+      setTimeout(() => {
+        openBookingTicket({ title, price, emoji, anon: true });
+      }, 320);
+    }
+
     function renderGuestAiSection() {
       const container = document.getElementById("guest-ai-section");
       if (!container) return;
       const d = DATA[currentTheme];
       const isCyber = currentTheme === "cyber_titanium";
       const grad = isCyber ? "from-indigo-600 to-emerald-500" : "from-pink-600 to-amber-500";
+      const dotBg = isCyber ? "bg-emerald-400" : "bg-rose-400";
       const chipKw = (AI_INTEREST_CHIPS.find((c) => c.id === aiInterest) || {}).kw || "";
 
       let cards = [];
@@ -1588,6 +1997,41 @@
         cards = AI_WEB_CARDS[currentTheme].map((c) => ({ ...c, fromList: false }));
       }
 
+      const cardsMarkup = aiThinking ? `
+        <div class="rounded-2xl bg-black/35 border border-white/15 px-5 py-6 flex items-center justify-center gap-3 text-base font-bold text-slate-200" aria-live="polite">
+          <span class="flex items-center gap-1.5" aria-hidden="true">
+            <span class="goo-dot ${dotBg}"></span>
+            <span class="goo-dot ${dotBg}"></span>
+            <span class="goo-dot ${dotBg}"></span>
+          </span>
+          <span>ШІ аналізує інтереси та підбирає 3 ідеї…</span>
+        </div>
+      ` : `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ${cards.map((card, idx) => `
+            <div class="stagger-card rounded-2xl bg-white/10 border border-white/20 p-5 flex flex-col justify-between gap-4" style="animation-delay: ${idx * 120}ms;">
+              <div class="space-y-3">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-3xl">${card.emoji}</div>
+                  <span class="px-3 py-1 rounded-xl text-sm font-black bg-amber-400/20 text-amber-300 border border-amber-400/40 tabular-nums">${card.price.toLocaleString("uk-UA")} ₴</span>
+                </div>
+                <div class="text-sm font-extrabold text-amber-300">🛍️ ${card.store}</div>
+                <h4 class="text-base font-extrabold text-white leading-snug">${card.title}</h4>
+                <p class="text-sm font-medium text-slate-200">💡 ${card.why}</p>
+              </div>
+              <div class="flex flex-col gap-2 pt-2 border-t border-white/15">
+                ${card.fromList ? `
+                  <button onclick="${card.isJar ? 'donateJar(\'' + card.id + '\', this)' : 'bookAiSurprise(\'' + card.title.replace(/'/g, '') + '\', ' + card.price + ', \'' + card.emoji + '\', this)'}" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-gradient-to-r ${grad} text-white shadow spring active:scale-95">${card.isJar ? "🫙 Скинутися на Банку" : "🎁 Забронювати цей подарунок"}</button>
+                ` : `
+                  <button onclick="bookAiSurprise('${card.title.replace(/'/g, '')}', ${card.price}, '${card.emoji}', this)" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-gradient-to-r ${grad} text-white shadow spring active:scale-95">🤫 Забронювати як сюрприз</button>
+                  <a href="${card.url}" target="_blank" rel="noopener noreferrer" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 flex items-center justify-center">🛒 Відкрити в магазині ↗</a>
+                `}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
       container.innerHTML = `
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
@@ -1607,29 +2051,7 @@
           `).join("")}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          ${cards.map((card) => `
-            <div class="rounded-2xl bg-white/10 border border-white/20 p-5 flex flex-col justify-between gap-4">
-              <div class="space-y-3">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-3xl">${card.emoji}</div>
-                  <span class="px-3 py-1 rounded-xl text-sm font-black bg-amber-400/20 text-amber-300 border border-amber-400/40 tabular-nums">${card.price.toLocaleString("uk-UA")} ₴</span>
-                </div>
-                <div class="text-sm font-extrabold text-amber-300">🛍️ ${card.store}</div>
-                <h4 class="text-base font-extrabold text-white leading-snug">${card.title}</h4>
-                <p class="text-sm font-medium text-slate-200">💡 ${card.why}</p>
-              </div>
-              <div class="flex flex-col gap-2 pt-2 border-t border-white/15">
-                ${card.fromList ? `
-                  <button onclick="${card.isJar ? 'donateJar(\'' + card.id + '\')' : 'showToast(\'💎 Подарунок заброньовано!\')'}" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-gradient-to-r ${grad} text-white shadow spring active:scale-95">${card.isJar ? "🫙 Скинутися на Банку" : "🎁 Забронювати цей подарунок"}</button>
-                ` : `
-                  <button onclick="showToast('🤫 Таємний сюрприз зафіксовано! Іменинник не побачить його до свята.')" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold bg-gradient-to-r ${grad} text-white shadow spring active:scale-95">🤫 Забронювати як сюрприз</button>
-                  <a href="${card.url}" target="_blank" rel="noopener noreferrer" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 flex items-center justify-center">🛒 Відкрити в магазині ↗</a>
-                `}
-              </div>
-            </div>
-          `).join("")}
-        </div>
+        ${cardsMarkup}
       `;
     }
 
@@ -1770,24 +2192,72 @@
       if (bpr) bpr.className = view === 'preview' ? activeCls : idleCls;
     }
 
+    let dashAddBusy = false;
     function dashAddFromInput(e) {
       e.preventDefault();
+      if (dashAddBusy) return;
       const inp = document.getElementById('dash-add-input');
+      const btn = document.getElementById('dash-add-btn');
       const val = (inp && inp.value || '').trim();
-      if (!val) return;
-      const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 60);
-      DATA[currentTheme].items.unshift({
-        id: 'dash-new-' + Date.now(),
-        title: cleanTitle,
-        price: 3500,
-        image: getDefaultGiftImage(cleanTitle),
-        comment: 'Додано через редактор Mriyii ✨',
-        isBooked: false
-      });
-      if (inp) inp.value = '';
-      renderAll();
-      showToast('✨ Мрію додано! Прев’ю праворуч оновлено.');
+      if (!val) {
+        if (inp) inp.focus();
+        if (btn) {
+          btn.classList.remove('shake-2px');
+          void btn.offsetWidth;
+          btn.classList.add('shake-2px');
+          btn.textContent = 'Не вдалося, спробуй ще';
+          setTimeout(() => {
+            btn.classList.remove('shake-2px');
+            btn.textContent = 'Додати';
+          }, 1500);
+        }
+        return;
+      }
+
+      dashAddBusy = true;
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin"></span><span>Додаємо...</span>';
+      }
+
+      const delay = prefersReducedMotion() ? 100 : 380;
+      setTimeout(() => {
+        const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 60);
+        DATA[currentTheme].items.unshift({
+          id: 'dash-new-' + Date.now(),
+          title: cleanTitle,
+          price: 3500,
+          image: getDefaultGiftImage(cleanTitle),
+          comment: 'Додано через редактор Mriyii ✨',
+          isBooked: false
+        });
+        if (inp) inp.value = '';
+        renderAll();
+        showToast('✨ Мрію додано! Прев’ю праворуч оновлено.');
+        if (btn) {
+          btn.textContent = '✓ Додано';
+        }
+        setTimeout(() => {
+          dashAddBusy = false;
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Додати';
+          }
+        }, prefersReducedMotion() ? 150 : 1100);
+      }, delay);
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeBookingTicket();
+    });
+    (function initTicketBackdrop() {
+      const modal = document.getElementById('booking-ticket-modal');
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) closeBookingTicket();
+        });
+      }
+    })();
 
     function syncDashPreview() {
       const box = document.getElementById('dash-live-preview-body');

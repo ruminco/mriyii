@@ -209,6 +209,7 @@ export function AiGiftAssistantWidget({
   const [activeInterest, setActiveInterest] = useState<string>('all');
   const [guestQuery, setGuestQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [renderCycle, setRenderCycle] = useState(0);
   const [customIdeas, setCustomIdeas] = useState<AiGiftRecommendationDTO[] | null>(null);
   const [selectedIdea, setSelectedIdea] = useState<AiGiftRecommendationDTO | null>(null);
   const [guestName, setGuestName] = useState('');
@@ -258,8 +259,10 @@ export function AiGiftAssistantWidget({
       } else {
         setCustomIdeas(null);
       }
+      setRenderCycle((c) => c + 1);
     } catch {
       setCustomIdeas(null);
+      setRenderCycle((c) => c + 1);
     } finally {
       setIsLoading(false);
     }
@@ -368,6 +371,7 @@ export function AiGiftAssistantWidget({
               setMode('from_wishlist');
               setCustomIdeas(null);
               setSelectedIdea(null);
+              setRenderCycle((c) => c + 1);
             }}
             className={`min-h-[48px] px-4 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
               mode === 'from_wishlist'
@@ -384,6 +388,7 @@ export function AiGiftAssistantWidget({
               setMode('web_search');
               setCustomIdeas(null);
               setSelectedIdea(null);
+              setRenderCycle((c) => c + 1);
             }}
             className={`min-h-[48px] px-4 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 spring-transition ${
               mode === 'web_search'
@@ -411,6 +416,7 @@ export function AiGiftAssistantWidget({
                 onClick={() => {
                   setActiveInterest(chip.id);
                   setCustomIdeas(null);
+                  setRenderCycle((c) => c + 1);
                 }}
                 className={`min-h-[48px] px-4 py-2 rounded-2xl text-sm font-extrabold border spring-transition ${
                   activeInterest === chip.id
@@ -437,6 +443,7 @@ export function AiGiftAssistantWidget({
                   onClick={() => {
                     setBudget(preset.value);
                     setCustomIdeas(null);
+                    setRenderCycle((c) => c + 1);
                   }}
                   className={`min-h-[48px] px-3.5 py-2 rounded-xl text-sm font-extrabold spring-transition ${
                     budget === preset.value
@@ -491,13 +498,48 @@ export function AiGiftAssistantWidget({
         </div>
       )}
 
-      {/* Сітка з 3 інтерактивних карток (grid-cols-1 md:grid-cols-3) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-white/15">
-        {displayedIdeas.map((idea, idx) => (
-          <div
-            key={`${idea.title}-${idx}`}
-            className="rounded-2xl bg-white/10 border border-white/20 p-4 flex flex-col justify-between gap-4"
-          >
+      {/* P1 #5: Goo Thinking індикатор (3 краплі) поки чекаємо Gemini 2.5 Flash */}
+      {isLoading ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="pt-4 border-t border-white/15 flex flex-col items-center justify-center py-8 space-y-3"
+        >
+          <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/10 border border-white/20">
+            <span className="inline-flex items-center gap-1.5" aria-hidden="true">
+              <span
+                className={`w-3 h-3 rounded-full goo-dot ${
+                  themePreset === 'rose_luxury' ? 'bg-rose-400' : 'bg-emerald-400'
+                }`}
+                style={{ animationDelay: '0ms' }}
+              />
+              <span
+                className={`w-3 h-3 rounded-full goo-dot ${
+                  themePreset === 'rose_luxury' ? 'bg-rose-300' : 'bg-emerald-300'
+                }`}
+                style={{ animationDelay: '180ms' }}
+              />
+              <span
+                className={`w-3 h-3 rounded-full goo-dot ${
+                  themePreset === 'rose_luxury' ? 'bg-rose-200' : 'bg-emerald-200'
+                }`}
+                style={{ animationDelay: '360ms' }}
+              />
+            </span>
+            <span className="text-sm font-extrabold text-white">
+              ШІ аналізує інтереси та підбирає 3 ідеї…
+            </span>
+          </div>
+        </div>
+      ) : (
+        /* Сітка з 3 інтерактивних карток зі stagger 120мс */
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-white/15">
+          {displayedIdeas.map((idea, idx) => (
+            <div
+              key={`${renderCycle}-${idea.title}-${idx}`}
+              style={{ animationDelay: `${idx * 120}ms` }}
+              className="stagger-card rounded-2xl bg-white/10 border border-white/20 p-4 flex flex-col justify-between gap-4"
+            >
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-3xl shrink-0">
@@ -568,6 +610,7 @@ export function AiGiftAssistantWidget({
           </div>
         ))}
       </div>
+      )}
 
       {/* Підтвердження фіксації таємного сюрпризу */}
       {selectedIdea && (
