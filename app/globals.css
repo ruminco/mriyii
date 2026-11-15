@@ -10,7 +10,7 @@
 
   body {
     font-family: var(--font-sans);
-    background-color: #190d2c;
+    background-color: #0e1324;
     color: #ffffff;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -21,26 +21,27 @@
   transition: all 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Пресет 1: Для неї — rose_luxury (Linktree × Obsidian Velvet & Rose Gold Canvas) */
+/* DS V2 Option 2: Midnight Velvet & Champagne Aurora */
 .mesh-luxury,
 .canvas-rose {
-  background-color: #190d2c;
+  background-color: #0e1324;
   background-image:
-    radial-gradient(at 15% 10%, rgba(236, 72, 153, 0.48) 0px, transparent 50%),
-    radial-gradient(at 85% 15%, rgba(139, 92, 246, 0.52) 0px, transparent 55%),
-    radial-gradient(at 80% 85%, rgba(245, 158, 11, 0.35) 0px, transparent 52%),
-    linear-gradient(170deg, #190d2c 0%, #2d124d 50%, #1a103c 100%);
+    radial-gradient(ellipse at 50% 0%, rgba(245, 158, 11, 0.11) 0px, transparent 60%),
+    linear-gradient(180deg, #0e1324 0%, #161b33 38%, #11222e 72%, #0e1324 100%);
 }
 
-/* Пресет 2: Для нього — cyber_titanium (Linktree × Apple Pro Titanium & Cyber Mesh Canvas) */
+/* DS V2 Option 2: Cyber Titanium Aurora */
 .mesh-cyber,
 .canvas-cyber {
-  background-color: #090e1a;
+  background-color: #0b1120;
   background-image:
-    radial-gradient(at 15% 10%, rgba(52, 211, 153, 0.42) 0px, transparent 50%),
-    radial-gradient(at 85% 15%, rgba(99, 102, 241, 0.52) 0px, transparent 55%),
-    radial-gradient(at 15% 82%, rgba(56, 189, 248, 0.38) 0px, transparent 50%),
-    linear-gradient(170deg, #090e1a 0%, #111e3d 50%, #091e26 100%);
+    radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.11) 0px, transparent 60%),
+    linear-gradient(180deg, #0b1120 0%, #111c33 38%, #0e242c 72%, #0b1120 100%);
+}
+
+.ds-v2-card {
+  background: #171d30;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Градієнтні кільця аватарки Linktree-профілю */

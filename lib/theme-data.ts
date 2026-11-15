@@ -26,28 +26,27 @@ export const THEME_TOKENS: Record<ThemePreset, ThemeVisualTokens> = {
   rose_luxury: {
     preset: 'rose_luxury',
     gender: 'female',
-    label: '👩 Для неї • Rose Luxury',
+    label: '👩 Для неї • Midnight Velvet',
     meshClass: 'canvas-rose',
     avatarRingClass: 'avatar-ring-rose',
     fallbackPosterClass: 'fallback-poster-rose',
-    aiBannerGradient:
-      'bg-gradient-to-br from-fuchsia-600 via-purple-600 to-indigo-700',
+    aiBannerGradient: 'bg-[#171D30] border border-amber-400/30',
     commentBubbleClass:
-      'bg-gradient-to-r from-pink-50 via-fuchsia-50 to-purple-50 border-l-4 border-pink-500 text-pink-950',
+      'bg-amber-50 border-l-4 border-amber-500 text-slate-950',
     emojiFrameGradient:
-      'from-pink-500 via-fuchsia-500 to-amber-400 shadow-lg shadow-pink-500/25',
-    priorityBadgeClass: 'bg-pink-600/90 text-white',
+      'from-amber-400 via-amber-500 to-indigo-500 shadow-lg shadow-amber-500/20',
+    priorityBadgeClass: 'bg-amber-500 text-slate-950',
     priorityBadgeText: '🔥 Мрія #1',
     pricePillClass:
-      'text-amber-300 bg-amber-500/20 border border-amber-400/40',
-    shimmerBarClass: 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600',
+      'text-amber-200 bg-amber-500/20 border border-amber-400/40',
+    shimmerBarClass: 'bg-emerald-500',
     primaryCtaGradient:
-      'bg-gradient-to-r from-pink-600 via-fuchsia-600 to-violet-600 shadow-md shadow-pink-500/25',
+      'bg-amber-500 hover:bg-amber-600 !text-slate-950 shadow-lg shadow-amber-500/20',
     primaryJarBtnText: '🐈 Поповнити Банку',
     primaryBookBtnText: '👑 Подарувати все',
     donorsBadgeClass: 'bg-emerald-200/80 text-emerald-900',
     surpriseBoxGradient:
-      'from-indigo-50 via-purple-50 to-pink-50 border-indigo-200',
+      'from-indigo-50 via-slate-50 to-amber-50 border-indigo-200',
   },
   cyber_titanium: {
     preset: 'cyber_titanium',
@@ -56,24 +55,23 @@ export const THEME_TOKENS: Record<ThemePreset, ThemeVisualTokens> = {
     meshClass: 'canvas-cyber',
     avatarRingClass: 'avatar-ring-cyber',
     fallbackPosterClass: 'fallback-poster-cyber',
-    aiBannerGradient:
-      'bg-gradient-to-br from-indigo-600 via-blue-700 to-emerald-600',
+    aiBannerGradient: 'bg-[#171D30] border border-emerald-400/30',
     commentBubbleClass:
-      'bg-gradient-to-r from-indigo-50 via-blue-50 to-cyan-50 border-l-4 border-indigo-600 text-indigo-950',
+      'bg-indigo-50 border-l-4 border-indigo-600 text-indigo-950',
     emojiFrameGradient:
-      'from-cyan-400 via-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/25',
-    priorityBadgeClass: 'bg-indigo-600/90 text-white',
+      'from-emerald-400 via-cyan-400 to-indigo-500 shadow-lg shadow-emerald-500/20',
+    priorityBadgeClass: 'bg-indigo-600 text-white',
     priorityBadgeText: '⚡ Топ-бажання',
     pricePillClass:
-      'text-cyan-300 bg-cyan-500/20 border border-cyan-400/40',
-    shimmerBarClass: 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600',
+      'text-emerald-200 bg-emerald-500/20 border border-emerald-400/40',
+    shimmerBarClass: 'bg-emerald-500',
     primaryCtaGradient:
-      'bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-600 shadow-md shadow-indigo-500/25',
+      'bg-emerald-400 hover:bg-emerald-500 !text-slate-950 shadow-lg shadow-emerald-500/20',
     primaryJarBtnText: '🫙 Поповнити Банку',
     primaryBookBtnText: '🎁 Забронювати',
     donorsBadgeClass: 'bg-emerald-200/80 text-emerald-900',
     surpriseBoxGradient:
-      'from-indigo-50 via-blue-50 to-cyan-50 border-indigo-200',
+      'from-indigo-50 via-blue-50 to-emerald-50 border-indigo-200',
   },
 };
 
