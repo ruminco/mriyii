@@ -55,6 +55,7 @@ export function GuestWishlistClient({
     useState<UnifiedGiftCardItem | null>(null);
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
+  const [isAnonymousBooking, setIsAnonymousBooking] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,6 +72,7 @@ export function GuestWishlistClient({
   const [fanPrice, setFanPrice] = useState('');
   const [fanUrl, setFanUrl] = useState('');
   const [fanGuestName, setFanGuestName] = useState('');
+  const [isAnonymousFan, setIsAnonymousFan] = useState(false);
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
@@ -131,13 +133,17 @@ export function GuestWishlistClient({
       return;
     }
 
+    const effectiveGuestName = isAnonymousBooking
+      ? 'Таємний шанувальник 🕶️'
+      : guestName.trim() || 'Гість';
+
     setIsSubmitting(true);
     setModalError(null);
 
     try {
       const res = await bookGiftItem(
         activeBookingItem.id,
-        guestName.trim(),
+        effectiveGuestName,
         guestEmail.trim(),
         existingBrowserTokens
       );
@@ -146,7 +152,7 @@ export function GuestWishlistClient({
       setItems((prev) =>
         prev.map((it) =>
           it.id === activeBookingItem.id
-            ? { ...it, isBooked: true, bookedByName: guestName.trim() }
+            ? { ...it, isBooked: true, bookedByName: effectiveGuestName }
             : it
         )
       );
@@ -161,7 +167,7 @@ export function GuestWishlistClient({
         setItems((prev) =>
           prev.map((it) =>
             it.id === activeBookingItem.id
-              ? { ...it, isBooked: true, bookedByName: guestName.trim() }
+              ? { ...it, isBooked: true, bookedByName: effectiveGuestName }
               : it
           )
         );
@@ -427,30 +433,30 @@ export function GuestWishlistClient({
         </section>
 
         {/* =================================================================== */}
-        {/* 2. AI TEASER (згорнутий за замовчуванням, розгортається по кліку)   */}
+        {/* 2. AI TEASER (яскравий тригер VIP-сюрпризу)                         */}
         {/* =================================================================== */}
-        <section className="space-y-3">
+        <section id="guest-ai-section" className="space-y-3">
           <button
             type="button"
             onClick={() => setShowFullAiGenerator((p) => !p)}
             aria-expanded={showFullAiGenerator}
-            className="w-full min-h-[56px] rounded-[22px] bg-[#171D30]/95 hover:bg-[#1E2640] border border-amber-400/35 px-5 py-3.5 flex items-center justify-between gap-3 text-left shadow-lg spring-transition"
+            className="w-full min-h-[56px] rounded-[22px] bg-[#171D30]/95 hover:bg-[#1E2640] border border-amber-400/50 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left shadow-xl spring-transition"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/35 flex items-center justify-center text-xl shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/45 flex items-center justify-center text-xl shrink-0">
                 ✨
               </div>
               <div>
                 <div className="text-sm sm:text-base font-extrabold text-white">
-                  🤖 Не знаєш, що обрати? Підберу подарунок для {ownerName}
+                  ✨ Не знаєш що обрати? → Підібрати VIP-сюрприз за 10 сек
                 </div>
                 <div className="text-sm font-semibold text-slate-300">
-                  ШІ підбере подарунки зі списку або в магазинах під твій бюджет
+                  ШІ підбере подарунки для {ownerName} зі списку або в магазинах під твій бюджет
                 </div>
               </div>
             </div>
-            <span className="shrink-0 px-3.5 py-2 rounded-xl bg-amber-400 text-slate-950 text-sm font-black">
-              {showFullAiGenerator ? 'Згорнути ▴' : 'Підібрати ▾'}
+            <span className="shrink-0 min-h-[40px] px-4 py-2 rounded-xl bg-amber-400 text-slate-950 text-sm font-black inline-flex items-center justify-center">
+              {showFullAiGenerator ? 'Згорнути ▴' : 'Підібрати VIP-сюрприз ▾'}
             </span>
           </button>
 
@@ -633,20 +639,34 @@ export function GuestWishlistClient({
             )}
 
             <form onSubmit={handleConfirmBooking} className="space-y-3">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">
-                  Ваше ім’я або нікнейм (бачитимуть лише інші гості):
-                </label>
+              <label className="flex items-center justify-between gap-3 rounded-xl bg-slate-100 hover:bg-slate-200/70 border border-slate-200 px-3.5 py-2.5 cursor-pointer select-none">
+                <span className="text-sm font-extrabold text-slate-900">
+                  🕶️ Подарувати анонімно (Таємний шанувальник)
+                </span>
                 <input
-                  type="text"
-                  required
-                  minLength={2}
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="Наприклад: Олексій"
-                  className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950"
+                  type="checkbox"
+                  checked={isAnonymousBooking}
+                  onChange={(e) => setIsAnonymousBooking(e.target.checked)}
+                  className="w-5 h-5 accent-slate-950 rounded"
                 />
-              </div>
+              </label>
+
+              {!isAnonymousBooking && (
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">
+                    Ваше ім’я або нікнейм (бачитимуть лише інші гості):
+                  </label>
+                  <input
+                    type="text"
+                    required={!isAnonymousBooking}
+                    minLength={2}
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    placeholder="Наприклад: Олексій"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">
@@ -793,7 +813,9 @@ export function GuestWishlistClient({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!fanTitle.trim()) return;
-                const guestLabel = fanGuestName.trim() || 'Друг';
+                const guestLabel = isAnonymousFan
+                  ? 'Таємний шанувальник 🕶️'
+                  : fanGuestName.trim() || 'Друг';
                 const newSuggestion: UnifiedGiftCardItem = {
                   id: `fan-suggest-${Date.now()}`,
                   title: fanTitle.trim(),
@@ -812,11 +834,24 @@ export function GuestWishlistClient({
                 setFanPrice('');
                 setFanUrl('');
                 setFanGuestName('');
+                setIsAnonymousFan(false);
                 setShowFanSuggestModal(false);
                 triggerToast('💡 Ідею додано для інших гостей! Іменинник не побачить сюрприз.');
               }}
               className="space-y-3"
             >
+              <label className="flex items-center justify-between gap-3 rounded-xl bg-slate-100 hover:bg-slate-200/70 border border-slate-200 px-3.5 py-2.5 cursor-pointer select-none">
+                <span className="text-sm font-extrabold text-slate-900">
+                  🕶️ Подарувати анонімно (Таємний шанувальник)
+                </span>
+                <input
+                  type="checkbox"
+                  checked={isAnonymousFan}
+                  onChange={(e) => setIsAnonymousFan(e.target.checked)}
+                  className="w-5 h-5 accent-slate-950 rounded"
+                />
+              </label>
+
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">
                   Що пропонуєте подарувати?
@@ -843,19 +878,21 @@ export function GuestWishlistClient({
                     className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950 tabular-nums"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">
-                    Ваше ім’я:
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={fanGuestName}
-                    onChange={(e) => setFanGuestName(e.target.value)}
-                    placeholder="Максим"
-                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950"
-                  />
-                </div>
+                {!isAnonymousFan && (
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                      Ваше ім’я:
+                    </label>
+                    <input
+                      type="text"
+                      required={!isAnonymousFan}
+                      value={fanGuestName}
+                      onChange={(e) => setFanGuestName(e.target.value)}
+                      placeholder="Максим"
+                      className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">
