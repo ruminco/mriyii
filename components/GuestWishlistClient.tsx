@@ -63,6 +63,13 @@ export function GuestWishlistClient({
   // Віральний Growth Loop поп-ап після бронювання
   const [showGrowthModal, setShowGrowthModal] = useState(false);
 
+  // COPY-08: Fan Suggestions (ідея подарунка від друга, прихована Сюрприз-режимом від власника)
+  const [showFanSuggestModal, setShowFanSuggestModal] = useState(false);
+  const [fanTitle, setFanTitle] = useState('');
+  const [fanPrice, setFanPrice] = useState('');
+  const [fanUrl, setFanUrl] = useState('');
+  const [fanGuestName, setFanGuestName] = useState('');
+
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
@@ -273,7 +280,7 @@ export function GuestWishlistClient({
   return (
     <div className={`min-h-screen ${tokens.meshClass} text-white spring-transition pb-24`}>
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-950/95 backdrop-blur-xl rounded-2xl px-4 py-3 border border-emerald-400/50 shadow-2xl flex items-center gap-2.5 text-xs sm:text-sm font-extrabold text-emerald-300">
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-950/95 backdrop-blur-xl rounded-2xl px-4 py-3 border border-emerald-400/50 shadow-2xl flex items-center gap-2.5 text-sm font-extrabold text-emerald-300">
           <span>💌</span>
           <span>{toastMessage}</span>
         </div>
@@ -298,7 +305,7 @@ export function GuestWishlistClient({
               <button
                 type="button"
                 onClick={() => setLocale('ua')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition ${
+                className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
                   locale === 'ua' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
                 }`}
               >
@@ -307,7 +314,7 @@ export function GuestWishlistClient({
               <button
                 type="button"
                 onClick={() => setLocale('en')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition ${
+                className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
                   locale === 'en' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
                 }`}
               >
@@ -318,7 +325,7 @@ export function GuestWishlistClient({
             <button
               type="button"
               onClick={() => setForceFallbackPoster((p) => !p)}
-              className="py-1.5 px-2.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15 flex items-center gap-1"
+              className="py-1.5 px-2.5 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15 flex items-center gap-1"
             >
               <ImageIcon className="w-3.5 h-3.5 text-amber-300" />
               <span>{forceFallbackPoster ? '✨ Smart Постер' : '🖼️ З фото'}</span>
@@ -332,14 +339,14 @@ export function GuestWishlistClient({
                 setThemePreset(next);
                 setItems(DEMO_WISHLISTS[next].items);
               }}
-              className="py-1.5 px-2.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15"
+              className="py-1.5 px-2.5 rounded-xl text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/15"
             >
               {tokens.label}
             </button>
 
             <Link
               href="/"
-              className="py-1.5 px-3 rounded-xl text-xs font-extrabold bg-white text-slate-950 shadow"
+              className="py-1.5 px-3 rounded-xl text-sm font-extrabold bg-white text-slate-950 shadow"
             >
               {locale === 'en' ? '✨ Create wishlist' : '✨ Створити свій вішліст'}
             </Link>
@@ -507,6 +514,27 @@ export function GuestWishlistClient({
         </section>
 
         {/* =================================================================== */}
+        {/* COPY-08: FAN SUGGESTIONS (Ідея подарунка від друга)                 */}
+        {/* =================================================================== */}
+        <section className="rounded-[24px] bg-[#171D30]/90 border border-indigo-400/25 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="text-sm sm:text-base font-extrabold text-white">
+              💡 Маєш власну круту ідею подарунка?
+            </div>
+            <p className="text-sm text-slate-300">
+              Запропонуй її іншим гостям — іменинник не побачить сюрприз до дати свята.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowFanSuggestModal(true)}
+            className="min-h-[48px] px-5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-extrabold shrink-0 transition"
+          >
+            💡 Запропонувати ідею подарунка
+          </button>
+        </section>
+
+        {/* =================================================================== */}
         {/* 5. FLOWERS / INSTAGRAM BANNER (Zero Home Address Storage)           */}
         {/* =================================================================== */}
         {resolvedFlowerNotes && (
@@ -565,7 +593,7 @@ export function GuestWishlistClient({
           <div className="solid-white-card rounded-[28px] w-full max-w-md p-6 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">
+                <span className="text-sm font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">
                   🤫 Сюрприз для іменинника
                 </span>
                 <h3 className="text-lg font-black text-slate-950 mt-1.5">
@@ -582,14 +610,14 @@ export function GuestWishlistClient({
             </div>
 
             {modalError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-sm font-bold text-rose-700">
                 {modalError}
               </div>
             )}
 
             <form onSubmit={handleConfirmBooking} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-sm font-bold text-slate-700 mb-1">
                   Ваше ім’я або нікнейм (бачитимуть лише інші гості):
                 </label>
                 <input
@@ -604,7 +632,7 @@ export function GuestWishlistClient({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-sm font-bold text-slate-700 mb-1">
                   Ваш Email (для можливості скасувати бронь):
                 </label>
                 <input
@@ -644,13 +672,13 @@ export function GuestWishlistClient({
           <div className="solid-white-card rounded-[28px] w-full max-w-md p-6 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <span className="text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">
+                <span className="text-sm font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">
                   🫙 Організація спільного збору
                 </span>
                 <h3 className="text-lg font-black text-slate-950 mt-1.5">
                   Прив’язати Банку Monobank
                 </h3>
-                <p className="text-xs font-semibold text-slate-600 mt-1">
+                <p className="text-sm font-semibold text-slate-600 mt-1">
                   Вставте посилання на вашу Банку для лота «{activeJarItem.title}», щоб інші гості могли скинутися разом з вами.
                 </p>
               </div>
@@ -664,7 +692,7 @@ export function GuestWishlistClient({
             </div>
 
             {modalError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-sm font-bold text-rose-700">
                 {modalError}
               </div>
             )}
@@ -681,7 +709,7 @@ export function GuestWishlistClient({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-500 hover:bg-emerald-400 text-slate-950"
+                className="w-full py-3 px-4 rounded-xl text-sm font-extrabold bg-emerald-500 hover:bg-emerald-400 text-slate-950"
               >
                 🫙 Запустити спільний збір
               </button>
@@ -700,13 +728,13 @@ export function GuestWishlistClient({
             <h3 className="text-xl font-black text-slate-950">
               💎 Вау! Ваш внесок у мрію зафіксовано.
             </h3>
-            <p className="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed">
+            <p className="text-sm font-semibold text-slate-600 leading-relaxed">
               Хочете такий самий Linktree-вішліст із Монобанкою та ШІ для свого свята? Створіть його безкоштовно за 30 секунд!
             </p>
             <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
               <Link
                 href="/"
-                className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold ${tokens.primaryCtaGradient} text-white flex items-center justify-center gap-1.5`}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} text-white flex items-center justify-center gap-1.5`}
               >
                 <Sparkles className="w-4 h-4" />
                 <span>✨ Створити мій вішліст</span>
@@ -714,11 +742,124 @@ export function GuestWishlistClient({
               <button
                 type="button"
                 onClick={() => setShowGrowthModal(false)}
-                className="py-3 px-4 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700"
+                className="py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700"
               >
                 Закрити
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальне вікно Fan Suggestions (COPY-08) */}
+      {showFanSuggestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="solid-white-card rounded-[28px] w-full max-w-md p-6 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <span className="text-sm font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900">
+                  💡 Ідея від друга (Сюрприз-режим)
+                </span>
+                <h3 className="text-lg font-black text-slate-950 mt-1.5">
+                  Запропонувати подарунок
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFanSuggestModal(false)}
+                className="p-1.5 rounded-xl bg-slate-100 text-slate-700"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!fanTitle.trim()) return;
+                const guestLabel = fanGuestName.trim() || 'Друг';
+                const newSuggestion: UnifiedGiftCardItem = {
+                  id: `fan-suggest-${Date.now()}`,
+                  title: fanTitle.trim(),
+                  emoji: '💡',
+                  description: `Ідея від гостя (${guestLabel}) — приховано від іменинника до свята 🤫`,
+                  price: Number.parseInt(fanPrice, 10) || undefined,
+                  currency: 'UAH',
+                  originalUrl: fanUrl.trim() || undefined,
+                  affiliateUrl: fanUrl.trim() || undefined,
+                  isBooked: true,
+                  bookedByName: guestLabel,
+                  isAiSurprise: true,
+                };
+                setItems((prev) => [newSuggestion, ...prev]);
+                setFanTitle('');
+                setFanPrice('');
+                setFanUrl('');
+                setFanGuestName('');
+                setShowFanSuggestModal(false);
+                triggerToast('💡 Ідею додано для інших гостей! Іменинник не побачить сюрприз.');
+              }}
+              className="space-y-3"
+            >
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">
+                  Що пропонуєте подарувати?
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={fanTitle}
+                  onChange={(e) => setFanTitle(e.target.value)}
+                  placeholder="Наприклад: Вініловий програвач Audio-Technica"
+                  className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">
+                    Орієнтовна ціна (₴):
+                  </label>
+                  <input
+                    type="number"
+                    value={fanPrice}
+                    onChange={(e) => setFanPrice(e.target.value)}
+                    placeholder="4500"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950 tabular-nums"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">
+                    Ваше ім’я:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fanGuestName}
+                    onChange={(e) => setFanGuestName(e.target.value)}
+                    placeholder="Максим"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-950"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">
+                  Посилання на товар (опціонально):
+                </label>
+                <input
+                  type="url"
+                  value={fanUrl}
+                  onChange={(e) => setFanUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-sm font-semibold text-slate-950"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full min-h-[48px] py-3 px-4 rounded-xl text-sm font-extrabold bg-indigo-500 hover:bg-indigo-400 text-white transition"
+              >
+                💡 Опублікувати ідею для гостей
+              </button>
+            </form>
           </div>
         </div>
       )}

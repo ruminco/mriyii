@@ -408,6 +408,21 @@
       <span>Користуйся посиланнями — застосунок безкоштовний</span>
     </div>
     <div id="guest-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    <section id="guest-fan-suggest-box" class="rounded-[24px] bg-[#171D30]/90 border border-indigo-400/25 p-5 space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="text-sm sm:text-base font-extrabold text-white">💡 Маєш власну круту ідею подарунка?</div>
+          <p class="text-sm text-slate-300">Запропонуй її іншим гостям — іменинник не побачить сюрприз до дати свята.</p>
+        </div>
+        <button type="button" onclick="toggleGuestFanSuggest()" class="min-h-[48px] px-5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-extrabold shrink-0">💡 Запропонувати ідею подарунка</button>
+      </div>
+      <form id="guest-fan-suggest-form" onsubmit="submitGuestFanSuggest(event)" class="hidden pt-2 border-t border-white/10 grid sm:grid-cols-3 gap-2.5">
+        <input id="fan-title-inp" type="text" required placeholder="Назва подарунка (напр. Вініл)" class="sm:col-span-2 rounded-xl bg-[#0E1324] border border-white/15 px-3.5 py-2.5 text-sm font-bold text-white" />
+        <input id="fan-price-inp" type="number" placeholder="Ціна (₴)" class="rounded-xl bg-[#0E1324] border border-white/15 px-3.5 py-2.5 text-sm font-bold text-white tabular-nums" />
+        <input id="fan-name-inp" type="text" required placeholder="Ваше ім’я" class="sm:col-span-2 rounded-xl bg-[#0E1324] border border-white/15 px-3.5 py-2.5 text-sm font-bold text-white" />
+        <button type="submit" class="min-h-[44px] rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-extrabold">Опублікувати 💡</button>
+      </form>
+    </section>
     <div id="guest-flower-banner"></div>
   </main>
 
@@ -447,9 +462,39 @@
               <input id="dash-add-input" type="text" placeholder="Вставте лінк або @instagram_shop..." class="flex-1 px-3.5 py-2.5 text-sm font-bold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none" />
               <button type="submit" class="sec-cta min-h-[48px] px-5 rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shrink-0">Додати</button>
             </form>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm font-bold text-slate-300">Шаблони:</span>
+                <button type="button" onclick="applyDashTemplate('birthday')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">🎂 День народження</button>
+                <button type="button" onclick="applyDashTemplate('santa')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">🎅 Таємний Санта</button>
+                <button type="button" onclick="applyDashTemplate('housewarming')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">🏡 Новосілля</button>
+              </div>
+              <button type="button" onclick="toggleDashImport()" class="min-h-[40px] px-3.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/35 text-sm font-extrabold text-indigo-200">📥 Імпорт списку</button>
+            </div>
+            <form id="dash-import-form" onsubmit="runDashBulkImport(event)" class="hidden rounded-2xl bg-[#0E1324] border border-indigo-400/30 p-4 space-y-3">
+              <div class="text-sm font-bold text-slate-200">Вставте список з Нотаток, Notion або посилання (по одному в рядок):</div>
+              <textarea id="dash-import-textarea" rows="3" placeholder="- Dyson Airwrap 26000&#10;- Навушники Sony 11999" class="w-full rounded-xl bg-[#171D30] border border-white/15 p-3 text-sm font-semibold text-white"></textarea>
+              <button type="submit" class="sec-cta min-h-[44px] px-5 rounded-xl text-sm font-extrabold bg-amber-500 text-slate-950">✨ Розпізнати та додати</button>
+            </form>
           </div>
           <div id="dashboard-cards-grid" class="space-y-3"></div>
-          <div id="dashboard-post-event-card" class="rounded-3xl bg-[#171D30] border border-white/10 p-5 space-y-3"></div>
+          <div id="dashboard-post-event-card" class="rounded-3xl bg-[#171D30] border border-white/10 p-5 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="text-base font-black text-white">🎉 Кому подякувати за подарунки</h3>
+              <button type="button" onclick="toggleDashPostEvent()" id="dash-post-event-btn" class="min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold bg-white/10 text-white hover:bg-white/20">🔒 До свята</button>
+            </div>
+            <div id="dash-post-event-hint" class="text-sm text-slate-300">Імена дарувальників приховані Сюрприз-режимом і відкриються після дати свята.</div>
+            <ul id="dash-post-event-list" class="hidden space-y-2 text-sm text-slate-200">
+              <li class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-between gap-2">
+                <span>🎁 <strong class="text-white">Аліна</strong> подарувала <span class="font-bold text-amber-300">Dyson Airwrap</span></span>
+                <button type="button" onclick="thankDonorDash(this, 'Аліна')" class="min-h-[38px] px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-extrabold">💌 Подякувати</button>
+              </li>
+              <li class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-between gap-2">
+                <span>🫙 <strong class="text-white">Максим, Оля, Діма</strong> скинулись у <span class="font-bold text-emerald-300">Монобанку</span></span>
+                <button type="button" onclick="thankDonorDash(this, 'Максим, Оля, Діма')" class="min-h-[38px] px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-extrabold">💌 Подякувати</button>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <!-- TAB: HEADER -->
@@ -1204,6 +1249,112 @@
           <div>${flVal}</div>
         </div>
       `;
+    }
+
+    function applyDashTemplate(key) {
+      const tpls = {
+        birthday: [
+          { title: '💇‍♀️ Стайлер Dyson Airwrap', price: 25990, comment: 'Шаблон День народження 🎂' },
+          { title: '🌸 Парфуми Jo Malone 50 мл', price: 5800, comment: 'Шаблон День народження 🎂' }
+        ],
+        santa: [
+          { title: '☕ Набір specialty-кави', price: 950, comment: 'Шаблон Таємний Санта 🎅' },
+          { title: '🕯️ Аромасвічка WoodWick', price: 890, comment: 'Шаблон Таємний Санта 🎅' }
+        ],
+        housewarming: [
+          { title: '☕ Кавоварка DeLonghi', price: 11500, comment: 'Шаблон Новосілля 🏡' },
+          { title: '🥂 Набір келихів Spiegelau', price: 2100, comment: 'Шаблон Новосілля 🏡' }
+        ]
+      };
+      const list = tpls[key] || [];
+      list.forEach((it, i) => {
+        DATA[currentTheme].items.unshift({
+          id: 'tpl-' + key + '-' + Date.now() + '-' + i,
+          title: it.title,
+          price: it.price,
+          comment: it.comment,
+          isBooked: false
+        });
+      });
+      renderAll();
+      showToast('✨ Додано ' + list.length + ' ідеї із шаблону!');
+    }
+
+    function toggleDashImport() {
+      const f = document.getElementById('dash-import-form');
+      if (f) f.classList.toggle('hidden');
+    }
+
+    function runDashBulkImport(e) {
+      e.preventDefault();
+      const ta = document.getElementById('dash-import-textarea');
+      const lines = ((ta && ta.value) || '').split(/\r?\n/).map(l => l.trim().replace(/^[-*•\d.)]+\s*/, '')).filter(Boolean);
+      if (!lines.length) return;
+      lines.forEach((line, i) => {
+        const pm = line.match(/(\d[\d\s]{2,7})\s*(?:₴|грн)?\s*$/i);
+        const price = pm ? parseInt(pm[1].replace(/\s+/g, ''), 10) : 2500;
+        const title = line.replace(/[-—–]?\s*\d[\d\s]{2,7}\s*(?:₴|грн)?\s*$/i, '').trim() || line;
+        DATA[currentTheme].items.unshift({
+          id: 'imp-' + Date.now() + '-' + i,
+          title: '📥 ' + title,
+          price: price,
+          comment: 'Імпортовано зі списку',
+          isBooked: false
+        });
+      });
+      if (ta) ta.value = '';
+      toggleDashImport();
+      renderAll();
+      showToast('📥 Імпортовано ' + lines.length + ' позицій!');
+    }
+
+    function toggleDashPostEvent() {
+      const list = document.getElementById('dash-post-event-list');
+      const hint = document.getElementById('dash-post-event-hint');
+      const btn = document.getElementById('dash-post-event-btn');
+      if (!list || !hint || !btn) return;
+      const isHidden = list.classList.contains('hidden');
+      list.classList.toggle('hidden', !isHidden);
+      hint.classList.toggle('hidden', isHidden);
+      btn.textContent = isHidden ? '🎉 Після свята' : '🔒 До свята';
+      btn.className = isHidden
+        ? 'min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold bg-emerald-400 text-slate-950'
+        : 'min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold bg-white/10 text-white hover:bg-white/20';
+    }
+
+    function thankDonorDash(btn, name) {
+      btn.textContent = '✅ Подяку надіслано!';
+      btn.className = 'min-h-[38px] px-3 rounded-xl bg-emerald-400 text-slate-950 text-sm font-extrabold';
+      showToast('💌 Подяку для ' + name + ' скопійовано в буфер!');
+    }
+
+    function toggleGuestFanSuggest() {
+      const f = document.getElementById('guest-fan-suggest-form');
+      if (f) f.classList.toggle('hidden');
+    }
+
+    function submitGuestFanSuggest(e) {
+      e.preventDefault();
+      const t = document.getElementById('fan-title-inp');
+      const p = document.getElementById('fan-price-inp');
+      const n = document.getElementById('fan-name-inp');
+      const title = (t && t.value || '').trim();
+      const name = (n && n.value || '').trim() || 'Друг';
+      if (!title) return;
+      DATA[currentTheme].items.unshift({
+        id: 'fan-' + Date.now(),
+        title: '💡 ' + title,
+        price: parseInt((p && p.value) || '3000', 10) || 3000,
+        comment: 'Ідея від гостя (' + name + ') — приховано від іменинника 🤫',
+        isBooked: true,
+        bookedBy: name
+      });
+      if (t) t.value = '';
+      if (p) p.value = '';
+      if (n) n.value = '';
+      toggleGuestFanSuggest();
+      renderAll();
+      showToast('💡 Ідею додано для інших гостей! Іменинник не побачить сюрприз.');
     }
 
     renderAll();

@@ -35,6 +35,88 @@ const INTEREST_CHIPS = [
   '🎨 Творчість',
 ];
 
+const WISHLIST_TEMPLATES: Record<
+  'birthday' | 'santa' | 'housewarming',
+  {
+    label: string;
+    title: string;
+    items: Array<{ title: string; emoji: string; price: number; description: string }>;
+  }
+> = {
+  birthday: {
+    label: '🎂 День народження',
+    title: 'Мій День Народження 🎂',
+    items: [
+      {
+        title: 'Стайлер Dyson Airwrap Complete Long',
+        emoji: '💇‍♀️',
+        price: 25990,
+        description: 'Можна скинутися в Монобанку або подарувати разом ✨',
+      },
+      {
+        title: 'Парфуми Jo Malone Wood Sage & Sea Salt',
+        emoji: '🌸',
+        price: 5800,
+        description: 'Обʼєм 50 мл або 100 мл',
+      },
+      {
+        title: 'Сертифікат на SPA-день та масаж',
+        emoji: '🧖‍♀️',
+        price: 3500,
+        description: 'Будь-який вечірній час на вихідних',
+      },
+    ],
+  },
+  santa: {
+    label: '🎅 Таємний Санта',
+    title: 'Таємний Санта 2025 🎅',
+    items: [
+      {
+        title: 'Набір specialty-кави (3 пачки по 250г)',
+        emoji: '☕',
+        price: 950,
+        description: 'Під фільтр або воронку, світле обсмаження',
+      },
+      {
+        title: 'Термочашка KeepCup або Stanley',
+        emoji: '🥤',
+        price: 1200,
+        description: 'Колір бежевий, чорний або оливковий',
+      },
+      {
+        title: 'Аромасвічка WoodWick з деревʼяним гнотом',
+        emoji: '🕯️',
+        price: 890,
+        description: 'Запах ванілі, кедра або морської солі',
+      },
+    ],
+  },
+  housewarming: {
+    label: '🏡 Новосілля',
+    title: 'Наше затишне Новосілля 🏡',
+    items: [
+      {
+        title: 'Кавоварка DeLonghi або Nespresso',
+        emoji: '☕',
+        price: 11500,
+        description: 'Для ранків на новій кухні',
+      },
+      {
+        title: 'Набір келихів для вина Spiegelau (4 шт)',
+        emoji: '🥂',
+        price: 2100,
+        description: 'Прозоре тонке скло',
+      },
+      {
+        title: 'Плед із мериносової вовни',
+        emoji: '🛋️',
+        price: 3200,
+        description: 'Молочний або графітовий колір',
+      },
+    ],
+  },
+};
+
 function DashboardContent() {
   const searchParams = useSearchParams();
   const initialThemeParam = searchParams.get('theme');
@@ -85,6 +167,11 @@ function DashboardContent() {
     instagramHandle: string;
     monoJarUrl: string;
   } | null>(null);
+
+  const [showImportPanel, setShowImportPanel] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [templateToast, setTemplateToast] = useState<string | null>(null);
+  const [thankedDonors, setThankedDonors] = useState<Record<string, boolean>>({});
 
   const [isPostEventReveal, setIsPostEventReveal] = useState(false);
   const [previewAiExpanded, setPreviewAiExpanded] = useState(false);
@@ -271,6 +358,94 @@ function DashboardContent() {
       )
     );
     setEditingItemId(null);
+  };
+
+  const handleApplyTemplate = (key: 'birthday' | 'santa' | 'housewarming') => {
+    const tpl = WISHLIST_TEMPLATES[key];
+    const mapped: UnifiedGiftCardItem[] = tpl.items.map((entry, idx) => ({
+      id: `tpl-${key}-${Date.now()}-${idx}`,
+      title: entry.title,
+      emoji: entry.emoji,
+      description: entry.description,
+      price: entry.price,
+      currency: 'UAH',
+      isBooked: false,
+    }));
+    setWishlistTitle(tpl.title);
+    setItems((prev) => [...mapped, ...prev]);
+    setTemplateToast(`✨ Додано ${mapped.length} ідеї із шаблону «${tpl.label}»!`);
+    setTimeout(() => setTemplateToast(null), 3500);
+  };
+
+  const handleBulkImport = (e: React.FormEvent) => {
+    e.preventDefault();
+    const lines = importText
+      .split(/\r?\n/)
+      .map((l) => l.trim().replace(/^[-*•\d.)]+\s*/, ''))
+      .filter((l) => l.length > 1);
+
+    if (lines.length === 0) return;
+
+    const imported: UnifiedGiftCardItem[] = lines.map((line, idx) => {
+      const urlMatch = line.match(/https?:\/\/\S+/i);
+      const priceMatch = line.match(/(\d[\d\s]{2,7})\s*(?:₴|грн|uah)?\s*$/i);
+      const parsedPrice = priceMatch
+        ? Number.parseInt(priceMatch[1].replace(/\s+/g, ''), 10)
+        : undefined;
+      let cleanTitle = line
+        .replace(/https?:\/\/\S+/i, '')
+        .replace(/[-—–]\s*\d[\d\s]{2,7}\s*(?:₴|грн|uah)?\s*$/i, '')
+        .replace(/\d[\d\s]{2,7}\s*(?:₴|грн|uah)?\s*$/i, '')
+        .trim();
+
+      if (!cleanTitle && urlMatch) {
+        cleanTitle = urlMatch[0].replace(/^https?:\/\/(www\.)?/i, '').slice(0, 64);
+      }
+
+      const lower = cleanTitle.toLowerCase();
+      const emoji =
+        lower.includes('кав') || lower.includes('coffee')
+          ? '☕'
+          : lower.includes('навуш') || lower.includes('airpods') || lower.includes('sony')
+          ? '🎧'
+          : lower.includes('dyson') || lower.includes('стайл')
+          ? '💇‍♀️'
+          : lower.includes('квіт') || lower.includes('півон')
+          ? '🌸'
+          : lower.includes('книг')
+          ? '📚'
+          : '🎁';
+
+      return {
+        id: `imp-${Date.now()}-${idx}`,
+        title: cleanTitle || 'Імпортована мрія',
+        emoji,
+        price: parsedPrice,
+        currency: 'UAH',
+        originalUrl: urlMatch?.[0],
+        affiliateUrl: urlMatch?.[0],
+        description: 'Імпортовано зі списку 📥',
+        isBooked: false,
+      };
+    });
+
+    setItems((prev) => [...imported, ...prev]);
+    setImportText('');
+    setShowImportPanel(false);
+    setTemplateToast(`📥 Імпортовано ${imported.length} позицій у вішліст!`);
+    setTimeout(() => setTemplateToast(null), 3500);
+  };
+
+  const handleThankDonor = async (donorId: string, donorName: string, giftName: string) => {
+    const thankMsg = `Дякую тобі велике за ${giftName}! Це було неймовірно приємно 💛✨`;
+    try {
+      await navigator.clipboard.writeText(thankMsg);
+    } catch {
+      // Fallback
+    }
+    setThankedDonors((prev) => ({ ...prev, [donorId]: true }));
+    setTemplateToast(`💌 Подяку для ${donorName} скопійовано в буфер обміну!`);
+    setTimeout(() => setTemplateToast(null), 3500);
   };
 
   const toggleInterestChip = (chip: string) => {
@@ -468,6 +643,64 @@ function DashboardContent() {
                     </button>
                   </form>
 
+                  {/* COPY-04: 1-click шаблони + COPY-05: Імпорт списку */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-bold text-slate-300">Шаблони:</span>
+                      {(
+                        Object.keys(WISHLIST_TEMPLATES) as Array<
+                          keyof typeof WISHLIST_TEMPLATES
+                        >
+                      ).map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => handleApplyTemplate(key)}
+                          className="min-h-[40px] px-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-sm font-bold text-white transition"
+                        >
+                          {WISHLIST_TEMPLATES[key].label}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowImportPanel((v) => !v)}
+                      className="min-h-[40px] px-3.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/35 text-sm font-extrabold text-indigo-200 transition"
+                    >
+                      {showImportPanel ? 'Закрити імпорт ▴' : '📥 Імпорт списку'}
+                    </button>
+                  </div>
+
+                  {templateToast && (
+                    <div className="rounded-xl bg-emerald-500/20 border border-emerald-400/35 px-4 py-2.5 text-sm font-bold text-emerald-200">
+                      {templateToast}
+                    </div>
+                  )}
+
+                  {showImportPanel && (
+                    <form
+                      onSubmit={handleBulkImport}
+                      className="rounded-2xl bg-[#0E1324] border border-indigo-400/30 p-4 space-y-3"
+                    >
+                      <div className="text-sm font-bold text-slate-200">
+                        Вставте список з Нотаток, Notion або посилання (по одному в рядок):
+                      </div>
+                      <textarea
+                        rows={4}
+                        value={importText}
+                        onChange={(e) => setImportText(e.target.value)}
+                        placeholder={`- Dyson Airwrap 26000\n- Навушники Sony — 11999\nhttps://rozetka.com.ua/...`}
+                        className="w-full rounded-xl bg-[#171D30] border border-white/15 p-3 text-sm font-semibold text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-400"
+                      />
+                      <button
+                        type="submit"
+                        className={`min-h-[48px] px-5 rounded-xl text-sm font-extrabold ${solidBtnClass}`}
+                      >
+                        ✨ Розпізнати та додати в список
+                      </button>
+                    </form>
+                  )}
+
                   {previewItem && (
                     <form
                       onSubmit={handleConfirmAddPreview}
@@ -653,15 +886,46 @@ function DashboardContent() {
                     </button>
                   </div>
                   {isPostEventReveal ? (
-                    <ul className="space-y-2 text-sm text-slate-200">
-                      <li className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/30 font-semibold">
-                        🎁 <strong className="text-white">Аліна</strong> подарувала{' '}
-                        <span className="font-bold text-amber-300">Dyson Airwrap</span>
-                      </li>
-                      <li className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/30 font-semibold">
-                        🫙 <strong className="text-white">Максим, Оля, Діма</strong> скинулись у{' '}
-                        <span className="font-bold text-emerald-300">Монобанку / Приват24</span>
-                      </li>
+                    <ul className="space-y-2.5 text-sm text-slate-200">
+                      {[
+                        {
+                          id: 'donor-alina',
+                          icon: '🎁',
+                          name: 'Аліна',
+                          action: 'подарувала',
+                          gift: 'Dyson Airwrap',
+                          accent: 'text-amber-300',
+                        },
+                        {
+                          id: 'donor-group',
+                          icon: '🫙',
+                          name: 'Максим, Оля, Діма',
+                          action: 'скинулись у',
+                          gift: 'Монобанку / Приват24',
+                          accent: 'text-emerald-300',
+                        },
+                      ].map((d) => (
+                        <li
+                          key={d.id}
+                          className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/30 font-semibold flex flex-wrap items-center justify-between gap-2"
+                        >
+                          <span>
+                            {d.icon} <strong className="text-white">{d.name}</strong> {d.action}{' '}
+                            <span className={`font-bold ${d.accent}`}>{d.gift}</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleThankDonor(d.id, d.name, d.gift)}
+                            className={`min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold transition ${
+                              thankedDonors[d.id]
+                                ? 'bg-emerald-400 text-slate-950'
+                                : 'bg-white/15 hover:bg-white/25 text-white'
+                            }`}
+                          >
+                            {thankedDonors[d.id] ? '✅ Подяку надіслано!' : '💌 Подякувати'}
+                          </button>
+                        </li>
+                      ))}
                     </ul>
                   ) : (
                     <p className="text-sm font-medium text-slate-300">
