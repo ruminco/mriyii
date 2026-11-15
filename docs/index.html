@@ -419,45 +419,106 @@
   <!-- ======================================================================= -->
   <!-- SCREEN 3: OWNER DASHBOARD (/dashboard)                                  -->
   <!-- ======================================================================= -->
-  <main id="screen-dashboard" class="hidden mx-auto max-w-5xl px-4 py-10 pb-28 space-y-6">
-    <div class="bg-[#0f111a]/75 backdrop-blur-xl border border-white/20 rounded-3xl p-6 flex flex-wrap items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-black text-white">Кабінет іменинника • Мої бажання</h2>
-        <p class="text-base text-slate-200 mt-1">Імена друзів, сума в Монобанці та ШІ-сюрпризи приховані до свята.</p>
-      </div>
-      <button onclick="showToast('🔗 Посилання mriyii.app/w/' + DATA[currentTheme].slug + ' скопійовано!'); switchScreen('guest');" class="min-h-[48px] px-5 rounded-xl text-base font-bold bg-white text-slate-950 shadow-xl">
-        🔗 Скопіювати лінк →
-      </button>
+  <main id="screen-dashboard" class="hidden mx-auto max-w-7xl px-4 py-6 pb-28 space-y-5">
+    <!-- Mobile segmented toggle (<1024px) -->
+    <div class="lg:hidden grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-[#171D30] border border-white/10">
+      <button onclick="setDashMobileView('editor')" id="dash-mob-editor" class="min-h-[48px] rounded-xl text-sm font-extrabold bg-amber-500 text-slate-950">✏️ Редактор</button>
+      <button onclick="setDashMobileView('preview')" id="dash-mob-preview" class="min-h-[48px] rounded-xl text-sm font-extrabold text-slate-200">👁️ Прев'ю</button>
     </div>
 
-    <!-- Профіль смаків та інтересів для ШІ-помічника -->
-    <div class="solid-white-card rounded-3xl p-6 space-y-4">
-      <div>
-        <h3 class="text-xl font-black text-slate-950">🧠 Мій профіль смаків та інтересів (для ШІ-помічника)</h3>
-        <p class="text-base text-slate-600 mt-1">Оберіть теги та вкажіть табу — ШІ використає це для точного пошуку подарунків в інтернеті.</p>
-      </div>
-      <div id="dash-interest-chips" class="flex flex-wrap gap-2"></div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">🎨 Хобі та улюблені бренди:</label>
-          <input id="dash-hobbies-input" type="text" class="w-full rounded-xl bg-slate-100 border border-slate-200 px-3.5 py-2.5 text-base font-semibold text-slate-950" value="Dyson, Apple, @cher17.ua, бежевий та rose gold" />
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- ЛІВА ПАНЕЛЬ (7 cols): 4 таби -->
+      <section id="dash-editor-col" class="lg:col-span-7 space-y-5">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-2xl bg-[#171D30] border border-white/10">
+          <button onclick="setDashTab('content')" id="dtab-content" class="min-h-[48px] px-3 rounded-xl text-sm font-extrabold bg-amber-500 text-slate-950">📦 Content</button>
+          <button onclick="setDashTab('header')" id="dtab-header" class="min-h-[48px] px-3 rounded-xl text-sm font-extrabold text-slate-200 hover:text-white">👤 Header</button>
+          <button onclick="setDashTab('design')" id="dtab-design" class="min-h-[48px] px-3 rounded-xl text-sm font-extrabold text-slate-200 hover:text-white">🎨 Design</button>
+          <button onclick="setDashTab('interests')" id="dtab-interests" class="min-h-[48px] px-3 rounded-xl text-sm font-extrabold text-slate-200 hover:text-white">🧠 Interests</button>
         </div>
-        <div>
-          <label class="block font-bold text-emerald-800 mb-1">📏 Розміри та улюблені квіти:</label>
-          <input id="dash-sizes-input" type="text" class="w-full rounded-xl bg-emerald-50 border border-emerald-200 px-3.5 py-2.5 text-base font-semibold text-slate-950" value="Одяг S • Взуття 37 • Білі півонії" />
-        </div>
-        <div class="sm:col-span-2">
-          <label class="block font-bold text-rose-800 mb-1">🚫 Анти-подарунки (табу — ШІ ніколи не запропонує):</label>
-          <input id="dash-antigifts-input" type="text" class="w-full rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2.5 text-base font-semibold text-slate-950" value="Сувеніри, свічки, м'які іграшки" />
-        </div>
-      </div>
-      <button onclick="saveInterestsProfile()" class="min-h-[48px] px-6 rounded-xl text-base font-bold bg-gradient-to-r from-pink-600 to-amber-500 text-white shadow-lg spring active:scale-95">
-        ✨ Зберегти профіль інтересів для ШІ
-      </button>
-    </div>
 
-    <div id="dashboard-post-event-card" class="solid-white-card rounded-3xl p-6 space-y-3"></div>
-    <div id="dashboard-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <!-- TAB: CONTENT -->
+        <div id="dpanel-content" class="space-y-4">
+          <div class="rounded-3xl bg-[#171D30] border border-white/10 p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 class="text-base font-black text-white">➕ Додати мрію за лінком або @shop</h2>
+              <span class="text-sm font-bold text-amber-300">🔒 Сюрприз-захист активний</span>
+            </div>
+            <form onsubmit="dashAddFromInput(event)" class="bg-white rounded-2xl p-2 flex flex-col sm:flex-row gap-2">
+              <input id="dash-add-input" type="text" placeholder="Вставте лінк або @instagram_shop..." class="flex-1 px-3.5 py-2.5 text-sm font-bold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none" />
+              <button type="submit" class="sec-cta min-h-[48px] px-5 rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shrink-0">Додати</button>
+            </form>
+          </div>
+          <div id="dashboard-cards-grid" class="space-y-3"></div>
+          <div id="dashboard-post-event-card" class="rounded-3xl bg-[#171D30] border border-white/10 p-5 space-y-3"></div>
+        </div>
+
+        <!-- TAB: HEADER -->
+        <div id="dpanel-header" class="hidden rounded-3xl bg-[#171D30] border border-white/10 p-6 space-y-4">
+          <h2 class="text-lg font-black text-white">👤 Профіль свята та квіти</h2>
+          <div>
+            <label class="block text-sm font-bold text-slate-200 mb-1">Заголовок вішліста:</label>
+            <input id="dash-title-input" oninput="syncDashPreview()" type="text" class="w-full min-h-[48px] rounded-xl bg-[#0E1324] border border-white/15 px-4 text-sm font-bold text-white" value="Олена Ковальчук • Мої 25 рочків 🥂" />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-slate-200 mb-1">Коротке біо:</label>
+            <textarea id="dash-bio-input" oninput="syncDashPreview()" rows="2" class="w-full rounded-xl bg-[#0E1324] border border-white/15 p-3 text-sm font-semibold text-white">Зібрала тут речі, про які справді мрію. Можна бронювати у 1 клік або скидатися на Банку!</textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-amber-300 mb-1">🌸 Квіти та @Instagram без адреси:</label>
+            <textarea id="dash-flowers-input" oninput="syncDashPreview()" rows="2" class="w-full rounded-xl bg-[#0E1324] border border-white/15 p-3 text-sm font-semibold text-white">🌸 Обожнюю білі півонії від @kamelia_flowers_kyiv. Напишіть магазину мій @olena.muse!</textarea>
+          </div>
+        </div>
+
+        <!-- TAB: DESIGN -->
+        <div id="dpanel-design" class="hidden rounded-3xl bg-[#171D30] border border-white/10 p-6 space-y-4">
+          <h2 class="text-lg font-black text-white">🎨 Дизайн-тема DS V2</h2>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <button onclick="setThemeExplicit('rose_luxury')" class="rounded-2xl p-5 text-left border-2 border-amber-400 bg-[#0E1324] space-y-2">
+              <div class="text-base font-black text-white">👩 Midnight Velvet</div>
+              <p class="text-sm text-slate-300">#0E1324 + Solid Champagne Amber #F59E0B</p>
+            </button>
+            <button onclick="setThemeExplicit('cyber_titanium')" class="rounded-2xl p-5 text-left border-2 border-emerald-400/50 bg-[#0B1120] space-y-2">
+              <div class="text-base font-black text-white">👨 Cyber Titanium</div>
+              <p class="text-sm text-slate-300">#0B1120 + Solid Emerald Mint #34D399</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: INTERESTS -->
+        <div id="dpanel-interests" class="hidden rounded-3xl bg-[#171D30] border border-white/10 p-6 space-y-4">
+          <h2 class="text-lg font-black text-white">🧠 Профіль смаків та інтересів (для ШІ)</h2>
+          <div id="dash-interest-chips" class="flex flex-wrap gap-2"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <label class="block font-bold text-slate-200 mb-1">🎨 Хобі та улюблені бренди:</label>
+              <input id="dash-hobbies-input" oninput="syncDashPreview()" type="text" class="w-full min-h-[48px] rounded-xl bg-[#0E1324] border border-white/15 px-3.5 text-sm font-semibold text-white" value="Dyson, Apple, @cher17.ua" />
+            </div>
+            <div>
+              <label class="block font-bold text-emerald-300 mb-1">📏 Розміри та квіти:</label>
+              <input id="dash-sizes-input" oninput="syncDashPreview()" type="text" class="w-full min-h-[48px] rounded-xl bg-[#0E1324] border border-emerald-400/30 px-3.5 text-sm font-semibold text-white" value="Одяг S • Взуття 37" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block font-bold text-rose-300 mb-1">🚫 Анти-подарунки (табу):</label>
+              <input id="dash-antigifts-input" oninput="syncDashPreview()" type="text" class="w-full min-h-[48px] rounded-xl bg-[#0E1324] border border-rose-400/30 px-3.5 text-sm font-semibold text-white" value="Сувеніри, свічки, м'які іграшки" />
+            </div>
+          </div>
+          <button onclick="saveInterestsProfile()" class="sec-cta min-h-[48px] px-6 rounded-xl text-sm font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-lg spring active:scale-95">
+            ✨ Зберегти анкету для ШІ
+          </button>
+        </div>
+      </section>
+
+      <!-- ПРАВА ПАНЕЛЬ (5 cols): LIVE PHONE PREVIEW у порядку Issue #8 -->
+      <aside id="dash-preview-col" class="hidden lg:block lg:col-span-5 lg:sticky lg:top-20">
+        <div class="rounded-[32px] border border-white/20 bg-[#0B0F19] p-3 shadow-2xl">
+          <div class="flex items-center justify-between px-3 pb-2.5 text-sm font-bold text-slate-300">
+            <span>👁️ Live Preview</span>
+            <span id="dash-prev-slug" class="text-amber-300">mriyii.app/w/olena-vip</span>
+          </div>
+          <div id="dash-live-preview-body" class="rounded-[24px] p-4 space-y-3.5 max-h-[75vh] overflow-y-auto"></div>
+        </div>
+      </aside>
+    </div>
   </main>
 
   <!-- Компактний нижній перемикач екранів (не перевантажує липкий хедер на 390px) -->
@@ -730,6 +791,7 @@
       document.getElementById('guest-cards-grid').innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'guest')).join('');
       document.getElementById('dashboard-cards-grid').innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'owner')).join('');
       renderInterestChips();
+      if (typeof syncDashPreview === 'function') syncDashPreview();
     }
 
     function switchScreen(screen) {
@@ -1052,6 +1114,97 @@
       }
     }
     setInterval(() => toggleHeroPill(), 3200);
+
+    function setDashTab(tab) {
+      const isCyber = currentTheme === 'cyber_titanium';
+      const activeCls = isCyber ? 'min-h-[48px] px-3 rounded-xl text-sm font-extrabold bg-emerald-400 text-slate-950' : 'min-h-[48px] px-3 rounded-xl text-sm font-extrabold bg-amber-500 text-slate-950';
+      const idleCls = 'min-h-[48px] px-3 rounded-xl text-sm font-extrabold text-slate-200 hover:text-white';
+      ['content', 'header', 'design', 'interests'].forEach((t) => {
+        const panel = document.getElementById('dpanel-' + t);
+        const btn = document.getElementById('dtab-' + t);
+        if (panel) panel.classList.toggle('hidden', t !== tab);
+        if (btn) btn.className = t === tab ? activeCls : idleCls;
+      });
+    }
+
+    function setDashMobileView(view) {
+      const ed = document.getElementById('dash-editor-col');
+      const pr = document.getElementById('dash-preview-col');
+      const bed = document.getElementById('dash-mob-editor');
+      const bpr = document.getElementById('dash-mob-preview');
+      const isCyber = currentTheme === 'cyber_titanium';
+      const activeCls = isCyber ? 'min-h-[48px] rounded-xl text-sm font-extrabold bg-emerald-400 text-slate-950' : 'min-h-[48px] rounded-xl text-sm font-extrabold bg-amber-500 text-slate-950';
+      const idleCls = 'min-h-[48px] rounded-xl text-sm font-extrabold text-slate-200';
+      if (ed) ed.classList.toggle('hidden', view === 'preview');
+      if (pr) pr.classList.toggle('hidden', view === 'editor');
+      if (bed) bed.className = view === 'editor' ? activeCls : idleCls;
+      if (bpr) bpr.className = view === 'preview' ? activeCls : idleCls;
+    }
+
+    function dashAddFromInput(e) {
+      e.preventDefault();
+      const inp = document.getElementById('dash-add-input');
+      const val = (inp && inp.value || '').trim();
+      if (!val) return;
+      DATA[currentTheme].items.unshift({
+        id: 'dash-new-' + Date.now(),
+        title: val.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 60),
+        price: 3500,
+        comment: 'Додано через редактор Mriyii ✨',
+        isBooked: false
+      });
+      if (inp) inp.value = '';
+      renderAll();
+      showToast('✨ Мрію додано! Прев’ю праворуч оновлено.');
+    }
+
+    function syncDashPreview() {
+      const box = document.getElementById('dash-live-preview-body');
+      if (!box) return;
+      const d = DATA[currentTheme];
+      const isCyber = currentTheme === 'cyber_titanium';
+      box.className = 'rounded-[24px] p-4 space-y-3.5 max-h-[75vh] overflow-y-auto ' + (isCyber ? 'canvas-cyber' : 'canvas-rose');
+      const slugEl = document.getElementById('dash-prev-slug');
+      if (slugEl) slugEl.textContent = 'mriyii.app/w/' + d.slug;
+      const titleVal = (document.getElementById('dash-title-input') || {}).value || d.title;
+      const bioVal = (document.getElementById('dash-bio-input') || {}).value || d.bio;
+      const flVal = (document.getElementById('dash-flowers-input') || {}).value || d.flowerNotes;
+      const sizesVal = (document.getElementById('dash-sizes-input') || {}).value || 'Одяг S • Взуття 37';
+      const btnCls = isCyber ? 'bg-emerald-400 text-slate-950' : 'bg-amber-500 text-slate-950';
+
+      box.innerHTML = `
+        <div class="rounded-2xl bg-[#171D30]/95 border border-white/15 p-4 text-center space-y-2">
+          <div class="mx-auto w-14 h-14 rounded-full p-[2px] inline-block ${isCyber ? 'avatar-ring-cyber' : 'avatar-ring-rose'}">
+            <img src="${d.avatar}" alt="${d.name}" class="w-full h-full rounded-full object-cover border-2 border-[#0E1324]" />
+          </div>
+          <div class="text-base font-black text-white">${titleVal}</div>
+          <p class="text-sm text-slate-200">${bioVal}</p>
+          <div class="text-sm font-bold text-emerald-300">📏 ${sizesVal}</div>
+        </div>
+        <div class="rounded-2xl bg-[#171D30]/95 border border-amber-400/35 px-4 py-3 flex items-center justify-between text-sm font-extrabold text-white">
+          <span>✨ Хочеш, допоможу з ідеєю на основі інтересів?</span>
+          <span class="text-amber-300">▾</span>
+        </div>
+        <div class="rounded-xl bg-[#171D30]/85 border border-white/10 px-3.5 py-2.5 text-sm font-semibold text-amber-200">
+          💡 Користуйся посиланнями — застосунок безкоштовний
+        </div>
+        ${d.items.slice(0, 2).map((it) => `
+          <div class="solid-white-card rounded-2xl p-4 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="text-base font-black text-slate-950">${it.title}</div>
+              <span class="text-sm font-black text-slate-950 tabular-nums shrink-0">${it.price.toLocaleString('uk-UA')} ₴</span>
+            </div>
+            <div class="w-full min-h-[44px] rounded-xl text-sm font-extrabold flex items-center justify-center ${btnCls}">
+              ${it.jarTarget ? '🫙 Поповнити Банку' : it.instagramHandle ? '📸 Замовити в @' + it.instagramHandle : '🎁 Забронювати'}
+            </div>
+          </div>
+        `).join('')}
+        <div class="rounded-2xl bg-[#171D30]/95 border border-white/15 p-4 text-sm text-slate-200">
+          <div class="font-extrabold text-amber-300 mb-1">🌸 Квіти без адреси</div>
+          <div>${flVal}</div>
+        </div>
+      `;
+    }
 
     renderAll();
   </script>
