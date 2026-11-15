@@ -329,9 +329,25 @@
   <!-- ======================================================================= -->
   <main id="screen-guest" class="hidden mx-auto max-w-5xl px-4 py-10 pb-28 space-y-6">
     <div id="guest-profile-header"></div>
-    <div id="guest-flower-banner"></div>
+    <section id="guest-ai-teaser-wrap" class="space-y-3">
+      <button type="button" onclick="toggleGuestAiTeaser()" class="w-full min-h-[56px] rounded-[22px] bg-[#171D30]/95 hover:bg-[#1E2640] border border-amber-400/35 px-5 py-3.5 flex items-center justify-between gap-3 text-left shadow-lg spring">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/35 flex items-center justify-center text-xl shrink-0">✨</div>
+          <div>
+            <div class="text-sm sm:text-base font-extrabold text-white">✨ Хочеш, допоможу з ідеєю на основі інтересів?</div>
+            <div class="text-sm font-semibold text-slate-300">ШІ підбере подарунки зі списку або в магазинах під твій бюджет</div>
+          </div>
+        </div>
+        <span id="guest-ai-toggle-pill" class="shrink-0 px-3.5 py-2 rounded-xl bg-amber-400 text-slate-950 text-sm font-black">Підібрати ▾</span>
+      </button>
+      <section id="guest-ai-section" class="hidden bg-[#171D30]/95 backdrop-blur-xl border border-white/15 rounded-3xl p-6 sm:p-7 space-y-5"></section>
+    </section>
+    <div id="guest-free-note" class="rounded-2xl bg-[#171D30]/90 border border-white/10 px-4 py-3 flex items-center gap-2.5 text-sm font-semibold text-amber-200">
+      <span>💡</span>
+      <span>Користуйся посиланнями — застосунок безкоштовний</span>
+    </div>
     <div id="guest-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-    <section id="guest-ai-section" class="bg-[#0f111a]/80 backdrop-blur-xl border border-white/25 rounded-3xl p-6 sm:p-7 space-y-5"></section>
+    <div id="guest-flower-banner"></div>
   </main>
 
   <!-- ======================================================================= -->
@@ -781,6 +797,15 @@
     function setAiInterest(nextInterest) {
       aiInterest = nextInterest;
       renderGuestAiSection();
+    }
+
+    let guestAiExpanded = false;
+    function toggleGuestAiTeaser() {
+      guestAiExpanded = !guestAiExpanded;
+      const sec = document.getElementById("guest-ai-section");
+      const pill = document.getElementById("guest-ai-toggle-pill");
+      if (sec) sec.classList.toggle("hidden", !guestAiExpanded);
+      if (pill) pill.textContent = guestAiExpanded ? "Згорнути ▴" : "Підібрати ▾";
     }
 
     function renderGuestAiSection() {

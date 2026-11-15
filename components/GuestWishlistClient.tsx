@@ -46,13 +46,6 @@ export function GuestWishlistClient({
   const [bookingTokensMap, setBookingTokensMap] = useState<Record<string, string>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [forceFallbackPoster, setForceFallbackPoster] = useState(false);
-  const [quickAiResult, setQuickAiResult] = useState<{
-    budget: string;
-    title: string;
-    price: number;
-    emoji: string;
-    booked: boolean;
-  } | null>(null);
   const [showFullAiGenerator, setShowFullAiGenerator] = useState(false);
 
   // Модалка бронювання
@@ -356,289 +349,138 @@ export function GuestWishlistClient({
 
       <main className="mx-auto max-w-5xl px-4 py-6 space-y-5">
         {/* =================================================================== */}
-        {/* БЛОК 1 (LINKTREE МІНІ-ПРОФІЛЬ ІЗ КОЛЬОРОВИМИ ЧІПСАМИ АНКЕТИ)         */}
-        {/* ТА БЛОК 2 (ШІ-АСИСТЕНТ НА САМОМУ ПОЧАТКУ ПІД ПРОФІЛЕМ!)             */}
+        {/* 1. PROFILE HEADER (Аватарка + 2px кільце, ім'я, коротке біо)        */}
         {/* =================================================================== */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-          {/* Блок 1 (7 cols): Linktree Mini-Profile */}
-          <div className="lg:col-span-7 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[26px] p-5 flex flex-col justify-between text-center sm:text-left">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              {/* Кругла аватарка у живому градієнтному кільці */}
-              <div className="relative shrink-0">
-                <div
-                  className={`w-20 h-20 rounded-full ${tokens.avatarRingClass} p-[3px] shadow-xl`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={demoProfile.ownerAvatarUrl}
-                    alt={ownerName}
-                    className="w-full h-full rounded-full object-cover border-2 border-slate-950"
-                  />
-                </div>
-                <span className="absolute -bottom-1 right-0 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-300 text-slate-950 shadow">
-                  VIP ✨
+        <section className="bg-[#171D30]/95 backdrop-blur-xl border border-white/15 rounded-[26px] p-5 sm:p-6 flex flex-col justify-between text-center sm:text-left shadow-xl">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* Кругла аватарка з 2px кільцем */}
+            <div className="relative shrink-0">
+              <div
+                className={`w-20 h-20 rounded-full ${tokens.avatarRingClass} p-[2px] shadow-xl`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={demoProfile.ownerAvatarUrl}
+                  alt={ownerName}
+                  className="w-full h-full rounded-full object-cover border-2 border-[#0E1324]"
+                />
+              </div>
+              <span className="absolute -bottom-1 right-0 text-sm font-extrabold px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow">
+                VIP ✨
+              </span>
+            </div>
+
+            <div className="space-y-1.5 flex-1">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm font-extrabold">
+                <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                  🎂 До свята {demoProfile.daysLeft} днів
+                </span>
+                <span className="px-3 py-0.5 rounded-full bg-white/10 text-white border border-white/15">
+                  @{resolvedOwnerIg}
+                </span>
+                <span className="px-3 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30">
+                  🤫 Сюрприз-режим
                 </span>
               </div>
 
-              <div className="space-y-1.5 flex-1">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 text-[11px] font-extrabold">
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/25 text-emerald-200 border border-emerald-400/30">
-                    🎂 До свята {demoProfile.daysLeft} днів
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white">
-                    @{resolvedOwnerIg}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30">
-                    🤫 Сюрприз-режим
-                  </span>
-                </div>
-
-                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  {initialTitle}
-                </h1>
-                <p className="text-xs font-semibold text-white/85 leading-snug">
-                  {demoProfile.ownerBio}
-                </p>
-              </div>
-            </div>
-
-            {/* 3 кольорові чіпси-факти з анкети іменинника (видимі без зайвих кліків!) */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 mt-4 pt-3.5 border-t border-white/15 text-xs font-extrabold">
-              <span className="px-3 py-1 rounded-xl bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">
-                📏 {demoProfile.aiSizes}
-              </span>
-              <span className="px-3 py-1 rounded-xl bg-pink-400/25 text-pink-100 border border-pink-400/30">
-                💖 Люблю: {demoProfile.aiHobbies.slice(0, 3).join(', ')}
-              </span>
-              <span className="px-3 py-1 rounded-xl bg-rose-500/25 text-rose-200 border border-rose-400/30">
-                🚫 Табу: {demoProfile.aiAntiGifts[0]}
-              </span>
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {initialTitle}
+              </h1>
+              <p className="text-sm font-semibold text-slate-200 leading-snug">
+                {demoProfile.ownerBio}
+              </p>
             </div>
           </div>
 
-          {/* Блок 2 (5 cols): Акцентний віджет «🤖 ШІ-Асистент подарунків» прямо на старті! */}
-          <div
-            className={`lg:col-span-5 ${tokens.aiBannerGradient} rounded-[26px] p-5 text-white shadow-2xl border border-white/25 flex flex-col justify-between space-y-3`}
-          >
-            <div className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shrink-0">
-                    🤖
-                  </div>
-                  <div>
-                    <div className="text-sm font-black tracking-tight flex items-center gap-1.5">
-                      <span>ШІ-Асистент подарунків</span>
-                      <span className="text-[10px] uppercase px-1.5 py-0.5 rounded bg-amber-300 text-slate-950 font-black">
-                        Gemini 2.5
-                      </span>
-                    </div>
-                    <div className="text-xs text-white/90 font-semibold">
-                      Врахує розміри й табу та підбере сюрприз під твій бюджет:
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3 кнопки швидкого вибору бюджету в 1 клік прямо на екрані */}
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQuickAiResult({
-                      budget: 'до 1 000 ₴',
-                      title:
-                        themePreset === 'rose_luxury'
-                          ? 'Дріп-кава MadHeads Specialty Set'
-                          : 'Пуровер Hario V60 Craft Set',
-                      price: 750,
-                      emoji: '☕',
-                      booked: false,
-                    })
-                  }
-                  className="py-2 px-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-extrabold spring-transition active:scale-95"
-                >
-                  до 1 000 ₴
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQuickAiResult({
-                      budget: '~1 500 ₴',
-                      title:
-                        themePreset === 'rose_luxury'
-                          ? 'Термокружка Fellow Carter Mug White'
-                          : 'Док-станція MagSafe Ugreen Qi2',
-                      price: 1650,
-                      emoji: '✨',
-                      booked: false,
-                    })
-                  }
-                  className="py-2 px-2 rounded-xl bg-white text-slate-950 text-xs font-extrabold shadow spring-transition active:scale-95"
-                >
-                  ✨ ~1 500 ₴
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQuickAiResult({
-                      budget: 'VIP 💎',
-                      title:
-                        themePreset === 'rose_luxury'
-                          ? 'Нішевий сет Maison Francis Kurkdjian'
-                          : 'Кастомні кейкапи PBTfans Set',
-                      price: 4800,
-                      emoji: '💎',
-                      booked: false,
-                    })
-                  }
-                  className="py-2 px-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-extrabold spring-transition active:scale-95"
-                >
-                  VIP 💎
-                </button>
-              </div>
-            </div>
-
-            {quickAiResult ? (
-              <div className="bg-slate-950/75 backdrop-blur-md rounded-2xl p-3 border border-white/20 flex items-center justify-between gap-2 text-xs">
-                <div className="min-w-0">
-                  <div className="text-amber-300 font-extrabold truncate">
-                    {quickAiResult.emoji} {quickAiResult.title}
-                  </div>
-                  <div className="text-white/85 text-[11px] font-semibold">
-                    {quickAiResult.price.toLocaleString('uk-UA')} ₴ • Точний збіг з анкетою!
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const tok = `ai_tok_${Date.now()}`;
-                    const newId = `ai-quick-${Date.now()}`;
-                    persistBookingToken(newId, tok);
-                    setItems((prev) => [
-                      {
-                        id: newId,
-                        title: quickAiResult.title,
-                        emoji: quickAiResult.emoji,
-                        description: 'Таємний сюрприз, підібраний ШІ Gemini 2.5 під інтереси іменинника!',
-                        price: quickAiResult.price,
-                        currency: 'UAH',
-                        isBooked: true,
-                        bookedByName: 'Таємний Санта (AI 🤫)',
-                        isAiSurprise: true,
-                      },
-                      ...prev,
-                    ]);
-                    setQuickAiResult({ ...quickAiResult, booked: true });
-                    triggerToast(
-                      '🤫 Таємний ШІ-сюрприз додано! Іменинник не бачить його у своєму кабінеті.'
-                    );
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-amber-300 hover:bg-amber-200 text-slate-950 font-black text-xs shrink-0"
-                >
-                  {quickAiResult.booked ? '✅ Додано!' : '🎁 Подарувати'}
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowFullAiGenerator((p) => !p)}
-                className="w-full py-2 px-3 rounded-xl bg-black/25 hover:bg-black/35 border border-white/20 text-xs font-extrabold text-white flex items-center justify-center gap-1.5"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>
-                  {showFullAiGenerator
-                    ? 'Сховати розширений генератор ШІ'
-                    : 'Або відкрити повний підбір Gemini AI →'}
-                </span>
-              </button>
-            )}
+          {/* 3 кольорові чіпси-факти з анкети іменинника */}
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-4 pt-4 border-t border-white/10 text-sm font-extrabold">
+            <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+              📏 {demoProfile.aiSizes}
+            </span>
+            <span className="px-3 py-1 rounded-xl bg-indigo-500/25 text-indigo-100 border border-indigo-400/30">
+              💖 Люблю: {demoProfile.aiHobbies.slice(0, 3).join(', ')}
+            </span>
+            <span className="px-3 py-1 rounded-xl bg-rose-500/20 text-rose-200 border border-rose-400/30">
+              🚫 Табу: {demoProfile.aiAntiGifts[0]}
+            </span>
           </div>
         </section>
 
-        {/* Розширений віджет Gemini 2.5 Flash (за кліком) */}
-        {showFullAiGenerator && (
-          <AiGiftAssistantWidget
-            wishlistSlug={slug}
-            wishlistTitle={initialTitle}
-            themePreset={themePreset}
-            existingBrowserTokens={existingBrowserTokens}
-            wishlistItems={items}
-            hasOwnerInterests={true}
-            onSelectWishlistItem={() => {
-              setShowFullAiGenerator(false);
-              triggerToast('🎁 Оберіть підсвічений лот зі списку нижче!');
-            }}
-            onSurpriseBooked={(surprise) => {
-              persistBookingToken(surprise.id, surprise.bookingToken);
-              setItems((prev) => [
-                {
-                  id: surprise.id,
-                  title: surprise.title,
-                  emoji: surprise.emoji,
-                  description: surprise.description,
-                  price: surprise.price,
-                  currency: 'UAH',
-                  affiliateUrl: surprise.affiliateUrl,
-                  isBooked: true,
-                  bookedByName: surprise.bookedByName,
-                  isAiSurprise: true,
-                },
-                ...prev,
-              ]);
-              setTimeout(() => setShowGrowthModal(true), 1200);
-            }}
-          />
-        )}
-
-        {/* Компактна картка «🌸 Які квіти я люблю та мої побажання» (Zero Home Address Storage) */}
-        {resolvedFlowerNotes && (
-          <section className="bg-white/10 backdrop-blur-xl rounded-[24px] p-4 sm:p-5 border border-pink-400/35 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-pink-500/25 text-pink-200 border border-pink-400/40">
-                  🌸 Які квіти я люблю та мої побажання
-                </span>
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                  🔒 Доставка через Direct @{resolvedOwnerIg} (без домашньої адреси)
-                </span>
+        {/* =================================================================== */}
+        {/* 2. AI TEASER (згорнутий за замовчуванням, розгортається по кліку)   */}
+        {/* =================================================================== */}
+        <section className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setShowFullAiGenerator((p) => !p)}
+            aria-expanded={showFullAiGenerator}
+            className="w-full min-h-[56px] rounded-[22px] bg-[#171D30]/95 hover:bg-[#1E2640] border border-amber-400/35 px-5 py-3.5 flex items-center justify-between gap-3 text-left shadow-lg spring-transition"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/35 flex items-center justify-center text-xl shrink-0">
+                ✨
               </div>
-              <p className="text-xs sm:text-sm font-semibold text-white/90 leading-relaxed pt-1">
-                {resolvedFlowerNotes}
-              </p>
+              <div>
+                <div className="text-sm sm:text-base font-extrabold text-white">
+                  ✨ Хочеш, допоможу з ідеєю на основі інтересів?
+                </div>
+                <div className="text-sm font-semibold text-slate-300">
+                  ШІ підбере подарунки зі списку або в магазинах під твій бюджет
+                </div>
+              </div>
             </div>
+            <span className="shrink-0 px-3.5 py-2 rounded-xl bg-amber-400 text-slate-950 text-sm font-black">
+              {showFullAiGenerator ? 'Згорнути ▴' : 'Підібрати ▾'}
+            </span>
+          </button>
 
-            <button
-              type="button"
-              onClick={async () => {
-                const msg = buildInstagramDirectOrderMessage(
-                  resolvedOwnerIg,
-                  'Улюблений букет квітів за списком побажань 🌸'
-                );
-                try {
-                  await navigator.clipboard.writeText(msg);
-                } catch {
-                  // Fallback
-                }
-                triggerToast('Текст замовлення скопійовано в буфер обміну! 💌');
-                window.open(
-                  `https://ig.me/m/${featuredFlowerShop}?ref=mriyii`,
-                  '_blank',
-                  'noopener,noreferrer'
-                );
+          {showFullAiGenerator && (
+            <AiGiftAssistantWidget
+              wishlistSlug={slug}
+              wishlistTitle={initialTitle}
+              themePreset={themePreset}
+              existingBrowserTokens={existingBrowserTokens}
+              wishlistItems={items}
+              hasOwnerInterests={true}
+              onSelectWishlistItem={() => {
+                setShowFullAiGenerator(false);
+                triggerToast('🎁 Оберіть підсвічений лот зі списку нижче!');
               }}
-              className="py-2.5 px-4 rounded-xl text-xs font-extrabold bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 hover:brightness-110 text-white shadow-lg shrink-0 flex items-center gap-2"
-            >
-              <Camera className="w-4 h-4" />
-              <span>Замовити в Instagram @{featuredFlowerShop} 📸</span>
-            </button>
-          </section>
-        )}
+              onSurpriseBooked={(surprise) => {
+                persistBookingToken(surprise.id, surprise.bookingToken);
+                setItems((prev) => [
+                  {
+                    id: surprise.id,
+                    title: surprise.title,
+                    emoji: surprise.emoji,
+                    description: surprise.description,
+                    price: surprise.price,
+                    currency: 'UAH',
+                    affiliateUrl: surprise.affiliateUrl,
+                    isBooked: true,
+                    bookedByName: surprise.bookedByName,
+                    isAiSurprise: true,
+                  },
+                  ...prev,
+                ]);
+                setTimeout(() => setShowGrowthModal(true), 1200);
+              }}
+            />
+          )}
+        </section>
 
         {/* =================================================================== */}
-        {/* БЛОК 3: СІТКА НАСИЧЕНИХ КАРТОК БАЖАНЬ НА СУЦІЛЬНОМУ БІЛОМУ ТЛІ      */}
+        {/* 3. FREE APP NOTE                                                    */}
         {/* =================================================================== */}
-        <section className="grid gap-5 sm:grid-cols-2">
+        <section className="rounded-2xl bg-[#171D30]/85 border border-white/10 px-4 py-3 flex items-center justify-center sm:justify-start gap-2.5 text-sm font-semibold text-amber-200">
+          <span>💡</span>
+          <span>Користуйся посиланнями — застосунок безкоштовний</span>
+        </section>
+
+        {/* =================================================================== */}
+        {/* 4. OWNER-CHOSEN ITEMS WITH STATUSES (Білі картки #FFFFFF)           */}
+        {/* =================================================================== */}
+        <section id="wishlist-grid" className="grid gap-5 sm:grid-cols-2">
           {items.map((item) => (
             <SmokedGiftCard
               key={item.id}
@@ -663,6 +505,56 @@ export function GuestWishlistClient({
             />
           ))}
         </section>
+
+        {/* =================================================================== */}
+        {/* 5. FLOWERS / INSTAGRAM BANNER (Zero Home Address Storage)           */}
+        {/* =================================================================== */}
+        {resolvedFlowerNotes && (
+          <section className="bg-[#171D30]/95 backdrop-blur-xl rounded-[24px] p-5 border border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-extrabold px-3 py-1 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/35">
+                  🌸 Які квіти я люблю та мої побажання
+                </span>
+                <span className="text-sm font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                  🔒 Доставка через Direct @{resolvedOwnerIg} (без домашньої адреси)
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-slate-200 leading-relaxed pt-1">
+                {resolvedFlowerNotes}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={async () => {
+                const msg = buildInstagramDirectOrderMessage(
+                  resolvedOwnerIg,
+                  'Улюблений букет квітів за списком побажань 🌸'
+                );
+                try {
+                  await navigator.clipboard.writeText(msg);
+                } catch {
+                  // Fallback
+                }
+                triggerToast('Текст замовлення скопійовано в буфер обміну! 💌');
+                window.open(
+                  `https://ig.me/m/${featuredFlowerShop}?ref=mriyii`,
+                  '_blank',
+                  'noopener,noreferrer'
+                );
+              }}
+              className={`min-h-[48px] py-2.5 px-5 rounded-xl text-sm font-extrabold ${
+                themePreset === 'rose_luxury'
+                  ? 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                  : 'bg-emerald-400 hover:bg-emerald-500 text-slate-950'
+              } shadow-lg shrink-0 flex items-center gap-2`}
+            >
+              <Camera className="w-4 h-4" />
+              <span>Замовити в Instagram @{featuredFlowerShop} 📸</span>
+            </button>
+          </section>
+        )}
 
         <AffiliateDisclosureBadge />
       </main>
@@ -725,10 +617,19 @@ export function GuestWishlistClient({
                 />
               </div>
 
+              <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-sm font-semibold text-amber-900 flex items-center gap-2">
+                <span>💡</span>
+                <span>Користуйся посиланнями — застосунок безкоштовний</span>
+              </div>
+
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold ${tokens.primaryCtaGradient} text-white spring-transition active:scale-95`}
+                className={`w-full min-h-[48px] py-3 px-4 rounded-xl text-sm font-extrabold ${
+                  themePreset === 'rose_luxury'
+                    ? 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                    : 'bg-emerald-400 hover:bg-emerald-500 text-slate-950'
+                } spring-transition active:scale-95`}
               >
                 {isSubmitting ? 'Бронюємо...' : '💎 Підтвердити бронювання'}
               </button>
