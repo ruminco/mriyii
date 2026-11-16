@@ -6,7 +6,7 @@
   <title>Mriyii — Розумні вішлісти • Монобанка • ШІ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600;1,700&display=swap&subset=cyrillic,latin" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @font-face {
@@ -133,6 +133,20 @@
       font-style: italic;
       font-weight: 700;
       letter-spacing: -0.01em;
+    }
+
+    @keyframes typewriterBlink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 0.78em;
+      background-color: currentColor;
+      vertical-align: -0.08em;
+      margin-left: 3px;
+      animation: typewriterBlink 0.9s steps(1) infinite;
     }
 
     .band-hero { background-color: var(--bg-hero); color: var(--bg-hero-ink); }
@@ -313,10 +327,14 @@
       .shake-2px,
       .like-burst-particle,
       .goo-dot,
-      .stagger-card {
+      .stagger-card,
+      .typewriter-cursor {
         animation: none !important;
         opacity: 1 !important;
         transform: none !important;
+      }
+      .typewriter-cursor {
+        display: none !important;
       }
     }
   </style>
@@ -376,8 +394,8 @@
   <!-- ======================================================================= -->
   <main id="screen-landing" class="w-full pb-24">
 
-    <!-- СЕКЦІЯ 1: HERO (DS V3 M3 EXPRESSIVE + 3-CASE PILL + TEMPLATES + SAFE SHIELD) -->
-    <section id="hero-band" class="band-hero w-full py-12 sm:py-20 spring">
+    <!-- СМУГА 1: HERO + TYPEWRITER + LIVE PREVIEW SANDBOX -->
+    <section id="hero-band" class="band-hero w-full py-10 sm:py-16 lg:py-20 spring">
       <div class="mx-auto max-w-6xl px-4 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
         <div class="lg:col-span-7 space-y-5">
           <!-- Анімована 3-кейсова Hero-пігулка До/Після -->
@@ -390,42 +408,50 @@
             </button>
           </div>
 
-          <h1 class="text-4xl sm:text-5xl lg:text-[56px] font-black tracking-tight leading-[1.06]">
-            Твої мрії <span id="hero-accent" class="serif-accent" style="color: var(--accent-strong)">варті того,</span> щоб збутися
+          <!-- Zero-CLS Ghost-Sizer Occasion Typewriter H1 -->
+          <h1 class="tracking-tight">
+            <span class="block text-[30px] sm:text-[46px] lg:text-[54px] font-black leading-[1.08]">
+              Твій вішліст мрій
+            </span>
+            <span class="relative inline-block max-w-full text-[34px] sm:text-[54px] lg:text-[64px] leading-[1.15] mt-1">
+              <span id="hero-occasion-ghost" aria-hidden="true" class="serif-accent font-semibold invisible select-none px-2 whitespace-nowrap">на день народження</span>
+              <span id="hero-occasion-live" aria-live="polite" class="serif-accent font-semibold absolute left-0 top-0 px-2 transition-opacity duration-200 whitespace-nowrap" style="color: var(--accent-strong)"><span id="hero-occasion-typed">на день народження</span><span id="hero-occasion-cursor" class="typewriter-cursor" aria-hidden="true"></span></span>
+            </span>
           </h1>
 
           <p id="hero-subtitle" class="text-base sm:text-lg max-w-xl leading-relaxed font-medium" style="color: var(--bg-hero-sub)">
-            Одне посилання для друзів: бронювання в 1 клік без дублів, пряма Монобанка 0% та доставка квітів без розкриття адреси — готова вітрина за <strong class="font-extrabold">30 секунд</strong>.
+            Додай посилання з будь-якого магазину або @instagram за 15 секунд. Близькі бронюють без спойлерів, скидаються на Монобанку 0% і дарують без твоєї домашньої адреси.
           </p>
 
-          <!-- 3-пресетний перемикач тем (Без dev-контролів Стиль) -->
+          <!-- 3-пресетний перемикач тем -->
           <div id="hero-preset-bar" role="tablist" aria-label="Обери стиль вішліста" class="inline-flex flex-wrap gap-1.5 p-1.5 rounded-full border bg-white/85 border-[#141218]/10 shadow-sm">
             <button type="button" role="tab" aria-selected="true" onclick="setPreset('rose_luxury')" id="hero-sw-rose" class="min-h-[44px] px-4 rounded-full text-sm font-extrabold bg-[#141218] text-white shadow-md spring">👩 Для неї</button>
             <button type="button" role="tab" aria-selected="false" onclick="setPreset('cyber_titanium')" id="hero-sw-cyber" class="min-h-[44px] px-4 rounded-full text-sm font-extrabold text-[#141218] hover:bg-black/5 spring">👨 Для нього</button>
             <button type="button" role="tab" aria-selected="false" onclick="setPreset('creator_bio')" id="hero-sw-creator" class="min-h-[44px] px-4 rounded-full text-sm font-extrabold text-[#141218] hover:bg-black/5 spring">💎 Creator Bio</button>
           </div>
 
-          <!-- Суцільна капсула вводу (Issue #21 Loading -> Success / Error + Shake) -->
+          <!-- Суцільна капсула вводу (додає прямо в Hero Live Preview без викидання) -->
           <form onsubmit="event.preventDefault(); addFromCapsule('capsule-input');" id="capsule-form" class="max-w-xl rounded-2xl p-2 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border bg-white border-[#141218]/10">
             <input id="capsule-input" type="text" placeholder="Посилання з Rozetka, Instagram чи Apple..." class="flex-1 px-4 py-3 text-base font-semibold text-[#141218] placeholder:text-slate-500 bg-transparent focus:outline-none min-w-0" />
             <button id="capsule-btn" type="submit" aria-live="polite" style="background-color: var(--cta-main-bg); color: var(--cta-main-ink);" class="w-full sm:w-[228px] min-h-[48px] px-5 rounded-xl text-base font-bold shrink-0 spring active:scale-95 flex items-center justify-center gap-2">✨ Зібрати вішліст</button>
           </form>
 
-          <!-- Inline Claim Link Preview -->
+          <!-- Inline Claim Link Preview (синхронізується з localStorage) -->
           <div class="flex flex-wrap items-center gap-2 text-sm font-semibold">
             <span id="hero-claim-label" style="color: var(--bg-hero-sub)">Твій майбутній лінк:</span>
             <span id="hero-claim-pill" class="inline-flex items-center px-3 py-1.5 rounded-xl border bg-white border-[#141218]/15 text-[#141218] font-bold">
-              mriyii.app/w/<input id="hero-claim-slug" type="text" value="olena-vip" oninput="syncClaimSlug(this.value)" aria-label="Твій нікнейм для посилання" class="w-24 bg-transparent font-black focus:outline-none ml-0.5" style="color: var(--accent-strong)" />
+              mriyii.app/w/<input id="hero-claim-slug" type="text" value="olena-vip" oninput="this.dataset.userEdited='1'; syncClaimSlug(this.value)" aria-label="Твій нікнейм для посилання" class="w-24 bg-transparent font-black focus:outline-none ml-0.5" style="color: var(--accent-strong)" />
             </span>
-            <button id="hero-copy-slug-btn" type="button" onclick="copyClaimSlug(this)" aria-live="polite" class="min-h-[40px] min-w-[144px] px-3.5 rounded-xl text-sm font-bold border bg-white text-[#141218] border-[#141218]/15 hover:bg-slate-50 inline-flex items-center justify-center gap-1.5 spring">Копіювати</button>
+            <button id="hero-copy-slug-btn" type="button" onclick="copyClaimSlug(this)" aria-live="polite" class="min-h-[40px] min-w-[144px] px-3.5 rounded-xl text-sm font-bold border bg-white text-[#141218] border-[#141218]/15 hover:bg-slate-50 inline-flex items-center justify-center gap-1.5 spring">Скопіювати</button>
           </div>
 
-          <!-- 1-Клік шаблони вішлістів -->
+          <!-- 4 1-клік шаблони вішлістів -->
           <div class="flex flex-wrap items-center gap-2 pt-1" aria-label="Готові шаблони">
             <span id="hero-tpl-label" class="text-sm font-bold" style="color: var(--bg-hero-sub)">Швидкий старт:</span>
+            <button type="button" onclick="applyTemplate('justBecause')" id="tpl-justBecause" class="min-h-[44px] px-4 rounded-full text-sm font-bold border bg-white/80 text-[#141218] border-[#141218]/15 hover:bg-white spring">✨ Просто так</button>
             <button type="button" onclick="applyTemplate('bday')" id="tpl-bday" class="min-h-[44px] px-4 rounded-full text-sm font-bold border bg-[#141218] text-white border-transparent spring">🎂 День народження</button>
-            <button type="button" onclick="applyTemplate('vip')" id="tpl-vip" class="min-h-[44px] px-4 rounded-full text-sm font-bold border bg-white/80 text-[#141218] border-[#141218]/15 hover:bg-white spring">💎 Люкс без адреси</button>
-            <button type="button" onclick="applyTemplate('him')" id="tpl-him" class="min-h-[44px] px-4 rounded-full text-sm font-bold border bg-white/80 text-[#141218] border-[#141218]/15 hover:bg-white spring">🎮 Хлопцю / ДР</button>
+            <button type="button" onclick="applyTemplate('romance')" id="tpl-romance" class="min-h-[44px] px-4 rounded-full text-sm font-bold border bg-white/80 text-[#141218] border-[#141218]/15 hover:bg-white spring">🌷 8 березня / Побачення</button>
+            <button type="button" onclick="applyTemplate('vip')" id="tpl-vip" class="min-h-[44px] px-4 rounded-full text-sm font-bold border bg-white/80 text-[#141218] border-[#141218]/15 hover:bg-white spring">💎 Creator Bio</button>
           </div>
 
           <!-- Щит Creator Safe Mode (активний у пресеті creator_bio) -->
@@ -445,14 +471,21 @@
               <img src="https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=120" alt="Друг Максим" />
               <img src="https://images.pexels.com/photos/36425425/pexels-photo-36425425.jpeg?auto=compress&cs=tinysrgb&w=120" alt="Друг Софія" />
             </div>
-            <span id="hero-social-count" class="text-sm sm:text-base font-bold">+14 друзів уже збираються на свято</span>
+            <span id="hero-social-count" class="text-sm sm:text-base font-bold">+14 друзів уже збираються на особливий момент</span>
           </div>
         </div>
 
-        <!-- Right Column: Scallop-10 Emotion Photo + Starburst-12 + Apple Invites Pill -->
-        <div class="lg:col-span-5 flex justify-center">
-          <div class="relative w-full max-w-[400px] aspect-square">
-            <img id="hero-scallop-img" src="https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Щаслива іменинниця з букетом квітів" class="scallop-photo" />
+        <!-- Right Column: Inline LivePreviewWishlistCard або Scallop-10 Emotion Photo -->
+        <div class="lg:col-span-5 flex flex-col items-center gap-3">
+          <div id="hero-right-toggle" class="hidden inline-flex p-1 rounded-full border bg-white/85 border-[#141218]/10 shadow-sm">
+            <button type="button" onclick="setHeroRightTab('preview')" id="hero-rtab-preview" class="min-h-[40px] px-4 rounded-full text-sm font-extrabold bg-[#141218] text-white spring">📱 Моя вітрина (<span id="hero-draft-count">0</span>)</button>
+            <button type="button" onclick="setHeroRightTab('photo')" id="hero-rtab-photo" class="min-h-[40px] px-4 rounded-full text-sm font-extrabold text-[#141218] spring">📸 Фото</button>
+          </div>
+
+          <div id="hero-right-live-preview" class="hidden w-full max-w-[420px]"></div>
+
+          <div id="hero-right-photo" class="relative w-full max-w-[400px] aspect-square">
+            <img id="hero-scallop-img" src="https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=900" alt="Щаслива авторка вішліста з букетом квітів" class="scallop-photo" />
             <div class="starburst-badge absolute top-2 right-1 rotate-6 shadow-xl rounded-full">
               <svg viewBox="0 0 100 100" aria-hidden="true">
                 <path d="M50,2 L59,16 L75,9 L77,25 L94,26 L88,41 L99,52 L87,62 L92,78 L76,80 L73,96 L58,88 L48,99 L39,87 L23,94 L22,78 L6,75 L14,60 L3,49 L15,39 L10,23 L26,21 L29,5 L44,13 Z" />
@@ -463,7 +496,7 @@
               <div id="hero-invite-emoji" class="diia-box !w-11 !h-11 !text-xl !rounded-xl bg-[#EFEAFF]">🎂</div>
               <div>
                 <div id="hero-invite-title" class="text-sm font-black leading-tight">День народження Олени</div>
-                <div id="hero-invite-sub" class="text-sm font-semibold text-slate-600">12 днів до свята • Без спойлерів</div>
+                <div id="hero-invite-sub" class="text-sm font-semibold text-slate-600">12 днів до події • Без спойлерів</div>
               </div>
             </div>
           </div>
@@ -471,14 +504,14 @@
       </div>
     </section>
 
-    <!-- СЕКЦІЯ 2: ДО / ПІСЛЯ («Досить здогадок у месенджерах» + COMPARE SLIDER) -->
+    <!-- СМУГА 2: КОНСОЛІДОВАНИЙ ДО / ПІСЛЯ («Досить здогадок у месенджерах» + МОНОБАНКА + COMPARE SLIDER) -->
     <section id="section-before-after" class="band-cream w-full py-16 sm:py-24">
       <div class="mx-auto max-w-5xl px-4 space-y-10">
         <div class="max-w-3xl mx-auto text-center space-y-3">
           <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
             Досить <span id="ba-accent" class="serif-accent" style="color: #5B50EC">здогадок</span> у месенджерах
           </h2>
-          <p class="text-base sm:text-lg opacity-85">Порівняй, як свято виглядає в чатах і як — із твоїм посиланням Mriyii.</p>
+          <p class="text-base sm:text-lg opacity-85">Порівняй, як вибір подарунка виглядає в чатах і як — із твоїм посиланням Mriyii.</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div id="ba-card-before" class="rounded-[28px] p-6 sm:p-8 space-y-4 border bg-white border-[#141218]/10 text-[#141218] shadow-lg">
@@ -492,7 +525,7 @@
             <ul class="space-y-2.5 text-base opacity-90">
               <li>• Друзі створюють окремий чат і все одно губляться в ідеях</li>
               <li>• Хтось дарує два однакові сертифікати чи не той колір</li>
-              <li>• Хтось збирає гроші на картку вручну й плутається в сумах</li>
+              <li>• Гола картка Монобанку в сторіс без фото, назви і мети в ₴</li>
             </ul>
           </div>
           <div id="ba-card-after" class="rounded-[28px] p-6 sm:p-8 space-y-4 border-2 bg-white border-[#5B50EC] text-[#141218] shadow-xl">
@@ -505,8 +538,8 @@
             </div>
             <ul class="space-y-2.5 text-base opacity-90">
               <li>• Бронювання подарунка в 1 клік без реєстрації для гостей</li>
-              <li>• Спільний збір на Банку Monobank або Приват24 з 0% комісії</li>
-              <li>• Сюрприз-режим: ти не бачиш, хто що обрав, до самого свята</li>
+              <li>• Вітрина мрії з Монобанкою 0%: видно мету в ₴, фото і прогрес-бар</li>
+              <li>• Сюрприз-режим: ти не бачиш, хто що обрав, до моменту вручення</li>
             </ul>
           </div>
         </div>
@@ -514,19 +547,19 @@
         <!-- Інтерактивний Compare Slider -->
         <div class="max-w-3xl mx-auto space-y-3 pt-2">
           <div class="flex items-center justify-between text-sm font-bold px-1">
-            <span>↔ Потягни слайдер: Хаос у чаті vs Вітрина Mriyii</span>
+            <span>↔ Потягни слайдер: Хаос у чаті та гола Банка vs Вітрина Mriyii</span>
             <span id="compare-pct-label" class="tabular-nums font-black">52%</span>
           </div>
           <div class="relative h-52 sm:h-44 rounded-3xl overflow-hidden border border-black/10 bg-[#141218] select-none shadow-xl">
             <div class="absolute inset-0 p-6 flex flex-col justify-center bg-[#141218] text-white">
-              <span class="inline-flex w-fit px-3 py-1 rounded-full bg-[#34D399]/20 text-[#34D399] text-sm font-bold mb-2">✅ Стало: Mriyii Вітрина</span>
-              <p class="text-lg sm:text-xl font-black text-white">1 посилання • Бронь за 5 сек • Монобанка 0% • Сюрприз 🕶️</p>
-              <p class="text-sm text-slate-200 mt-1">Жодних дублів і незручних питань у Direct.</p>
+              <span class="inline-flex w-fit px-3 py-1 rounded-full bg-[#34D399]/20 text-[#34D399] text-sm font-bold mb-2">✅ Стало: Mriyii Вітрина (Конверсія ×2.4)</span>
+              <p class="text-lg sm:text-xl font-black text-white">✨ Dyson Airwrap • 26 000 ₴ • Монобанка 0% • Сюрприз 🕶️</p>
+              <p class="text-sm text-slate-200 mt-1">Гість бачить фото, мету і прогрес — і додає внесок через Apple Pay за 5 секунд.</p>
             </div>
             <div id="compare-before-pane" class="absolute inset-0 p-6 flex flex-col justify-center bg-[#FAF6F0] text-[#141218] border-r-2 border-[#5B50EC]" style="clip-path: inset(0 48% 0 0);">
-              <span class="inline-flex w-fit px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-sm font-bold mb-2">❌ Було: «То що даруємо?» у Telegram</span>
-              <p class="text-lg sm:text-xl font-black text-[#141218]">48 повідомлень • 2 однакові подарунки • Зіпсований сюрприз</p>
-              <p class="text-sm text-slate-700 mt-1">Гола картка Монобанку без фото й контексту.</p>
+              <span class="inline-flex w-fit px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-sm font-bold mb-2">❌ Було: Чат у Telegram та голий лінк на Банку</span>
+              <p class="text-lg sm:text-xl font-black text-[#141218]">48 повідомлень • 2 однакові подарунки • 0 контексту</p>
+              <p class="text-sm text-slate-700 mt-1">send.monobank.ua/jar/4x9k... «Кидайте сюди хто скільки може 😅»</p>
             </div>
             <input type="range" min="10" max="90" value="52" oninput="updateCompareSlider(this.value)" aria-label="Порівняння До і Після" class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20" />
             <div id="compare-handle" class="absolute top-0 bottom-0 w-0.5 bg-[#5B50EC] pointer-events-none z-10" style="left: 52%;">
@@ -537,59 +570,24 @@
       </div>
     </section>
 
-    <!-- СЕКЦІЯ 3: ЯК ЦЕ ПРАЦЮЄ ЗА 3 КРОКИ (BAND-AI + SVG BEAM + 64×64 ДІЯ-БОКСИ) -->
-    <section class="band-ai w-full py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl px-4 space-y-12">
-        <div class="max-w-3xl mx-auto text-center space-y-3">
-          <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#141218] border border-black/10 shadow-sm">
-            ⚡ Простий старт за 30 секунд
-          </span>
-          <h2 class="text-3xl sm:text-5xl font-black text-[#141218] tracking-tight leading-tight">
-            Як це <span class="serif-accent" style="color: #4F46E5">працює</span> за 3 кроки
-          </h2>
-          <p class="text-base sm:text-lg text-[#3A3546] leading-relaxed">
-            Замість 100 натяків і таємних чатів — один естетичний лінк у профілі чи сторіс.
-          </p>
-        </div>
-        <div class="relative grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
-          <svg class="hidden md:block absolute top-7 left-[18%] w-[64%] h-6 pointer-events-none" viewBox="0 0 600 24" fill="none" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0 12 L600 12" stroke="rgba(20,18,24,0.12)" stroke-width="3" />
-            <path id="step-beam-pulse" d="M0 12 L600 12" stroke="#4F46E5" stroke-width="3" stroke-linecap="round" class="beam-path-pulse" />
-          </svg>
-          <div class="relative flex flex-col items-center text-center space-y-3 bg-white rounded-[28px] p-6 shadow-md border border-black/5">
-            <div class="diia-box diia-box-lg bg-[#EFEAFF] text-[#141218] z-10">🔗</div>
-            <div class="text-sm font-black text-[#4F46E5]">Крок 01</div>
-            <h3 class="text-xl font-black text-[#141218]">Встав лінк або @instagram</h3>
-            <p class="text-base text-[#3A3546] leading-relaxed">Ми автоматично підтягнемо фото, ціну в гривні (₴) та назву з будь-якого українського магазину.</p>
-          </div>
-          <div class="relative flex flex-col items-center text-center space-y-3 bg-white rounded-[28px] p-6 shadow-md border border-black/5">
-            <div class="diia-box diia-box-lg bg-[#EAF1FF] text-[#141218] z-10">📲</div>
-            <div class="text-sm font-black text-[#4F46E5]">Крок 02</div>
-            <h3 class="text-xl font-black text-[#141218]">Поділись одним лінком</h3>
-            <p class="text-base text-[#3A3546] leading-relaxed">Додай посилання в Instagram Bio, Telegram або сторіс. Друзям не потрібна реєстрація.</p>
-          </div>
-          <div class="relative flex flex-col items-center text-center space-y-3 bg-white rounded-[28px] p-6 shadow-md border border-black/5">
-            <div class="diia-box diia-box-lg bg-[#FFE8EE] text-[#141218] z-10">🎁</div>
-            <div class="text-sm font-black text-[#4F46E5]">Крок 03</div>
-            <h3 class="text-xl font-black text-[#141218]">Друзі бронюють без спойлерів</h3>
-            <p class="text-base text-[#3A3546] leading-relaxed">Гості бачать вільні мрії та скидаються на Банку, а ти отримуєш сюрприз без дублікатів.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- СЕКЦІЯ 4: PRODUCT SHOWCASE (BAND-OBSIDIAN, БЕЗ BORDER-BEAM) -->
+    <!-- СМУГА 3: ЖИВА ВІТРИНА + ТУМБЛЕР ГОСТЯ/ВЛАСНИКА + 3 КРОКИ -->
     <section class="band-obsidian w-full py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl px-4 space-y-10">
-        <div class="max-w-3xl mx-auto text-center space-y-3">
+      <div class="mx-auto max-w-5xl px-4 space-y-12">
+        <div class="max-w-3xl mx-auto text-center space-y-4">
           <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white/10 text-white border border-white/15">
-            👀 Як виглядає твій вішліст для друзів
+            👀 Ти бачиш інтригу — друзі бачать план
           </span>
           <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
             Жива <span class="serif-accent" style="color: var(--cta-pop-bg)">вітрина</span> твоїх мрій
           </h2>
-          <p class="text-base sm:text-lg text-slate-200 leading-relaxed">Саме так друзі бачать твою сторінку: профіль, підказка ШІ, безкоштовні посилання, статуси лотів та Банка.</p>
+          <p class="text-base sm:text-lg text-slate-200 leading-relaxed">Перемкни погляд просто зараз: гості бронюють без спойлерів, а ти у своєму кабінеті бачиш лише приємну інтригу до моменту вручення.</p>
+          <!-- Тумблер Очима Гостя / Очима Власника піднято у Вітрину -->
+          <div class="inline-flex p-1.5 rounded-2xl bg-white/10 border border-white/15 gap-2">
+            <button type="button" onclick="setHeroShowcaseRole('guest')" id="hero-role-guest" class="min-h-[48px] px-5 rounded-xl text-base font-bold bg-[#34D399] text-[#0B1120] shadow-lg spring">🎁 Очима Гостя</button>
+            <button type="button" onclick="setHeroShowcaseRole('owner')" id="hero-role-owner" class="min-h-[48px] px-5 rounded-xl text-base font-bold text-slate-200 hover:text-white spring">👀 Очима Власника</button>
+          </div>
         </div>
+
         <div class="max-w-4xl mx-auto rounded-[28px] bg-[#1E1C2A] border border-white/15 p-5 sm:p-8 shadow-2xl space-y-5">
           <div id="landing-showcase-profile"></div>
           <button onclick="switchScreen('guest')" class="w-full min-h-[52px] rounded-2xl bg-[#141218] hover:bg-black/60 border border-white/15 px-4 py-3 flex items-center justify-between gap-3 text-left spring">
@@ -600,52 +598,56 @@
             <span>✨</span>
             <span>Mriyii безкоштовний для тебе і гостей — магазини платять нам невеликий % партнерської винагороди за перехід.</span>
           </div>
-          <div id="landing-showcase-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+          <div id="landing-showcase-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
           <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <button onclick="switchScreen('guest')" style="background-color: var(--cta-pop-bg); color: var(--cta-pop-ink);" class="w-full sm:w-auto min-h-[48px] px-7 py-3 rounded-2xl text-base font-extrabold spring active:scale-95">
-              Відкрити повний живий приклад →
+              👀 Подивитись, як це бачать гості →
             </button>
             <button onclick="switchScreen('dashboard')" class="w-full sm:w-auto min-h-[48px] px-6 py-3 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring active:scale-95">
-              ✏️ Спробувати редактор з Live Preview
+              🎨 Зібрати свою вітрину наживо
             </button>
+          </div>
+        </div>
+
+        <!-- Компактна 3-крокова лінія під Вітриною -->
+        <div class="pt-4 space-y-8">
+          <div class="text-center space-y-2">
+            <h3 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+              Від «хочу» до подарунка — <span class="serif-accent" style="color: var(--cta-pop-bg)">за 30 секунд</span>
+            </h3>
+            <p class="text-base text-slate-200">Замість 100 натяків і чатів — один естетичний лінк у профілі чи сторіс.</p>
+          </div>
+          <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6">
+            <svg class="hidden md:block absolute top-7 left-[18%] w-[64%] h-6 pointer-events-none" viewBox="0 0 600 24" fill="none" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 12 L600 12" stroke="rgba(255,255,255,0.16)" stroke-width="3" />
+              <path id="step-beam-pulse" d="M0 12 L600 12" stroke="var(--cta-pop-bg)" stroke-width="3" stroke-linecap="round" class="beam-path-pulse" />
+            </svg>
+            <div class="relative flex flex-col items-center text-center space-y-2.5 bg-white/5 border border-white/12 rounded-[24px] p-5">
+              <div class="diia-box bg-[#EFEAFF] text-[#141218] z-10">🔗</div>
+              <div class="text-sm font-black" style="color: var(--cta-pop-bg)">01 • Посилання або @shop</div>
+              <h4 class="text-lg font-black text-white">Встав лінк з будь-якого сайту</h4>
+              <p class="text-sm text-slate-200 leading-relaxed">Автоматично підтягнемо фото, ціну в ₴ та назву з українських магазинів.</p>
+            </div>
+            <div class="relative flex flex-col items-center text-center space-y-2.5 bg-white/5 border border-white/12 rounded-[24px] p-5">
+              <div class="diia-box bg-[#EAF1FF] text-[#141218] z-10">📲</div>
+              <div class="text-sm font-black" style="color: var(--cta-pop-bg)">02 • 1 клік у Bio або Сторіс</div>
+              <h4 class="text-lg font-black text-white">Поділись одним лінком</h4>
+              <p class="text-sm text-slate-200 leading-relaxed">Додай в Instagram Bio, Telegram або TikTok. Друзям реєстрація не потрібна.</p>
+            </div>
+            <div class="relative flex flex-col items-center text-center space-y-2.5 bg-white/5 border border-white/12 rounded-[24px] p-5">
+              <div class="diia-box bg-[#FFE8EE] text-[#141218] z-10">🎁</div>
+              <div class="text-sm font-black" style="color: var(--cta-pop-bg)">03 • Без спойлерів</div>
+              <h4 class="text-lg font-black text-white">Друзі бронюють і дарують</h4>
+              <p class="text-sm text-slate-200 leading-relaxed">Близькі бачать вільні мрії та скидаються на Банку — жодних дублікатів.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- СЕКЦІЯ 5: МОНОБАНКА (WAVY PROGRESS + КЛАСТЕР) + ДИНАМІЧНИЙ IG STORIES 9:16 -->
+    <!-- СМУГА 4: СПІЛЬНИЙ ЗБІР НА МОНОБАНКУ 0% + ДИНАМІЧНИЙ IG STORIES 9:16 -->
     <section class="band-periwinkle w-full py-16 sm:py-24 spring">
-      <div class="mx-auto max-w-6xl px-4 space-y-12">
-        <!-- Before / After: Гола Монобанка vs Вітрина мрії -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          <div class="rounded-3xl p-6 bg-[#141218]/45 border border-white/15 space-y-3 backdrop-blur-lg">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-sm font-extrabold text-rose-200">❌ Було: Гола Монобанка в сторіс</span>
-              <span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-100 text-sm font-bold">0 контексту</span>
-            </div>
-            <div class="rounded-2xl bg-[#141218]/75 border border-white/10 p-4 space-y-2 text-sm text-slate-200">
-              <p class="font-mono text-[#34D399]">send.monobank.ua/jar/4x9k...</p>
-              <p class="text-white">«Кидайте сюди на ДР, хто скільки може 😅»</p>
-            </div>
-            <p class="text-sm text-slate-100">Гості не розуміють, на що саме збираєте, скільки не вистачає і чи не краще купити подарунок окремо.</p>
-          </div>
-          <div class="rounded-3xl p-6 bg-[#141218]/65 border border-white/25 space-y-3 shadow-xl backdrop-blur-lg">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-sm font-extrabold text-[#34D399]">✅ Стало: Вітрина мрії з коментарем</span>
-              <span class="px-2.5 py-1 rounded-full bg-[#34D399]/20 text-[#34D399] text-sm font-bold">Конверсія ×2.4</span>
-            </div>
-            <div class="rounded-2xl bg-white p-4 text-[#141218] space-y-2">
-              <div class="flex items-center justify-between text-sm font-black">
-                <span>✨ Dyson Airwrap • 26 000 ₴</span>
-                <span class="text-emerald-700">75% зібрано</span>
-              </div>
-              <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden"><div class="h-full w-[75%] rounded-full bg-emerald-500"></div></div>
-              <p class="text-sm font-semibold text-slate-700">«Друзі, мрію про цей стайлер на ДР! Кожен внесок наближає мрію ✨»</p>
-            </div>
-            <p class="text-sm text-slate-100">Людина бачить фото, мету в ₴ та живий прогрес-бар — і з радістю додає свою частку через Apple Pay за 5 секунд.</p>
-          </div>
-        </div>
-
+      <div class="mx-auto max-w-6xl px-4">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div class="lg:col-span-6 space-y-5">
             <div class="flex items-center gap-4">
@@ -658,7 +660,7 @@
               </div>
             </div>
             <p class="text-base sm:text-lg text-slate-100 leading-relaxed">
-              Для компанії з 10 друзів дорогий подарунок перетворюється на комфортну частку через Apple Pay прямо на твою Банку або Конверт Приват24.
+              Для компанії з 10 друзів дорогий подарунок перетворюється на комфортний спільний внесок через Apple Pay прямо на твою Банку або Конверт Приват24.
             </p>
             <ul class="space-y-3 pt-1 text-base text-slate-100">
               <li class="flex items-start gap-3"><span class="text-lg shrink-0">⏱️</span><span><strong class="text-white font-bold">60 секунд авто-оновлення:</strong> живий прогрес-бар оновлюється після кожного внеску на мрію.</span></li>
@@ -702,7 +704,7 @@
             </div>
           </div>
 
-          <!-- Вертикальний IG Stories 9:16 Mockup (Динамічний на всі 3 теми) -->
+          <!-- Вертикальний IG Stories 9:16 Mockup -->
           <div class="lg:col-span-6 flex justify-center">
             <div id="stories-card" style="background-color: var(--stories-bg);" class="w-full max-w-[320px] rounded-[34px] border border-white/25 p-6 text-white text-center shadow-2xl space-y-4 spring">
               <div class="grid grid-cols-3 gap-1.5">
@@ -712,9 +714,9 @@
               </div>
               <div class="text-sm font-bold opacity-90">Готово для IG Stories 9:16</div>
               <div class="w-40 h-40 mx-auto">
-                <img id="stories-img" src="https://images.pexels.com/photos/6641330/pexels-photo-6641330.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Мій вішліст до ДР" class="scallop-photo" />
+                <img id="stories-img" src="https://images.pexels.com/photos/6641330/pexels-photo-6641330.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Мій вішліст мрій" class="scallop-photo" />
               </div>
-              <div id="stories-title" class="serif-accent text-4xl leading-none text-white">Мій вішліст до ДР</div>
+              <div id="stories-title" class="serif-accent text-4xl leading-none text-white">Мій вішліст мрій</div>
               <p id="stories-sub" class="text-sm text-slate-100 leading-snug">Обери мрію або додай частку в подарунку на Банку без повторів</p>
               <button type="button" onclick="switchScreen('guest')" style="background-color: var(--stories-pill-bg); color: var(--stories-pill-ink);" class="w-full min-h-[48px] rounded-full px-4 py-3 font-black text-sm shadow-lg spring hover:opacity-95">
                 🔗 mriyii.app/w/<span id="story-claim-slug">olena-vip</span>
@@ -725,7 +727,7 @@
       </div>
     </section>
 
-    <!-- СЕКЦІЯ 6: КВІТИ БЕЗ АДРЕСИ (CLOVER-4, ZERO DARK PHOTO OVERLAY) -->
+    <!-- СМУГА 5: КВІТИ БЕЗ АДРЕСИ (CLOVER-4, @INSTAGRAM DIRECT) -->
     <section class="band-blush w-full py-16 sm:py-24">
       <div class="mx-auto max-w-6xl px-4 space-y-10">
         <div class="max-w-3xl mx-auto text-center space-y-4">
@@ -782,7 +784,7 @@
       </div>
     </section>
 
-    <!-- СЕКЦІЯ 7: ШІ-ПОМІЧНИК GEMINI (BAND-AI + ЖИВИЙ РЯДОК ЗАПИТУ + 3 КАРТКИ З ФОТО) -->
+    <!-- СМУГА 6: ШІ-ПОМІЧНИК GEMINI (BAND-AI + ЖИВИЙ РЯДОК ЗАПИТУ + 1-КЛІК У /IDEAS) -->
     <section class="band-ai w-full py-16 sm:py-24">
       <div class="mx-auto max-w-6xl px-4 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         <div class="lg:col-span-6 space-y-5">
@@ -795,7 +797,7 @@
               </h2>
             </div>
           </div>
-          <p class="text-base sm:text-lg text-[#3A3546] leading-relaxed">Гість обирає чіпси інтересів та бюджет — ШІ пропонує 3 влучні подарунки зі списку або з українських магазинів. Заброньована порада ховається від іменинника до дня свята.</p>
+          <p class="text-base sm:text-lg text-[#3A3546] leading-relaxed">Гість обирає чіпси інтересів та бюджет — ШІ пропонує 3 влучні подарунки зі списку або з українських магазинів. Заброньована порада прихована від отримувача до моменту вручення, але інші близькі бачать, що ідея вже зайнята.</p>
 
           <!-- Живий ШІ-рядок запиту -->
           <form onsubmit="runLandingAi(event)" class="flex flex-col sm:flex-row gap-2.5 bg-white rounded-2xl p-2 shadow-lg border border-black/5">
@@ -810,8 +812,9 @@
             <button type="button" onclick="setLandingAiChip('flowers')" id="ai-spot-flowers" class="min-h-[44px] px-4 rounded-xl text-sm font-bold bg-white text-[#141218] border border-black/10 hover:bg-slate-50 spring">🌸 Квіти без адреси</button>
           </div>
 
-          <div class="pt-1">
-            <button type="button" onclick="switchScreen('guest')" class="min-h-[48px] px-7 py-3.5 rounded-2xl text-base font-extrabold bg-[#141218] hover:bg-slate-800 text-white shadow-xl spring active:scale-95">Протестувати ШІ-Помічника →</button>
+          <div class="flex flex-wrap gap-3 pt-1">
+            <button type="button" onclick="switchScreen('guest')" class="min-h-[48px] px-7 py-3.5 rounded-2xl text-base font-extrabold bg-[#141218] hover:bg-slate-800 text-white shadow-xl spring active:scale-95">✨ Підібрати сюрприз за 10 секунд →</button>
+            <button type="button" onclick="switchScreen('ideas')" class="min-h-[48px] px-5 py-3.5 rounded-2xl text-base font-bold bg-white hover:bg-slate-50 text-[#141218] border border-black/10 shadow-sm spring">💡 Каталог ідей</button>
           </div>
         </div>
 
@@ -819,29 +822,13 @@
       </div>
     </section>
 
-    <!-- СЕКЦІЯ 8: РЕЖИМ СЮРПРИЗУ (BAND-OBSIDIAN, ZERO DARK PHOTO OVERLAY) -->
-    <section class="band-obsidian w-full py-16 sm:py-24">
-      <div class="mx-auto max-w-6xl px-4 space-y-10">
-        <div class="max-w-3xl mx-auto text-center space-y-5">
-          <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Ти бачиш <span class="serif-accent" style="color: var(--cta-pop-bg)">інтригу</span> — друзі бачать план
-          </h2>
-          <div class="inline-flex p-1.5 rounded-2xl bg-white/10 border border-white/15 gap-2">
-            <button type="button" onclick="setHeroShowcaseRole('owner')" id="hero-role-owner" class="min-h-[48px] px-5 rounded-xl text-base font-bold text-slate-200 hover:text-white spring">👀 Очима Іменинника</button>
-            <button type="button" onclick="setHeroShowcaseRole('guest')" id="hero-role-guest" class="min-h-[48px] px-5 rounded-xl text-base font-bold bg-[#34D399] text-[#0B1120] shadow-lg spring">🎁 Очима Гостя</button>
-          </div>
-        </div>
-        <div id="hero-surprise-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-      </div>
-    </section>
-
-    <!-- СЕКЦІЯ 9: SOCIAL PROOF (BAND-CREAM EDITORIAL GRID, БЕЗ MARQUEE) -->
+    <!-- СМУГА 7: SOCIAL PROOF + FAQ + ФІНАЛЬНИЙ CTA + DISCLOSURE -->
     <section class="band-cream w-full py-16 sm:py-24">
-      <div class="mx-auto max-w-6xl px-4 space-y-10">
+      <div class="mx-auto max-w-6xl px-4 space-y-12">
         <div class="max-w-3xl mx-auto text-center space-y-3">
           <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#141218] border border-black/10 shadow-sm">💛 Живі історії спільноти</span>
           <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-            Уже обирають для <span class="serif-accent" style="color: #5B50EC">свят</span> в Україні
+            Уже обирають для <span class="serif-accent" style="color: #5B50EC">особливих моментів</span> в Україні
           </h2>
           <p class="text-base sm:text-lg opacity-85">Від дня народження в Києві до таємного VIP-букета чи спільного збору на PlayStation 5.</p>
         </div>
@@ -849,7 +836,7 @@
           <div class="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-1">
             <div class="text-3xl font-black text-[#5B50EC] tabular-nums">1 200+</div>
             <div class="text-base font-extrabold">створених вішлістів</div>
-            <p class="text-sm text-slate-600">Дні народження, новосілля та особливі події</p>
+            <p class="text-sm text-slate-600">Дні народження, побачення та приводи «просто так»</p>
           </div>
           <div class="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-1">
             <div class="text-3xl font-black text-emerald-700 tabular-nums">0%</div>
@@ -881,98 +868,72 @@
           </div>
           <div class="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-4">
             <div class="inline-flex px-3 py-1 rounded-full bg-[#EAF1FF] text-[#4F46E5] text-sm font-bold">🎮 Груповий збір PS5</div>
-            <p class="text-base text-slate-800 leading-relaxed font-medium">«Хлопці скинулись на Монобанку за два дні без жодних табличок у Excel. Іменинник до останнього не знав, що буде PS5!»</p>
+            <p class="text-base text-slate-800 leading-relaxed font-medium">«Хлопці скинулись на Монобанку за два дні без жодних табличок у Excel. Автор вішліста до останнього не знав, що буде PS5!»</p>
             <div class="flex items-center gap-3 pt-1">
               <img src="https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=160" alt="Максим, Дніпро" class="w-11 h-11 rounded-full object-cover object-top border border-slate-200 shrink-0" />
               <div><div class="text-sm font-black text-[#141218]">Максим</div><div class="text-sm font-bold text-[#4F46E5]">@max.dev • Дніпро</div></div>
             </div>
           </div>
         </div>
-        <div class="text-center pt-2">
-          <button id="hero-copy-bio-btn" type="button" onclick="copyClaimSlug(this)" aria-live="polite" class="min-h-[48px] min-w-[272px] px-7 py-3.5 rounded-2xl bg-[#141218] hover:bg-slate-800 text-white text-base font-extrabold shadow-xl spring active:scale-95 inline-flex items-center justify-center gap-2">
-            🔗 Скопіювати мій лінк у Bio
-          </button>
-        </div>
-      </div>
-    </section>
 
-    <!-- СЕКЦІЯ 10: FAQ (BAND-OBSIDIAN) -->
-    <section class="band-obsidian w-full py-16 sm:py-24">
-      <div class="mx-auto max-w-5xl px-4 space-y-10">
-        <div class="max-w-3xl mx-auto text-center">
-          <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Часті <span class="serif-accent" style="color: var(--cta-pop-bg)">питання</span>
-          </h2>
-        </div>
-        <div class="max-w-3xl mx-auto space-y-3">
-          <details class="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6" open>
-            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
+        <!-- Короткий FAQ (4 <details>) -->
+        <div class="max-w-3xl mx-auto space-y-3 pt-4">
+          <h3 class="text-2xl sm:text-3xl font-black text-center mb-4">Часті <span class="serif-accent" style="color: #5B50EC">питання</span></h3>
+          <details class="group rounded-2xl bg-white border border-black/10 p-5 shadow-sm" open>
+            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-base sm:text-lg font-black text-[#141218]">
               <span>💡 Чи справді Mriyii безкоштовний?</span>
-              <span class="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+              <span class="text-slate-500 group-open:rotate-180 transition-transform">▾</span>
             </summary>
-            <p class="mt-3 text-base text-slate-200 leading-relaxed">Так! Створення вішліста, бронювання, ШІ-підбір і збір на Монобанку безкоштовні.</p>
+            <p class="mt-2.5 text-base text-slate-700 leading-relaxed">Так! Створення вішліста, бронювання, ШІ-підбір і збір на Монобанку безкоштовні для тебе та гостей.</p>
           </details>
-          <details class="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
-            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
+          <details class="group rounded-2xl bg-white border border-black/10 p-5 shadow-sm">
+            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-base sm:text-lg font-black text-[#141218]">
               <span>💳 Як проходять оплати в Монобанці?</span>
-              <span class="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+              <span class="text-slate-500 group-open:rotate-180 transition-transform">▾</span>
             </summary>
-            <p class="mt-3 text-base text-slate-200 leading-relaxed">Кнопка веде напряму на вашу Банку Monobank або Конверт Приват24 з 0% комісії платформи.</p>
+            <p class="mt-2.5 text-base text-slate-700 leading-relaxed">Кнопка веде напряму на вашу Банку Monobank або Конверт Приват24 з 0% комісії платформи.</p>
           </details>
-          <details class="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
-            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
+          <details class="group rounded-2xl bg-white border border-black/10 p-5 shadow-sm">
+            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-base sm:text-lg font-black text-[#141218]">
               <span>🔒 Чи бачить хтось мою домашню адресу?</span>
-              <span class="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+              <span class="text-slate-500 group-open:rotate-180 transition-transform">▾</span>
             </summary>
-            <p class="mt-3 text-base text-slate-200 leading-relaxed">Ні! Для квітів та шоурумів гість передає магазину ваш @instagram, і кур'єр узгоджує доставку напряму з вами.</p>
+            <p class="mt-2.5 text-base text-slate-700 leading-relaxed">Ні! Для квітів та шоурумів гість передає магазину ваш @instagram, і кур'єр узгоджує доставку напряму з вами.</p>
           </details>
-          <details class="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
-            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
-              <span>📲 Чи потрібен Telegram або реєстрація?</span>
-              <span class="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+          <details class="group rounded-2xl bg-white border border-black/10 p-5 shadow-sm">
+            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-base sm:text-lg font-black text-[#141218]">
+              <span>📲 Чи потрібна реєстрація гостям і коли видно сюрпризи?</span>
+              <span class="text-slate-500 group-open:rotate-180 transition-transform">▾</span>
             </summary>
-            <p class="mt-3 text-base text-slate-200 leading-relaxed">Гостям реєстрація не потрібна взагалі. Ви можете додати перші мрії прямо зараз, а увійти через Google/Apple лише при збереженні свого посилання.</p>
-          </details>
-          <details class="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
-            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
-              <span>🔄 А якщо гість передумає або захоче скасувати бронь?</span>
-              <span class="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
-            </summary>
-            <p class="mt-3 text-base text-slate-200 leading-relaxed">Бронь скасовується в 1 клік, і подарунок одразу стає вільним. Діє анти-спам ліміт: не більше 2 активних бронювань на одного гостя.</p>
-          </details>
-          <details class="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
-            <summary class="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
-              <span>✈️ Чи можна додати бажання без посилання — подорож або сертифікат?</span>
-              <span class="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
-            </summary>
-            <p class="mt-3 text-base text-slate-200 leading-relaxed">Звісно! Можна додати будь-яку мрію текстом — квитки, враження, благодійний внесок на мрію чи просто спільний збір на Монобанку без конкретного магазину.</p>
+            <p class="mt-2.5 text-base text-slate-700 leading-relaxed">Гостям реєстрація не потрібна взагалі. Бронювання приховані до моменту вручення, щоб не зіпсувати інтригу.</p>
           </details>
         </div>
-      </div>
-    </section>
 
-    <!-- СЕКЦІЯ 11: КОМПАКТНИЙ ФІНАЛЬНИЙ CTA (#141218) -->
-    <section class="w-full bg-[#141218] text-white border-t border-white/10 py-14 sm:py-18">
-      <div class="mx-auto max-w-4xl px-4 text-center space-y-5">
-        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-[1.12]">
-          Створи свій вішліст за <span class="serif-accent" style="color: var(--cta-pop-bg)">30 секунд</span>
-        </h2>
-        <p class="text-base sm:text-lg text-slate-200">
-          Безкоштовно • 0% комісії на Монобанку • Працює в Instagram Bio, Telegram та TikTok.
-        </p>
-        <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-1">
-          <button onclick="focusSandboxInput('')" style="background-color: var(--cta-pop-bg); color: var(--cta-pop-ink);" class="w-full sm:w-auto min-h-[48px] px-8 py-3.5 rounded-2xl text-base font-extrabold shadow-2xl spring active:scale-95">
-            Створити свій лінк Mriyii
-          </button>
-          <button onclick="switchScreen('dashboard')" class="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring">
-            ✏️ Редактор з Live Preview
-          </button>
-          <button onclick="switchScreen('ideas')" class="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring">
-            💡 Ідеї подарунків
-          </button>
-          <button onclick="switchScreen('guest')" class="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring">
-            Переглянути приклад →
-          </button>
+        <!-- Компактний фінальний CTA + Affiliate Disclosure -->
+        <div class="rounded-[32px] bg-[#141218] text-white p-8 sm:p-10 text-center space-y-5 shadow-2xl">
+          <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-[1.12]">
+            Створи свій вішліст за <span class="serif-accent" style="color: var(--cta-pop-bg)">30 секунд</span>
+          </h2>
+          <p class="text-base sm:text-lg text-slate-200">
+            Безкоштовно • 0% комісії на Монобанку • Працює в Instagram Bio, Telegram та TikTok.
+          </p>
+          <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-1">
+            <button onclick="focusSandboxInput('')" style="background-color: var(--cta-pop-bg); color: var(--cta-pop-ink);" class="w-full sm:w-auto min-h-[48px] px-8 py-3.5 rounded-2xl text-base font-extrabold shadow-2xl spring active:scale-95">
+              Створити свій лінк Mriyii
+            </button>
+            <button onclick="switchScreen('dashboard')" class="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring">
+              🎨 Зібрати свою вітрину наживо
+            </button>
+            <button onclick="switchScreen('ideas')" class="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring">
+              💡 Ідеї подарунків
+            </button>
+            <button onclick="switchScreen('guest')" class="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring">
+              👀 Подивитись, як це бачать гості →
+            </button>
+          </div>
+          <div class="pt-2 text-sm font-semibold text-slate-300">
+            ✨ Mriyii безкоштовний для вас і друзів завдяки партнерським переходам до українських магазинів.
+          </div>
         </div>
       </div>
     </section>
@@ -982,8 +943,9 @@
   <!-- ======================================================================= -->
   <!-- SCREEN 2: GUEST PROFILE (/w/olena-vip)                                  -->
   <!-- ======================================================================= -->
-  <main id="screen-guest" class="hidden mx-auto max-w-5xl px-4 py-10 pb-28 space-y-6">
+  <main id="screen-guest" class="hidden mx-auto max-w-5xl px-4 py-6 pb-28 space-y-5">
     <div id="guest-profile-header"></div>
+    <div id="guest-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
     <section id="guest-ai-teaser-wrap" class="space-y-3">
       <button type="button" onclick="toggleGuestAiTeaser()" class="w-full min-h-[56px] rounded-[22px] bg-[#171D30]/95 hover:bg-[#1E2640] border border-amber-400/50 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left shadow-xl spring">
         <div class="flex items-center gap-3">
@@ -997,16 +959,11 @@
       </button>
       <section id="guest-ai-section" class="hidden bg-[#171D30]/95 backdrop-blur-xl border border-white/15 rounded-3xl p-6 sm:p-7 space-y-5"></section>
     </section>
-    <div id="guest-free-note" class="rounded-2xl bg-[#171D30]/90 border border-white/10 px-4 py-3 flex items-center gap-2.5 text-sm font-semibold text-amber-200">
-      <span>💡</span>
-      <span>Користуйся посиланнями — застосунок безкоштовний</span>
-    </div>
-    <div id="guest-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
     <section id="guest-fan-suggest-box" class="rounded-[24px] bg-[#171D30]/90 border border-indigo-400/25 p-5 space-y-3">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div class="text-sm sm:text-base font-extrabold text-white">💡 Маєш власну круту ідею подарунка?</div>
-          <p class="text-sm text-slate-300">Запропонуй її іншим гостям — іменинник не побачить сюрприз до дати свята.</p>
+          <p class="text-sm text-slate-300">Запропонуй її іншим гостям — отримувач не побачить сюрприз до моменту вручення.</p>
         </div>
         <button type="button" onclick="toggleGuestFanSuggest()" class="min-h-[48px] px-5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-extrabold shrink-0">💡 Запропонувати ідею подарунка</button>
       </div>
@@ -1022,10 +979,14 @@
       </form>
     </section>
     <div id="guest-flower-banner"></div>
+    <div class="rounded-2xl bg-[#171D30]/90 border border-white/10 px-4 py-3 flex items-center gap-2.5 text-sm font-semibold text-amber-200">
+      <span>💡</span>
+      <span>Mriyii безкоштовний для вас і друзів — магазини платять нам невеликий % за партнерський перехід.</span>
+    </div>
   </main>
 
   <!-- ======================================================================= -->
-  <!-- SCREEN 4: ADMIN METRICS & 30-CREATOR CRM (/admin/metrics)               -->
+  <!-- SCREEN 4: ADMIN METRICS (HIDDEN PLACEHOLDER FOR PARITY)                 -->
   <!-- ======================================================================= -->
   <main id="screen-metrics" class="hidden mx-auto max-w-6xl px-4 py-10 pb-28 space-y-6"></main>
 
@@ -1036,7 +997,7 @@
     <!-- Mobile segmented toggle (<1024px) -->
     <div class="lg:hidden grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-[#171D30] border border-white/10">
       <button onclick="setDashMobileView('editor')" id="dash-mob-editor" class="min-h-[48px] rounded-xl text-sm font-extrabold bg-amber-500 text-slate-950">✏️ Редактор</button>
-      <button onclick="setDashMobileView('preview')" id="dash-mob-preview" class="min-h-[48px] rounded-xl text-sm font-extrabold text-slate-200">👁️ Прев'ю</button>
+      <button onclick="setDashMobileView('preview')" id="dash-mob-preview" class="min-h-[48px] rounded-xl text-sm font-extrabold text-slate-200">👁️ Прев'ю (<span id="dash-mob-count">3</span>)</button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -1063,9 +1024,10 @@
             <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="text-sm font-bold text-slate-300">Шаблони:</span>
+                <button type="button" onclick="applyDashTemplate('justBecause')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">✨ Просто так</button>
                 <button type="button" onclick="applyDashTemplate('birthday')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">🎂 День народження</button>
-                <button type="button" onclick="applyDashTemplate('santa')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">🎅 Таємний Санта</button>
-                <button type="button" onclick="applyDashTemplate('housewarming')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">🏡 Новосілля</button>
+                <button type="button" onclick="applyDashTemplate('romance')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">🌷 8 березня / Побачення</button>
+                <button type="button" onclick="applyDashTemplate('creatorBio')" class="min-h-[40px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-bold text-white">💎 Creator Bio</button>
               </div>
               <button type="button" onclick="toggleDashImport()" class="min-h-[40px] px-3.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-400/35 text-sm font-extrabold text-indigo-200">📥 Імпорт списку</button>
             </div>
@@ -1079,9 +1041,9 @@
           <div id="dashboard-post-event-card" class="rounded-3xl bg-[#171D30] border border-white/10 p-5 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <h3 class="text-base font-black text-white">🎉 Кому подякувати за подарунки</h3>
-              <button type="button" onclick="toggleDashPostEvent()" id="dash-post-event-btn" class="min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold bg-white/10 text-white hover:bg-white/20">🔒 До свята</button>
+              <button type="button" onclick="toggleDashPostEvent()" id="dash-post-event-btn" class="min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold bg-white/10 text-white hover:bg-white/20">🔒 До події</button>
             </div>
-            <div id="dash-post-event-hint" class="text-sm text-slate-300">Імена дарувальників приховані Сюрприз-режимом і відкриються після дати свята.</div>
+            <div id="dash-post-event-hint" class="text-sm text-slate-300">Імена дарувальників приховані Сюрприз-режимом і відкриються після дати події.</div>
             <ul id="dash-post-event-list" class="hidden space-y-2 text-sm text-slate-200">
               <li class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-between gap-2">
                 <span>🎁 <strong class="text-white">Аліна</strong> подарувала <span class="font-bold text-amber-300">Dyson Airwrap</span></span>
@@ -1097,7 +1059,7 @@
 
         <!-- TAB: HEADER -->
         <div id="dpanel-header" class="hidden rounded-3xl bg-[#171D30] border border-white/10 p-6 space-y-4">
-          <h2 class="text-lg font-black text-white">👤 Профіль свята та квіти</h2>
+          <h2 class="text-lg font-black text-white">👤 Профіль вішліста та квіти</h2>
           <div>
             <label class="block text-sm font-bold text-slate-200 mb-1">Заголовок вішліста:</label>
             <input id="dash-title-input" oninput="syncDashPreview()" type="text" class="w-full min-h-[48px] rounded-xl bg-[#0E1324] border border-white/15 px-4 text-sm font-bold text-white" value="Олена Ковальчук • Мої 25 рочків 🥂" />
@@ -1166,7 +1128,7 @@
         </div>
       </section>
 
-      <!-- ПРАВА ПАНЕЛЬ (5 cols): LIVE PHONE PREVIEW у порядку Issue #8 -->
+      <!-- ПРАВА ПАНЕЛЬ (5 cols): LIVE PHONE PREVIEW -->
       <aside id="dash-preview-col" class="hidden lg:block lg:col-span-5 lg:sticky lg:top-20">
         <div class="rounded-[32px] border border-white/20 bg-[#0B0F19] p-3 shadow-2xl">
           <div class="flex items-center justify-between px-3 pb-2.5 text-sm font-bold text-slate-300">
@@ -1177,6 +1139,11 @@
         </div>
       </aside>
     </div>
+
+    <!-- Мобільна плаваюча кнопка швидкого прев'ю -->
+    <button type="button" id="dash-mob-float-preview" onclick="setDashMobileView('preview')" class="lg:hidden fixed bottom-20 right-4 z-40 min-h-[48px] px-5 rounded-full bg-[#F4FF7A] text-[#141218] text-sm font-extrabold shadow-2xl border border-black/15 inline-flex items-center gap-2">
+      <span>👁️ Прев'ю (<span id="dash-float-count">3</span>)</span>
+    </button>
   </main>
 
   <!-- ======================================================================= -->
@@ -1220,7 +1187,7 @@
       </div>
 
       <div class="p-6 space-y-4">
-        <p class="text-sm font-semibold text-slate-200">🔒 Власник вішліста не побачить цей квиток до самого свята (Сюрприз-режим).</p>
+        <p class="text-sm font-semibold text-slate-200">🔒 Власник вішліста не побачить цей квиток до моменту вручення (Сюрприз-режим).</p>
 
         <div id="ticket-stories-preview" class="hidden rounded-2xl bg-gradient-to-b from-[#1E1433] to-[#0E1324] border border-white/20 p-4 mx-auto w-[220px] aspect-[9/16] flex flex-col justify-between text-center shadow-xl">
           <div class="text-sm font-extrabold text-amber-300">Mriyii • Сюрприз 🤫</div>
@@ -1257,27 +1224,40 @@
     let currentTheme = 'rose_luxury';
     let currentScreen = 'landing';
     let heroShowcaseRole = 'guest';
+    let heroRightTab = 'photo';
+    let heroDraftItems = [];
+    let dashMobileView = 'editor';
+    let ideasAddedIds = {};
+
+    const HERO_OCCASIONS = [
+      'на день народження',
+      'просто так',
+      'на 8 березня',
+      'на річницю',
+      'на побачення',
+      'у Instagram Bio'
+    ];
 
     const PRESET_META = {
       rose_luxury: {
         heroImg: 'https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=900',
-        heroAlt: 'Щаслива іменинниця з букетом квітів',
+        heroAlt: 'Щаслива авторка вішліста з букетом квітів',
         storyImg: 'https://images.pexels.com/photos/6641330/pexels-photo-6641330.jpeg?auto=compress&cs=tinysrgb&w=600',
         inviteEmoji: '🎂',
         inviteTitle: 'День народження Олени',
-        inviteSub: '12 днів до свята • Без спойлерів',
+        inviteSub: '12 днів до події • Без спойлерів',
         starburst: '0% комісії<br />Монобанка',
-        socialCount: '+14 друзів уже збираються на свято',
+        socialCount: '+14 друзів уже збираються на особливий момент',
         jarGoalTitle: 'Мета: Стайлер Dyson Airwrap i.d.',
         jarTarget: 26000,
         jarDefault: 19500,
-        storyTitle: 'Мій вішліст до ДР',
+        storyTitle: 'Мій вішліст мрій',
         storySub: 'Обери мрію або додай частку в подарунку на Банку без повторів',
         slug: 'olena-vip'
       },
       cyber_titanium: {
         heroImg: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=900',
-        heroAlt: 'Іменинник святкує день народження з друзями',
+        heroAlt: 'Автор вішліста відпочиває з друзями',
         storyImg: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=600',
         inviteEmoji: '🎮',
         inviteTitle: 'ДР Максима • Збір на PS5',
@@ -1717,7 +1697,7 @@
 
       let bottomControls = '';
       if (roleMode === 'owner') {
-        bottomControls = `<div class="bg-[#EFEAFF] border border-[#DECFFC] rounded-2xl p-4 text-sm font-bold text-[#141218]">🤫 Інтрига збережена! Деталі приховані до свята.</div>`;
+        bottomControls = `<div class="bg-[#EFEAFF] border border-[#DECFFC] rounded-2xl p-4 text-sm font-bold text-[#141218]">🤫 Інтрига збережена! Деталі приховані до моменту вручення.</div>`;
       } else if (item.hasJar) {
         bottomControls = `
           <div class="bg-[#FAF6F0] rounded-2xl p-4 space-y-3 border border-black/5">
@@ -1732,7 +1712,7 @@
           </div>
         `;
       } else if (item.instagramHandle) {
-        bottomControls = `<button onclick="orderIgDirect('${item.instagramHandle}', '${safeTitle}')" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold ${ctaCls} shadow spring active:scale-95">${currentLocale === 'en' ? '📸 Order in Direct @' + item.instagramHandle : '📸 Замовити в @' + item.instagramHandle}</button>`;
+        bottomControls = `<button onclick="orderIgDirect('${item.instagramHandle}', '${safeTitle}', '${item.id}')" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold ${ctaCls} shadow spring active:scale-95">${currentLocale === 'en' ? '📸 Order in Direct @' + item.instagramHandle : '📸 Замовити в @' + item.instagramHandle}</button>`;
       } else if (item.isBooked) {
         bottomControls = `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1781,10 +1761,7 @@
     }
 
     function renderHeroSurpriseGrid() {
-      const grid = document.getElementById('hero-surprise-grid');
-      if (!grid) return;
-      const d = DATA[currentTheme];
-      grid.innerHTML = d.items.slice(1, 3).map((it) => renderRichPhotoCard(it, heroShowcaseRole)).join('');
+      renderLandingShowcase();
     }
 
     function setHeroShowcaseRole(role) {
@@ -1801,7 +1778,7 @@
           ? 'min-h-[48px] px-5 rounded-xl text-base font-bold bg-[#34D399] text-[#0B1120] shadow-lg spring'
           : 'min-h-[48px] px-5 rounded-xl text-base font-bold text-slate-200 hover:text-white spring';
       }
-      renderHeroSurpriseGrid();
+      renderLandingShowcase();
     }
 
     function renderLandingShowcase() {
@@ -1816,7 +1793,7 @@
             </div>
             <div class="space-y-1">
               <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm font-bold">
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">🎂 До свята 12 днів</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">✨ До події 12 днів</span>
                 <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-200">@${d.ownerIg}</span>
               </div>
               <h3 class="text-xl font-black text-white">${d.ownerName}</h3>
@@ -1826,34 +1803,7 @@
         `;
       }
       if (gridEl) {
-        gridEl.innerHTML = d.items.slice(0, 2).map((it) => {
-          const imgUrl = it.image || getDefaultGiftImage(it.title);
-          const pct = it.jarTarget ? Math.min(100, Math.round((it.jarCurrent / it.jarTarget) * 100)) : 0;
-          const emoji = it.emoji || (it.instagramHandle ? '🌸' : '🎁');
-          return `
-            <div class="style-surface solid-white-card rounded-3xl overflow-hidden shadow-xl flex flex-col h-full">
-              <div class="relative h-44 w-full overflow-hidden bg-slate-100">
-                <img src="${imgUrl}" alt="${it.title}" loading="eager" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
-                <div class="absolute top-3 left-3 w-11 h-11 rounded-xl bg-white/95 shadow-md flex items-center justify-center text-xl">${emoji}</div>
-              </div>
-              <div class="p-5 space-y-3 flex-1 flex flex-col justify-between">
-                <div class="space-y-2">
-                  <div class="text-lg font-black text-[#141218] leading-snug">${it.title}</div>
-                  <div class="text-base font-black text-[#5B50EC] tabular-nums">${(it.price || 0).toLocaleString('uk-UA')} ₴</div>
-                  ${it.hasJar ? `
-                    <div class="space-y-1">
-                      <div class="flex justify-between text-sm font-bold text-emerald-700 tabular-nums"><span>Зібрано ${it.jarCurrent.toLocaleString('uk-UA')} ₴</span><span>${pct}%</span></div>
-                      <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:${pct}%"></div></div>
-                    </div>
-                  ` : `<div class="text-sm font-semibold text-slate-600">${it.comment || '✨ Доступно для бронювання'}</div>`}
-                </div>
-                <button onclick="switchScreen('guest')" style="background-color: var(--cta-pop-bg); color: var(--cta-pop-ink);" class="w-full min-h-[48px] rounded-xl text-sm font-extrabold spring active:scale-95">
-                  ${it.hasJar ? '🐈 Закинути на мрію' : it.instagramHandle ? '📸 Замовити в Direct' : '🎁 Забронювати'}
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
+        gridEl.innerHTML = d.items.slice(0, 3).map((it) => renderRichPhotoCard(it, heroShowcaseRole)).join('');
       }
     }
 
@@ -2029,7 +1979,7 @@
         ],
         [
           { title: 'Дріп-бокс + Sony', price: '3 800 ₴', shop: 'Rozetka • ₴ UAH', img: 'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=500', pos: 'center center' },
-          { title: 'Свято з друзями', price: '3 200 ₴', shop: 'Сертифікат', img: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=500', pos: 'center 25%' },
+          { title: 'Вечір із друзями', price: '3 200 ₴', shop: 'Сертифікат', img: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=500', pos: 'center 25%' },
           { title: 'Стайлер Dyson (частка)', price: '2 950 ₴', shop: 'Монобанка 0%', img: 'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=500', pos: 'center center' }
         ]
       ]
@@ -2125,8 +2075,122 @@
       if (gGrid) gGrid.innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'guest')).join('');
       const dGrid = document.getElementById('dashboard-cards-grid');
       if (dGrid) dGrid.innerHTML = d.items.map((it) => renderRichPhotoCard(it, 'owner')).join('');
+      const itemCount = d.items.length;
+      const mobCountEl = document.getElementById('dash-mob-count');
+      const floatCountEl = document.getElementById('dash-float-count');
+      if (mobCountEl) mobCountEl.textContent = String(itemCount);
+      if (floatCountEl) floatCountEl.textContent = String(itemCount);
+      const floatBtn = document.getElementById('dash-mob-float-preview');
+      if (floatBtn) floatBtn.classList.toggle('hidden', currentScreen !== 'dashboard' || dashMobileView === 'preview');
+      renderHeroLivePreview();
       renderInterestChips();
       if (typeof syncDashPreview === 'function') syncDashPreview();
+    }
+
+    function saveHeroDraft() {
+      try {
+        const claimInp = document.getElementById('hero-claim-slug');
+        const claimSlug = (claimInp && claimInp.value.trim()) || DATA[currentTheme].slug || 'olena-vip';
+        localStorage.setItem('mriyii_delayed_auth_draft_v1', JSON.stringify({
+          themePreset: currentTheme,
+          claimSlug: claimSlug,
+          items: heroDraftItems
+        }));
+      } catch (e) {}
+    }
+
+    function hydrateHeroDraft() {
+      try {
+        const raw = localStorage.getItem('mriyii_delayed_auth_draft_v1');
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+          heroDraftItems = parsed.items;
+          heroRightTab = 'preview';
+        }
+        if (parsed && parsed.claimSlug) {
+          const clean = String(parsed.claimSlug).toLowerCase().replace(/[^a-z0-9-_]/g, '');
+          if (clean) {
+            DATA[currentTheme].slug = clean;
+            const claimInp = document.getElementById('hero-claim-slug');
+            if (claimInp) claimInp.value = clean;
+          }
+        }
+      } catch (e) {}
+    }
+
+    function setHeroRightTab(tab) {
+      heroRightTab = tab === 'preview' ? 'preview' : 'photo';
+      renderHeroLivePreview();
+    }
+
+    function removeHeroDraftItem(id) {
+      heroDraftItems = heroDraftItems.filter((x) => x.id !== id);
+      if (heroDraftItems.length === 0) heroRightTab = 'photo';
+      saveHeroDraft();
+      renderHeroLivePreview();
+      showToast('🗑️ Позицію прибрано з чернетки');
+    }
+
+    function renderHeroLivePreview() {
+      const toggle = document.getElementById('hero-right-toggle');
+      const previewEl = document.getElementById('hero-right-live-preview');
+      const photoEl = document.getElementById('hero-right-photo');
+      const countEl = document.getElementById('hero-draft-count');
+      const rTabPrev = document.getElementById('hero-rtab-preview');
+      const rTabPhoto = document.getElementById('hero-rtab-photo');
+      if (!previewEl || !photoEl) return;
+
+      const hasDraft = heroDraftItems.length > 0;
+      if (countEl) countEl.textContent = String(heroDraftItems.length);
+      if (toggle) toggle.classList.toggle('hidden', !hasDraft);
+
+      const showPreview = hasDraft && heroRightTab === 'preview';
+      previewEl.classList.toggle('hidden', !showPreview);
+      photoEl.classList.toggle('hidden', showPreview);
+
+      const isCreator = currentPreset === 'creator_bio';
+      const isCyber = currentPreset === 'cyber_titanium';
+      if (rTabPrev && rTabPhoto) {
+        const activeCls = isCreator ? 'min-h-[40px] px-4 rounded-full text-sm font-extrabold bg-[#F4FF7A] text-[#141218] spring' : 'min-h-[40px] px-4 rounded-full text-sm font-extrabold bg-[#141218] text-white spring';
+        const idleCls = isCreator ? 'min-h-[40px] px-4 rounded-full text-sm font-extrabold text-slate-200 hover:text-white spring' : 'min-h-[40px] px-4 rounded-full text-sm font-extrabold text-[#141218] hover:bg-black/5 spring';
+        rTabPrev.className = heroRightTab === 'preview' ? activeCls : idleCls;
+        rTabPhoto.className = heroRightTab === 'photo' ? activeCls : idleCls;
+      }
+
+      if (!showPreview) return;
+      const claimInp = document.getElementById('hero-claim-slug');
+      const slug = (claimInp && claimInp.value.trim()) || DATA[currentTheme].slug || 'olena-vip';
+      const badgeCls = isCyber ? 'bg-[#34D399] text-[#0B1120]' : 'bg-[#F4FF7A] text-[#141218]';
+      const accentTxt = isCyber ? 'text-[#34D399]' : 'text-[#F4FF7A]';
+
+      previewEl.innerHTML = `
+        <div class="rounded-[28px] bg-[#141218] border border-white/15 p-5 shadow-2xl text-white space-y-4">
+          <div class="flex items-center justify-between gap-2 pb-3 border-b border-white/10">
+            <div class="min-w-0">
+              <div class="text-sm font-extrabold ${accentTxt} truncate">mriyii.app/w/${slug}</div>
+              <div class="text-base font-black text-white">Чернетка твого вішліста</div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-sm font-black ${badgeCls} shrink-0">${heroDraftItems.length} шт.</span>
+          </div>
+          <div class="space-y-2.5 max-h-[270px] overflow-y-auto pr-1">
+            ${heroDraftItems.map((it) => `
+              <div class="rounded-2xl bg-white/10 border border-white/15 p-3 flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center text-2xl shrink-0">${it.emoji || '✨'}</div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-extrabold text-white truncate">${it.title}</div>
+                  <div class="text-sm font-bold ${accentTxt} tabular-nums">${(it.price || 4900).toLocaleString('uk-UA')} ₴</div>
+                </div>
+                <button type="button" onclick="removeHeroDraftItem('${it.id}')" aria-label="Прибрати зі списку" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-rose-500/30 text-white text-sm font-bold shrink-0">✕</button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <button type="button" onclick="switchScreen('guest')" class="w-full min-h-[46px] px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-extrabold border border-white/15 spring">👀 Як бачать гості</button>
+            <button type="button" onclick="switchScreen('dashboard')" class="w-full min-h-[46px] px-4 rounded-xl ${badgeCls} text-sm font-extrabold shadow-lg spring">🎨 Зберегти й налаштувати</button>
+          </div>
+        </div>
+      `;
     }
 
     function switchScreen(screen) {
@@ -2154,10 +2218,13 @@
 
     function syncClaimSlug(val) {
       const clean = (val || '').toLowerCase().replace(/[^a-z0-9-_]/g, '') || 'olena-vip';
+      DATA[currentTheme].slug = clean;
       const st = document.getElementById('story-claim-slug');
       const dp = document.getElementById('dash-prev-slug');
       if (st) st.textContent = clean;
       if (dp) dp.textContent = 'mriyii.app/w/' + clean;
+      saveHeroDraft();
+      renderHeroLivePreview();
     }
 
     async function copyClaimSlug(btn) {
@@ -2226,8 +2293,17 @@
       }
       const claimInp = document.getElementById('hero-claim-slug');
       if (claimInp) {
-        claimInp.value = m.slug;
-        syncClaimSlug(m.slug);
+        claimInp.style.color = isCreator ? '#F4FF7A' : isCyber ? '#4F46E5' : 'var(--accent-strong)';
+        if (!claimInp.dataset.userEdited) {
+          claimInp.value = m.slug;
+        }
+        syncClaimSlug(claimInp.value || m.slug);
+      }
+
+      const rightToggle = document.getElementById('hero-right-toggle');
+      if (rightToggle) {
+        rightToggle.className = (heroDraftItems.length > 0 ? 'inline-flex ' : 'hidden ') + 'p-1 rounded-full border shadow-sm ' +
+          (isCreator ? 'bg-white/10 border-white/20' : 'bg-white/85 border-[#141218]/10');
       }
 
       const scallopImg = document.getElementById('hero-scallop-img');
@@ -2301,21 +2377,29 @@
     function applyTemplate(tpl) {
       activeHeroTpl = tpl;
       const inp = document.getElementById('capsule-input');
-      if (tpl === 'bday') {
+      if (tpl === 'justBecause') {
+        setPreset('rose_luxury');
+        if (inp) inp.value = 'rozetka.com.ua/ua/marshall-stanmore-iii/';
+        showToast('✨ Обрано шаблон «Просто так» — додай мрію у вітрину!');
+      } else if (tpl === 'bday') {
         setPreset('rose_luxury');
         if (inp) inp.value = 'rozetka.com.ua/ua/dyson-airwrap/';
         showToast('🎂 Обрано шаблон «День народження» — натисніть «Зібрати вішліст»!');
+      } else if (tpl === 'romance') {
+        setPreset('rose_luxury');
+        if (inp) inp.value = 'instagram.com/kamelia_flowers_kyiv/';
+        showToast('🌷 Обрано шаблон «8 березня / Побачення»!');
       } else if (tpl === 'vip') {
         setPreset('creator_bio');
         if (inp) inp.value = 'instagram.com/kamelia_flowers_kyiv/';
-        showToast('💎 Активовано Creator Safe Mode без адреси та ПІБ!');
+        showToast('💎 Активовано Creator Bio Safe Mode без адреси та ПІБ!');
       } else {
         setPreset('cyber_titanium');
         if (inp) inp.value = 'rozetka.com.ua/ua/playstation-5-pro/';
-        showToast('🎮 Обрано шаблон «Хлопцю / ДР» у темі Pro Titanium!');
+        showToast('🎮 Обрано шаблон у темі Pro Titanium!');
       }
       const isCreator = currentPreset === 'creator_bio';
-      ['bday', 'vip', 'him'].forEach((id) => {
+      ['justBecause', 'bday', 'romance', 'vip'].forEach((id) => {
         const el = document.getElementById('tpl-' + id);
         if (!el) return;
         const active = id === tpl;
@@ -2346,11 +2430,18 @@
       showToast('✅ Позначено як куплене деінде! Інші друзі бачитимуть, що подарунок уже зайнятий.');
     }
 
-    async function orderIgDirect(shop, title) {
+    async function orderIgDirect(shop, title, itemId) {
       const ownerIg = DATA[currentTheme].ownerIg;
       const msg = `Привіт! Хочу оплатити подарунок із вішліста для @${ownerIg}: ${title}. Напишіть у Direct після оплати для узгодження доставки 🌸`;
       try { if (navigator.clipboard) await navigator.clipboard.writeText(msg); } catch (e) {}
-      showToast('📋 Текст скопійовано! Бутік сам уточнить адресу в Direct.');
+      if (itemId) {
+        const it = DATA[currentTheme].items.find((x) => x.id === itemId);
+        if (it) {
+          it.isBooked = true;
+          renderAll();
+        }
+      }
+      showToast('📋 Текст скопійовано та зафіксовано бронь! Бутік уточнить адресу в Direct.');
       window.open('https://ig.me/m/' + encodeURIComponent(shop) + '?ref=mriyii', '_blank', 'noopener,noreferrer');
     }
 
@@ -2384,30 +2475,34 @@
 
       const delay = prefersReducedMotion() ? 120 : 420;
       setTimeout(() => {
-        const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '');
-        DATA[currentTheme].items.unshift({
+        const cleanTitle = val.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 64);
+        const newItem = {
           id: 'new-' + Date.now(),
           title: cleanTitle,
-          emoji: '✨',
+          emoji: val.includes('instagram') ? '🌸' : val.includes('playstation') ? '🎮' : '✨',
           price: 4900,
           image: getDefaultGiftImage(cleanTitle),
           comment: 'Додано через капсулу швидкого старту ✨',
           hasJar: false,
           jarCurrent: 0,
           jarTarget: 0,
-          instagramHandle: '',
+          instagramHandle: val.includes('instagram') ? 'kamelia_flowers_kyiv' : '',
           isBooked: false
-        });
+        };
+        heroDraftItems.unshift(newItem);
+        DATA[currentTheme].items.unshift(newItem);
+        heroRightTab = 'preview';
+        saveHeroDraft();
         if (input) input.value = '';
-        if (btn) btn.textContent = '✓ Додано';
+        if (btn) btn.textContent = '✓ Додано у вітрину';
+        renderAll();
+        showToast('✨ Додано в живу вітрину праворуч! Можеш додати ще або відкрити кабінет.');
         setTimeout(() => {
           capsuleBusy = false;
           if (btn) {
             btn.disabled = false;
             btn.textContent = idleLabel;
           }
-          switchScreen('dashboard');
-          showToast('✨ Мрію додано! Налаштуй прев’ю та скопіюй свій лінк.');
         }, prefersReducedMotion() ? 150 : 750);
       }, delay);
     }
@@ -2426,14 +2521,14 @@
 
     const AI_WEB_CARDS = {
       rose_luxury: [
-        { title: "Шовкова наволочка Mulberry Silk 22 Momme", emoji: "✨", price: 2800, store: "Rozetka.ua", why: "Доповнює beauty-ритуали та дбайливо доглядає за волоссям.", url: "https://rozetka.com.ua" },
-        { title: "Аромадифузор Rituals Private Collection", emoji: "🕯️", price: 2450, store: "Aromateque.ua", why: "Створює атмосферу SPA та відповідає інтересу до нішевих ароматів.", url: "https://rozetka.com.ua" },
-        { title: "MagSafe павербанк Anker Nano 5000 mAh Pink", emoji: "🔋", price: 1999, store: "Rozetka.ua", why: "Стильний аксесуар для подорожей та зйомок.", url: "https://rozetka.com.ua" }
+        { title: "Шовкова наволочка Mulberry Silk 22 Momme", emoji: "✨", price: 2800, store: "Rozetka.ua", why: "Доповнює beauty-ритуали та дбайливо доглядає за волоссям.", url: "https://rozetka.com.ua/ua/search/?text=Шовкова+наволочка+Mulberry+Silk" },
+        { title: "Аромадифузор Rituals Private Collection", emoji: "🕯️", price: 2450, store: "Aromateque.ua", why: "Створює атмосферу SPA та відповідає інтересу до нішевих ароматів.", url: "https://rozetka.com.ua/ua/search/?text=Rituals+Private+Collection" },
+        { title: "MagSafe павербанк Anker Nano 5000 mAh Pink", emoji: "🔋", price: 1999, store: "Rozetka.ua", why: "Стильний аксесуар для подорожей та зйомок.", url: "https://rozetka.com.ua/ua/search/?text=Anker+Nano+MagSafe+5000" }
       ],
       cyber_titanium: [
-        { title: "Набір для specialty-кави Hario V60", emoji: "☕", price: 1450, store: "Rozetka.ua", why: "Точне влучання у захоплення альтернативною кавою.", url: "https://rozetka.com.ua" },
-        { title: "Док-станція Ugreen MagFlow Qi2 3-в-1", emoji: "⚡", price: 2699, store: "Rozetka.ua", why: "Мінімалістичний сетап на робочому столі Apple Pro Titanium.", url: "https://rozetka.com.ua" },
-        { title: "Килимок Wool Felt Desk Mat Anthracite", emoji: "🖥️", price: 1290, store: "Comfy.ua", why: "Покращує акустику механічної клавіатури та вигляд столу.", url: "https://comfy.ua" }
+        { title: "Набір для specialty-кави Hario V60", emoji: "☕", price: 1450, store: "Rozetka.ua", why: "Точне влучання у захоплення альтернативною кавою.", url: "https://rozetka.com.ua/ua/search/?text=Hario+V60" },
+        { title: "Док-станція Ugreen MagFlow Qi2 3-в-1", emoji: "⚡", price: 2699, store: "Rozetka.ua", why: "Мінімалістичний сетап на робочому столі Apple Pro Titanium.", url: "https://rozetka.com.ua/ua/search/?text=Ugreen+Qi2+3+in+1" },
+        { title: "Килимок Wool Felt Desk Mat Anthracite", emoji: "🖥️", price: 1290, store: "Comfy.ua", why: "Покращує акустику механічної клавіатури та вигляд столу.", url: "https://comfy.ua/ua/search/?q=Wool+Felt+Desk+Mat" }
       ]
     };
 
@@ -2501,9 +2596,9 @@
           id: it.id,
           title: it.title,
           emoji: it.emoji || (it.jarTarget ? "🫙" : it.instagramHandle ? "🌸" : "🎁"),
-          price: it.jarTarget ? Math.min(aiBudget, it.price) : it.price,
+          price: it.price,
           store: it.jarTarget ? "Монобанка" : "Зі списку",
-          why: it.jarTarget ? "Можна докинути комфортну частку в спільну Монобанку." : "100% збіг із бажанням іменинника зі списку.",
+          why: it.jarTarget ? "Можна докинути комфортну частку в спільну Монобанку." : "100% збіг із бажанням отримувача зі списку.",
           isJar: Boolean(it.jarTarget),
           fromList: true
         }));
@@ -2551,7 +2646,7 @@
           <div>
             <div class="text-sm font-extrabold uppercase tracking-wider text-[#DECFFC]">✨ Gemini 2.5 Flash • Google Search Grounding</div>
             <h3 class="text-xl sm:text-2xl font-black text-white mt-1">ШІ-Помічник подарунків</h3>
-            <p class="text-sm font-semibold text-emerald-300 mt-1">🧠 Враховує інтереси та табу іменинника (приховані від сторонніх)</p>
+            <p class="text-sm font-semibold text-emerald-300 mt-1">🧠 Враховує інтереси та табу отримувача (приховані від сторонніх)</p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/45 border border-white/15">
             <button onclick="setAiMode('from_wishlist')" class="min-h-[48px] px-4 rounded-xl text-sm font-extrabold ${aiMode === 'from_wishlist' ? ctaBtn + ' shadow-lg' : 'text-slate-200 hover:text-white'}">📋 Обрати з вішліста</button>
@@ -2617,17 +2712,20 @@
     }
 
     function setDashMobileView(view) {
+      dashMobileView = view === 'preview' ? 'preview' : 'editor';
       const ed = document.getElementById('dash-editor-col');
       const pr = document.getElementById('dash-preview-col');
       const bed = document.getElementById('dash-mob-editor');
       const bpr = document.getElementById('dash-mob-preview');
+      const floatBtn = document.getElementById('dash-mob-float-preview');
       const isCyber = currentTheme === 'cyber_titanium';
       const activeCls = isCyber ? 'min-h-[48px] rounded-xl text-sm font-extrabold bg-[#34D399] text-[#0B1120]' : 'min-h-[48px] rounded-xl text-sm font-extrabold bg-[#F4FF7A] text-[#141218]';
       const idleCls = 'min-h-[48px] rounded-xl text-sm font-extrabold text-slate-200';
-      if (ed) ed.classList.toggle('hidden', view === 'preview');
-      if (pr) pr.classList.toggle('hidden', view === 'editor');
-      if (bed) bed.className = view === 'editor' ? activeCls : idleCls;
-      if (bpr) bpr.className = view === 'preview' ? activeCls : idleCls;
+      if (ed) ed.classList.toggle('hidden', dashMobileView === 'preview');
+      if (pr) pr.classList.toggle('hidden', dashMobileView === 'editor');
+      if (bed) bed.className = dashMobileView === 'editor' ? activeCls : idleCls;
+      if (bpr) bpr.className = dashMobileView === 'preview' ? activeCls : idleCls;
+      if (floatBtn) floatBtn.classList.toggle('hidden', dashMobileView === 'preview' || currentScreen !== 'dashboard');
     }
 
     let dashAddBusy = false;
@@ -2746,17 +2844,21 @@
 
     function applyDashTemplate(key) {
       const tpls = {
+        justBecause: [
+          { title: 'Акустика Marshall Stanmore III Cream', emoji: '🔊', price: 14999, comment: 'Шаблон Просто так ✨' },
+          { title: 'Набір specialty-кави у зернах', emoji: '☕', price: 950, comment: 'Шаблон Просто так ✨' }
+        ],
         birthday: [
-          { title: 'Стайлер Dyson Airwrap', emoji: '✨', price: 25990, comment: 'Шаблон День народження 🎂' },
+          { title: 'Стайлер Dyson Airwrap i.d.', emoji: '✨', price: 25990, comment: 'Шаблон День народження 🎂' },
           { title: 'Парфуми Jo Malone 50 мл', emoji: '🌸', price: 5800, comment: 'Шаблон День народження 🎂' }
         ],
-        santa: [
-          { title: 'Набір specialty-кави', emoji: '☕', price: 950, comment: 'Шаблон Таємний Санта 🎅' },
-          { title: 'Аромасвічка WoodWick', emoji: '🕯️', price: 890, comment: 'Шаблон Таємний Санта 🎅' }
+        romance: [
+          { title: 'Букет 25 білих півоній без адреси', emoji: '🌷', price: 3800, comment: 'Шаблон 8 березня / Побачення 🌷' },
+          { title: 'Сертифікат на парний SPA-ритуал', emoji: '🕯️', price: 4500, comment: 'Шаблон 8 березня / Побачення 🌷' }
         ],
-        housewarming: [
-          { title: 'Кавоварка DeLonghi', emoji: '☕', price: 11500, comment: 'Шаблон Новосілля 🏡' },
-          { title: 'Набір келихів Spiegelau', emoji: '🥂', price: 2100, comment: 'Шаблон Новосілля 🏡' }
+        creatorBio: [
+          { title: 'Об’єктив Sony FE 35mm f/1.8', emoji: '📸', price: 27900, comment: 'Шаблон Creator Bio Safe Mode 💎' },
+          { title: 'Секретний букет через @шоурум', emoji: '🛡️', price: 3500, comment: 'Доставка без адреси 💎' }
         ]
       };
       const list = tpls[key] || [];
@@ -2813,7 +2915,7 @@
       const isHidden = list.classList.contains('hidden');
       list.classList.toggle('hidden', !isHidden);
       hint.classList.toggle('hidden', isHidden);
-      btn.textContent = isHidden ? '🎉 Після свята' : '🔒 До свята';
+      btn.textContent = isHidden ? '🎉 Після події' : '🔒 До події';
       btn.className = isHidden
         ? 'min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold bg-[#34D399] text-[#0B1120]'
         : 'min-h-[40px] px-3.5 rounded-xl text-sm font-extrabold bg-white/10 text-white hover:bg-white/20';
@@ -2847,7 +2949,7 @@
         emoji: '💡',
         price: parseInt((p && p.value) || '3000', 10) || 3000,
         image: getDefaultGiftImage(title),
-        comment: 'Ідея від гостя (' + name + ') — приховано від іменинника 🤫',
+        comment: 'Ідея від гостя (' + name + ') — приховано від отримувача 🤫',
         isBooked: true,
         bookedBy: name
       });
@@ -2857,16 +2959,16 @@
       if (anon) anon.checked = false;
       toggleGuestFanSuggest();
       renderAll();
-      showToast('💡 Ідею додано для інших гостей! Іменинник не побачить сюрприз.');
+      showToast('💡 Ідею додано для інших гостей! Отримувач не побачить сюрприз.');
     }
 
     const IDEAS_CATALOG = [
-      { id: 'i1', title: 'Стайлер Dyson Airwrap Multi-Styler', emoji: '✨', price: 26000, shop: 'Rozetka.ua', img: 'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-her', 'luxury', 'tech'], badge: '🔥 У 340+ вішлістах' },
-      { id: 'i2', title: 'Букет 25 білих півоній без адреси', emoji: '🌸', price: 3800, shop: '@kamelia_flowers_kyiv', img: 'https://images.pexels.com/photos/12775959/pexels-photo-12775959.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-her', 'luxury'], badge: '🌸 Доставка через Direct' },
-      { id: 'i3', title: 'Навушники Sony WH-1000XM5 Midnight', emoji: '🎧', price: 14500, shop: 'Comfy.ua', img: 'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-him', 'for-her', 'tech', 'luxury'], badge: '🎧 У 270+ вішлістах' },
-      { id: 'i4', title: 'Консоль PlayStation 5 Pro 2TB', emoji: '🎮', price: 32999, shop: 'Rozetka.ua', img: 'https://images.pexels.com/photos/5208818/pexels-photo-5208818.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-him', 'tech'], badge: '🎮 Груповий збір' },
-      { id: 'i5', title: 'Парфуми Parfums de Marly Delina', emoji: '💍', price: 9400, shop: 'Brocard.ua', img: 'https://images.pexels.com/photos/4938265/pexels-photo-4938265.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-her', 'luxury'], badge: '✨ Вибір редакції' },
-      { id: 'i6', title: 'Подарунковий бокс Safe Direct', emoji: '🎁', price: 2650, shop: '@kamelia_flowers_kyiv', img: 'https://images.pexels.com/photos/15176450/pexels-photo-15176450.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-him', 'for-her', 'under-3000'], badge: '💎 До 3 000 ₴' }
+      { id: 'i1', title: 'Стайлер Dyson Airwrap Multi-Styler', emoji: '✨', price: 26000, shop: 'Rozetka.ua', url: 'https://rozetka.com.ua/ua/search/?text=Dyson+Airwrap+Multi-Styler', img: 'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-her', 'luxury', 'tech'], badge: '🔥 У 340+ вішлістах' },
+      { id: 'i2', title: 'Букет 25 білих півоній без адреси', emoji: '🌸', price: 3800, shop: '@kamelia_flowers_kyiv', url: 'https://instagram.com/kamelia_flowers_kyiv', img: 'https://images.pexels.com/photos/12775959/pexels-photo-12775959.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-her', 'luxury'], badge: '🌸 Доставка через Direct' },
+      { id: 'i3', title: 'Навушники Sony WH-1000XM5 Midnight', emoji: '🎧', price: 14500, shop: 'Comfy.ua', url: 'https://comfy.ua/ua/search/?q=Sony+WH-1000XM5', img: 'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-him', 'for-her', 'tech', 'luxury'], badge: '🎧 У 270+ вішлістах' },
+      { id: 'i4', title: 'Консоль PlayStation 5 Pro 2TB', emoji: '🎮', price: 32999, shop: 'Rozetka.ua', url: 'https://rozetka.com.ua/ua/search/?text=PlayStation+5+Pro', img: 'https://images.pexels.com/photos/5208818/pexels-photo-5208818.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-him', 'tech'], badge: '🎮 Груповий збір' },
+      { id: 'i5', title: 'Парфуми Parfums de Marly Delina', emoji: '💍', price: 9400, shop: 'Brocard.ua', url: 'https://brocard.ua/ua/catalogsearch/result/?q=Parfums+de+Marly+Delina', img: 'https://images.pexels.com/photos/4938265/pexels-photo-4938265.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-her', 'luxury'], badge: '✨ Вибір редакції' },
+      { id: 'i6', title: 'Подарунковий бокс Safe Direct', emoji: '🎁', price: 2650, shop: '@kamelia_flowers_kyiv', url: 'https://instagram.com/kamelia_flowers_kyiv', img: 'https://images.pexels.com/photos/15176450/pexels-photo-15176450.jpeg?auto=compress&cs=tinysrgb&w=700', tags: ['all', 'for-him', 'for-her', 'under-3000'], badge: '💎 До 3 000 ₴' }
     ];
     let activeIdeasFilter = 'all';
 
@@ -2878,7 +2980,11 @@
     function addIdeaToWishlist(id) {
       const idea = IDEAS_CATALOG.find((x) => x.id === id);
       if (!idea) return;
-      DATA[currentTheme].items.unshift({
+      if (ideasAddedIds[id]) {
+        switchScreen('dashboard');
+        return;
+      }
+      const item = {
         id: 'idea-' + Date.now(),
         title: idea.title,
         emoji: idea.emoji,
@@ -2890,9 +2996,15 @@
         jarTarget: idea.price >= 15000 ? idea.price : 0,
         instagramHandle: idea.shop.startsWith('@') ? idea.shop.slice(1) : '',
         isBooked: false
-      });
-      switchScreen('dashboard');
-      showToast('✨ «' + idea.title + '» додано у твій вішліст!');
+      };
+      DATA[currentTheme].items.unshift(item);
+      heroDraftItems.unshift(item);
+      heroRightTab = 'preview';
+      ideasAddedIds[id] = true;
+      saveHeroDraft();
+      renderIdeasScreen();
+      renderAll();
+      showToast('✨ «' + idea.title + '» додано! Можеш обрати ще або перейти в кабінет.');
     }
 
     function renderIdeasScreen() {
@@ -2906,18 +3018,26 @@
         { k: 'under-3000', l: 'До 3 000 ₴' },
         { k: 'tech', l: 'Техніка ⚡' }
       ];
+      const addedCount = Object.keys(ideasAddedIds).length;
       const list = IDEAS_CATALOG.filter((x) => activeIdeasFilter === 'all' || x.tags.includes(activeIdeasFilter));
       el.innerHTML = `
-        <div class="space-y-3">
-          <span class="inline-flex px-3.5 py-1.5 rounded-full bg-[#EFEAFF] text-[#5B50EC] text-sm font-bold">✨ Трендові ідеї з реальних вішлістів • ₴ UAH</span>
-          <h1 class="text-3xl sm:text-5xl font-black text-white">💡 Ідеї подарунків, про які справді мріють</h1>
-          <p class="text-base sm:text-lg text-slate-200">Обирай за інтересом або бюджетом у гривні (₴) та додавай у свій вішліст за 1 клік.</p>
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div class="space-y-3">
+            <span class="inline-flex px-3.5 py-1.5 rounded-full bg-[#EFEAFF] text-[#5B50EC] text-sm font-bold">✨ Трендові ідеї з реальних вішлістів • ₴ UAH</span>
+            <h1 class="text-3xl sm:text-5xl font-black text-white">💡 Ідеї подарунків, про які справді мріють</h1>
+            <p class="text-base sm:text-lg text-slate-200">Обирай за інтересом або бюджетом у гривні (₴) та додавай у свій вішліст за 1 клік.</p>
+          </div>
+          ${addedCount > 0 ? `
+            <button type="button" onclick="switchScreen('dashboard')" class="min-h-[48px] px-5 rounded-2xl bg-[#34D399] hover:bg-emerald-400 text-[#0B1120] text-sm font-black shrink-0 shadow-lg spring">✅ У чернетці: ${addedCount} — Відкрити кабінет →</button>
+          ` : ''}
         </div>
         <div class="flex flex-wrap gap-2">
           ${chips.map((c) => `<button onclick="setIdeasFilter('${c.k}')" class="min-h-[48px] px-4 rounded-xl text-sm font-extrabold spring ${activeIdeasFilter === c.k ? 'bg-[#F4FF7A] text-[#141218] shadow-lg' : 'bg-white/10 text-slate-200 border border-white/15 hover:bg-white/15'}">${c.l}</button>`).join('')}
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          ${list.map((it) => `
+          ${list.map((it) => {
+            const isAdded = Boolean(ideasAddedIds[it.id]);
+            return `
             <article class="rounded-3xl bg-white text-[#141218] overflow-hidden shadow-xl flex flex-col justify-between">
               <div>
                 <div class="relative h-48 bg-slate-100">
@@ -2927,23 +3047,80 @@
                 </div>
                 <div class="p-5 space-y-2">
                   <div class="flex items-center justify-between text-sm font-bold text-slate-600">
-                    <span>${it.shop}</span>
+                    <a href="${it.url}" target="_blank" rel="noopener noreferrer" class="hover:text-[#5B50EC] underline decoration-dotted">${it.shop} ↗</a>
                     <span class="text-lg font-black text-[#5B50EC] tabular-nums">${it.price.toLocaleString('uk-UA')} ₴</span>
                   </div>
                   <h2 class="text-lg font-black text-[#141218] leading-snug">${it.title}</h2>
                 </div>
               </div>
               <div class="p-5 pt-0 space-y-2">
-                <button onclick="switchScreen('guest')" class="w-full min-h-[48px] px-4 rounded-xl bg-[#141218] hover:bg-slate-800 text-white text-sm font-extrabold">🎁 Подарувати</button>
-                <button onclick="addIdeaToWishlist('${it.id}')" class="w-full min-h-[48px] px-4 rounded-xl bg-[#F4FF7A] hover:bg-[#e8f566] text-[#141218] text-sm font-extrabold">✨ Додати у свій вішліст</button>
+                <div class="grid grid-cols-2 gap-2">
+                  <button onclick="switchScreen('guest')" class="w-full min-h-[48px] px-3 rounded-xl bg-[#141218] hover:bg-slate-800 text-white text-sm font-extrabold">🎁 Подарувати</button>
+                  <a href="${it.url}" target="_blank" rel="noopener noreferrer" class="w-full min-h-[48px] px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#141218] text-sm font-extrabold flex items-center justify-center">🛒 Магазин ↗</a>
+                </div>
+                <button onclick="addIdeaToWishlist('${it.id}')" class="w-full min-h-[48px] px-4 rounded-xl text-sm font-extrabold spring ${isAdded ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-[#F4FF7A] hover:bg-[#e8f566] text-[#141218]'}">${isAdded ? '✅ У вішлісті — Відкрити' : '✨ Додати у свій вішліст'}</button>
               </div>
             </article>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `;
     }
 
+    function initHeroTypewriter() {
+      const typedEl = document.getElementById('hero-occasion-typed');
+      const liveEl = document.getElementById('hero-occasion-live');
+      const cursorEl = document.getElementById('hero-occasion-cursor');
+      const ghostEl = document.getElementById('hero-occasion-ghost');
+      if (!typedEl || !liveEl) return;
+
+      if (prefersReducedMotion()) {
+        const staticPhrase = 'просто так і на будь-яку подію';
+        typedEl.textContent = staticPhrase;
+        if (ghostEl) ghostEl.textContent = staticPhrase;
+        if (cursorEl) cursorEl.style.display = 'none';
+        return;
+      }
+
+      let idx = 0;
+      let charPos = HERO_OCCASIONS[0].length;
+      let timer = null;
+
+      function typeNext() {
+        const phrase = HERO_OCCASIONS[idx];
+        if (charPos <= phrase.length) {
+          typedEl.textContent = phrase.slice(0, charPos);
+          charPos += 1;
+          timer = setTimeout(typeNext, 55);
+        } else {
+          timer = setTimeout(() => {
+            liveEl.classList.add('opacity-0');
+            timer = setTimeout(() => {
+              idx = (idx + 1) % HERO_OCCASIONS.length;
+              charPos = 0;
+              typedEl.textContent = '';
+              liveEl.classList.remove('opacity-0');
+              typeNext();
+            }, 220);
+          }, 1900);
+        }
+      }
+
+      timer = setTimeout(() => {
+        liveEl.classList.add('opacity-0');
+        timer = setTimeout(() => {
+          idx = 1;
+          charPos = 0;
+          typedEl.textContent = '';
+          liveEl.classList.remove('opacity-0');
+          typeNext();
+        }, 220);
+      }, 1900);
+    }
+
+    hydrateHeroDraft();
     setPreset('rose_luxury');
+    initHeroTypewriter();
   </script>
 </body>
 </html>

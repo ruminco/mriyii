@@ -182,13 +182,13 @@ function selectWishlistIdeasFallback(input: GenerateGiftIdeasInput): GeneratedGi
         item.description ||
         (isJarTopUp
           ? `Товар коштує ${price.toLocaleString('uk-UA')} ₴ — ви можете закинути комфортний внесок до ${input.budgetUah.toLocaleString('uk-UA')} ₴ прямо в Монобанку!`
-          : 'Позиція вже у вішлісті іменинника — 100% точне влучання в бажання.'),
+          : 'Позиція вже у вішлісті отримувача — 100% точне влучання в бажання.'),
       estimatedPrice: isJarTopUp ? input.budgetUah : price,
       currency: 'UAH',
       searchQuery: item.title,
       whyItFits: isJarTopUp
         ? 'Спільний збір на Монобанку дозволяє підтримати головну мрію в межах вашого бюджету.'
-        : 'Це точне бажання зі списку іменинника, яке ще вільне до бронювання.',
+        : 'Це точне бажання зі списку отримувача, яке ще вільне до бронювання.',
       mode: 'from_wishlist',
       wishlistItemId: item.id,
       isMonoJarContribution: isJarTopUp,

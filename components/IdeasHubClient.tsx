@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Sparkles, ExternalLink, Plus, ArrowLeft } from 'lucide-react';
+import { Sparkles, ExternalLink, Plus, ArrowLeft, Check } from 'lucide-react';
 import {
   CURATED_IDEAS,
   IDEA_CATEGORIES,
@@ -21,9 +20,24 @@ interface IdeasHubClientProps {
 }
 
 export function IdeasHubClient({ initialCategorySlug }: IdeasHubClientProps) {
-  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<IdeaFilterTag>('all');
   const [toast, setToast] = useState<string | null>(null);
+  const [draftCount, setDraftCount] = useState(0);
+  const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { items?: Array<Record<string, unknown>> };
+        if (Array.isArray(parsed.items)) {
+          setDraftCount(parsed.items.length);
+        }
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
 
   const categoryMeta = initialCategorySlug ? IDEA_CATEGORIES[initialCategorySlug] : null;
 
@@ -41,34 +55,45 @@ export function IdeasHubClient({ initialCategorySlug }: IdeasHubClientProps) {
       const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
       const parsed = raw
         ? (JSON.parse(raw) as {
+            gender?: string;
             themePreset?: string;
+            wishlistTitle?: string;
+            claimSlug?: string;
             items?: Array<Record<string, unknown>>;
           })
         : { themePreset: 'rose_luxury', items: [] };
 
+      const igMatch = idea.shopName.startsWith('@') ? idea.shopName.replace(/^@+/, '') : undefined;
+
       const nextItem = {
-        id: `idea_${Date.now()}`,
+        id: `idea_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         title: idea.title,
         emoji: idea.emoji,
         price: idea.price,
-        url: idea.originalUrl,
+        currency: 'UAH',
+        originalUrl: idea.originalUrl,
+        affiliateUrl: idea.originalUrl,
+        instagramHandle: igMatch,
         imageUrl: idea.imageUrl,
         description: idea.description,
+        isBooked: false,
       };
 
+      const nextItems = [nextItem, ...(parsed.items || [])];
       const nextDraft = {
+        ...parsed,
         themePreset: parsed.themePreset || 'rose_luxury',
-        items: [nextItem, ...(parsed.items || [])],
+        items: nextItems,
       };
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(nextDraft));
+      setDraftCount(nextItems.length);
+      setAddedIds((prev) => ({ ...prev, [idea.id]: true }));
     } catch {
       // ignore storage errors
     }
 
-    setToast(`✨ «${idea.title}» додано у твій вішліст!`);
-    setTimeout(() => {
-      router.push('/dashboard?added=1');
-    }, 350);
+    setToast(`✨ «${idea.title}» додано! Можеш обрати ще або перейти в «Мій вішліст».`);
+    setTimeout(() => setToast(null), 3200);
   };
 
   return (
@@ -96,11 +121,11 @@ export function IdeasHubClient({ initialCategorySlug }: IdeasHubClientProps) {
 
           <div className="flex items-center gap-2.5">
             <Link
-              href="/dashboard"
-              className="min-h-[40px] px-4 py-2 rounded-xl text-sm font-extrabold bg-white text-slate-950 hover:bg-slate-100 transition inline-flex items-center gap-1.5"
+              href="/dashboard?added=1"
+              className="min-h-[44px] px-4 py-2 rounded-xl text-sm font-extrabold bg-white text-slate-950 hover:bg-slate-100 transition inline-flex items-center gap-1.5"
             >
               <Sparkles className="w-4 h-4 text-rose-600" />
-              <span>Мій вішліст</span>
+              <span>Мій вішліст{draftCount > 0 ? ` (${draftCount})` : ''}</span>
             </Link>
           </div>
         </div>
@@ -220,10 +245,23 @@ export function IdeasHubClient({ initialCategorySlug }: IdeasHubClientProps) {
                 <button
                   type="button"
                   onClick={() => handleAddToMyWishlist(idea)}
-                  className="w-full min-h-[48px] px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-sm font-extrabold flex items-center justify-center gap-2 transition"
+                  className={`w-full min-h-[48px] px-4 py-2.5 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 transition ${
+                    addedIds[idea.id]
+                      ? 'bg-emerald-400 text-slate-950'
+                      : 'bg-amber-400 hover:bg-amber-300 text-slate-950'
+                  }`}
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>✨ Додати у свій вішліст</span>
+                  {addedIds[idea.id] ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>✓ Додано у вішліст</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>✨ Додати у свій вішліст</span>
+                    </>
+                  )}
                 </button>
               </div>
             </article>

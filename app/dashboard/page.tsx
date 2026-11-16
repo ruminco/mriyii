@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -36,13 +36,37 @@ const INTEREST_CHIPS = [
 ];
 
 const WISHLIST_TEMPLATES: Record<
-  'birthday' | 'santa' | 'housewarming',
+  'justBecause' | 'birthday' | 'romance' | 'creatorBio',
   {
     label: string;
     title: string;
     items: Array<{ title: string; emoji: string; price: number; description: string }>;
   }
 > = {
+  justBecause: {
+    label: '✨ Просто так',
+    title: 'Маленькі радості та мрії ✨',
+    items: [
+      {
+        title: 'Набір specialty-кави (3 пачки по 250г)',
+        emoji: '☕',
+        price: 950,
+        description: 'Під фільтр або воронку, світле обсмаження',
+      },
+      {
+        title: 'Аромасвічка WoodWick з деревʼяним гнотом',
+        emoji: '🕯️',
+        price: 890,
+        description: 'Запах ванілі, кедра або морської солі',
+      },
+      {
+        title: 'Шовкова наволочка Mulberry Silk',
+        emoji: '✨',
+        price: 2400,
+        description: 'Колір Champagne або Ivory',
+      },
+    ],
+  },
   birthday: {
     label: '🎂 День народження',
     title: 'Мій День Народження 🎂',
@@ -67,51 +91,51 @@ const WISHLIST_TEMPLATES: Record<
       },
     ],
   },
-  santa: {
-    label: '🎅 Таємний Санта',
-    title: 'Таємний Санта 2025 🎅',
+  romance: {
+    label: '🌷 8 березня / Побачення',
+    title: 'Для найтепліших моментів 🌷',
     items: [
       {
-        title: 'Набір specialty-кави (3 пачки по 250г)',
-        emoji: '☕',
-        price: 950,
-        description: 'Під фільтр або воронку, світле обсмаження',
+        title: 'Букет білих півоній без целофану',
+        emoji: '🌸',
+        price: 2850,
+        description: 'Доставка через @kamelia_flowers без розкриття адреси',
       },
       {
-        title: 'Термочашка KeepCup або Stanley',
-        emoji: '🥤',
-        price: 1200,
-        description: 'Колір бежевий, чорний або оливковий',
+        title: 'Шовкова піжама та маска для сну',
+        emoji: '✨',
+        price: 3600,
+        description: 'Розмір S, відтінок перлинний',
       },
       {
-        title: 'Аромасвічка WoodWick з деревʼяним гнотом',
-        emoji: '🕯️',
-        price: 890,
-        description: 'Запах ванілі, кедра або морської солі',
+        title: 'Вечеря або вікенд у SPA-готелі',
+        emoji: '🥂',
+        price: 6500,
+        description: 'Спільний збір на Банку або сертифікат',
       },
     ],
   },
-  housewarming: {
-    label: '🏡 Новосілля',
-    title: 'Наше затишне Новосілля 🏡',
+  creatorBio: {
+    label: '💎 Creator Safe Bio',
+    title: 'Wishlist у Instagram Bio 💎',
     items: [
       {
-        title: 'Кавоварка DeLonghi або Nespresso',
-        emoji: '☕',
-        price: 11500,
-        description: 'Для ранків на новій кухні',
+        title: 'Sony WH-1000XM5 Midnight Black',
+        emoji: '🎧',
+        price: 13999,
+        description: 'Доставка через @шоурум або Нова Пошта без ПІБ',
       },
       {
-        title: 'Набір келихів для вина Spiegelau (4 шт)',
-        emoji: '🥂',
-        price: 2100,
-        description: 'Прозоре тонке скло',
+        title: 'Кошик сезонних квітів у стрічці',
+        emoji: '💐',
+        price: 3400,
+        description: 'Бутік сам узгодить час у Direct Instagram',
       },
       {
-        title: 'Плед із мериносової вовни',
-        emoji: '🛋️',
-        price: 3200,
-        description: 'Молочний або графітовий колір',
+        title: 'Камера Sony ZV-E10 II для контенту',
+        emoji: '📸',
+        price: 38900,
+        description: 'Можна долучитися будь-яким внеском у Монобанку',
       },
     ],
   },
@@ -149,6 +173,7 @@ function DashboardContent() {
     DEMO_WISHLISTS[themePreset].items
   );
   const [forceFallbackPoster, setForceFallbackPoster] = useState(false);
+  const isDraftHydratedRef = useRef(false);
 
   // Редагування окремого лота
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -205,7 +230,12 @@ function DashboardContent() {
       if (saved) {
         const parsed = JSON.parse(saved) as {
           themePreset?: ThemePreset;
+          landingPreset?: 'rose_luxury' | 'cyber_titanium' | 'creator_bio';
+          claimSlug?: string;
           wishlistTitle?: string;
+          ownerBio?: string;
+          ownerInstagramHandle?: string;
+          flowerAndGiftNotes?: string;
           items?: UnifiedGiftCardItem[];
         };
         const resolvedPreset =
@@ -214,26 +244,66 @@ function DashboardContent() {
             : parsed.themePreset ?? 'rose_luxury';
 
         setThemePreset(resolvedPreset);
-        setSlug(DEMO_WISHLISTS[resolvedPreset].slug);
-        setOwnerBio(DEMO_WISHLISTS[resolvedPreset].ownerBio);
-        setOwnerAvatarUrl(DEMO_WISHLISTS[resolvedPreset].ownerAvatarUrl);
-        setOwnerInstagramHandle(DEMO_WISHLISTS[resolvedPreset].ownerInstagramHandle);
-        setFlowerAndGiftNotes(DEMO_WISHLISTS[resolvedPreset].flowerAndGiftNotes);
         setHobbiesInput(DEMO_WISHLISTS[resolvedPreset].aiHobbies.join(', '));
         setSizesInput(DEMO_WISHLISTS[resolvedPreset].aiSizes);
         setFlowerPrefsInput(DEMO_WISHLISTS[resolvedPreset].aiFlowerPreferences);
         setAntiGiftsInput(DEMO_WISHLISTS[resolvedPreset].aiAntiGifts.join(', '));
 
         if (parsed.items && parsed.items.length > 0) {
-          setItems([...parsed.items, ...DEMO_WISHLISTS[resolvedPreset].items]);
+          // Не змішуємо чернетку автора із чужим демо-профілем Олени / Максима
+          setItems(parsed.items);
+          setWishlistTitle(parsed.wishlistTitle || 'Мій вішліст мрій ✨');
+          setSlug(
+            parsed.claimSlug?.trim() ||
+              (resolvedPreset === 'cyber_titanium' ? 'my-cyber-wishes' : 'my-wishes')
+          );
+          setOwnerBio(
+            parsed.ownerBio ||
+              'Мій персональний вішліст на Mriyii — бронюй у 1 клік без спойлерів ✨'
+          );
+          setOwnerAvatarUrl(DEMO_WISHLISTS[resolvedPreset].ownerAvatarUrl);
+          setOwnerInstagramHandle(parsed.ownerInstagramHandle || 'my_wishlist');
+          setFlowerAndGiftNotes(
+            parsed.flowerAndGiftNotes ||
+              'Улюблені квіти та приємні дрібниці — доставка через Direct без домашньої адреси 🌸'
+          );
         } else {
+          setSlug(parsed.claimSlug?.trim() || DEMO_WISHLISTS[resolvedPreset].slug);
+          setWishlistTitle(parsed.wishlistTitle || DEMO_WISHLISTS[resolvedPreset].title);
+          setOwnerBio(DEMO_WISHLISTS[resolvedPreset].ownerBio);
+          setOwnerAvatarUrl(DEMO_WISHLISTS[resolvedPreset].ownerAvatarUrl);
+          setOwnerInstagramHandle(DEMO_WISHLISTS[resolvedPreset].ownerInstagramHandle);
+          setFlowerAndGiftNotes(DEMO_WISHLISTS[resolvedPreset].flowerAndGiftNotes);
           setItems(DEMO_WISHLISTS[resolvedPreset].items);
         }
       }
     } catch {
       // Ігноруємо
+    } finally {
+      isDraftHydratedRef.current = true;
     }
   }, [initialThemeParam]);
+
+  useEffect(() => {
+    if (!isDraftHydratedRef.current) return;
+    try {
+      localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({
+          gender: themePreset === 'cyber_titanium' ? 'male' : 'female',
+          themePreset,
+          claimSlug: slug,
+          wishlistTitle,
+          ownerBio,
+          ownerInstagramHandle,
+          flowerAndGiftNotes,
+          items,
+        })
+      );
+    } catch {
+      // Ігноруємо помилки localStorage
+    }
+  }, [themePreset, slug, wishlistTitle, ownerBio, ownerInstagramHandle, flowerAndGiftNotes, items]);
 
   const handleThemeChange = (nextPreset: ThemePreset) => {
     setThemePreset(nextPreset);
@@ -251,7 +321,7 @@ function DashboardContent() {
   };
 
   const handleCopyShareLink = async () => {
-    const shareUrl = `${window.location.origin}/w/${slug}`;
+    const shareUrl = `${window.location.origin}/w/${slug}?preview=draft`;
     try {
       await navigator.clipboard.writeText(shareUrl);
     } catch {
@@ -278,38 +348,49 @@ function DashboardContent() {
         candidateUrl = `https://${candidateUrl}`;
       }
 
+      let newItem: UnifiedGiftCardItem;
       try {
         const parsed = await parseProductUrlAction(candidateUrl);
-        setPreviewItem({
+        newItem = {
+          id: `owner-item-${Date.now()}`,
           title: parsed.title,
-          emoji: parsed.emoji || '✨',
+          emoji: parsed.emoji === '💇‍♀️' ? '✨' : parsed.emoji || '✨',
           description: parsed.description || 'Хочу саме цю модель ✨',
-          price: parsed.price ? String(parsed.price) : '4500',
-          imageUrl: parsed.imageUrl || '',
-          originalUrl: parsed.originalUrl,
-          instagramHandle: parsed.instagramHandle ?? igMatch?.[1] ?? '',
-          monoJarUrl: '',
-        });
+          price: parsed.price ?? 4500,
+          currency: 'UAH',
+          imageUrl: parsed.imageUrl || undefined,
+          originalUrl: parsed.originalUrl || undefined,
+          affiliateUrl: parsed.affiliateUrl || parsed.originalUrl || undefined,
+          instagramHandle: parsed.instagramHandle ?? (igMatch?.[1] || undefined),
+          isBooked: false,
+        };
       } catch {
-        setPreviewItem({
+        const isFlowers =
+          raw.toLowerCase().includes('півон') ||
+          raw.toLowerCase().includes('букет') ||
+          raw.toLowerCase().includes('kamelia');
+        newItem = {
+          id: `owner-item-${Date.now()}`,
           title: raw.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 90),
-          emoji:
-            raw.toLowerCase().includes('півон') || raw.toLowerCase().includes('букет')
-              ? '🌸'
-              : themePreset === 'rose_luxury'
-              ? '✨'
-              : '⚡',
-          description: 'Буду дуже рада цьому подарунку ✨',
-          price: themePreset === 'rose_luxury' ? '4500' : '4999',
-          imageUrl: '',
-          originalUrl: candidateUrl.startsWith('http') ? candidateUrl : '',
-          instagramHandle: igMatch?.[1] ?? '',
-          monoJarUrl: '',
-        });
+          emoji: isFlowers ? '🌸' : themePreset === 'rose_luxury' ? '✨' : '⚡',
+          description: 'Хочу саме цей подарунок ✨',
+          price: themePreset === 'rose_luxury' ? 4500 : 4999,
+          currency: 'UAH',
+          originalUrl: candidateUrl.startsWith('http') ? candidateUrl : undefined,
+          affiliateUrl: candidateUrl.startsWith('http') ? candidateUrl : undefined,
+          instagramHandle: igMatch?.[1] ?? (isFlowers ? 'kamelia_flowers' : undefined),
+          isBooked: false,
+        };
       }
+
+      // Додаємо одразу у список та Live Preview в 1 клік (без зайвої підтверджувальної форми)
+      setItems((prev) => [newItem, ...prev]);
+      setPreviewItem(null);
       setUrlInput('');
       setAddBtnState('success');
+      setTemplateToast(`✓ «${newItem.title}» додано у Live Preview!`);
       setTimeout(() => setAddBtnState('idle'), 1200);
+      setTimeout(() => setTemplateToast(null), 3000);
     } catch {
       setAddBtnState('error');
       setTimeout(() => setAddBtnState('idle'), 1600);
@@ -368,7 +449,7 @@ function DashboardContent() {
     setEditingItemId(null);
   };
 
-  const handleApplyTemplate = (key: 'birthday' | 'santa' | 'housewarming') => {
+  const handleApplyTemplate = (key: 'justBecause' | 'birthday' | 'romance' | 'creatorBio') => {
     const tpl = WISHLIST_TEMPLATES[key];
     const mapped: UnifiedGiftCardItem[] = tpl.items.map((entry, idx) => ({
       id: `tpl-${key}-${Date.now()}-${idx}`,
@@ -536,7 +617,7 @@ function DashboardContent() {
             </button>
 
             <Link
-              href={`/w/${slug}`}
+              href={`/w/${encodeURIComponent(slug)}?preview=draft`}
               className={`min-h-[44px] px-4 rounded-xl text-sm font-extrabold ${solidBtnClass} inline-flex items-center gap-1.5 shadow-lg spring-transition`}
             >
               <Eye className="w-4 h-4" />
@@ -568,7 +649,7 @@ function DashboardContent() {
                   : 'text-slate-200 hover:text-white'
               }`}
             >
-              👁️ Прев&apos;ю (/w/{slug})
+              👁️ Прев&apos;ю ({items.length})
             </button>
           </div>
         </div>
@@ -893,7 +974,7 @@ function DashboardContent() {
                   ))}
                 </div>
 
-                {/* COPY-01: Розкриття дарувальників наступного дня після свята */}
+                {/* COPY-01: Розкриття дарувальників наступного дня після події */}
                 <div className="rounded-[24px] bg-[#171D30] border border-white/10 p-5 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-base font-black text-white">
@@ -908,7 +989,7 @@ function DashboardContent() {
                           : 'bg-white/10 text-white hover:bg-white/20'
                       }`}
                     >
-                      {isPostEventReveal ? '🎉 Після свята' : '🔒 До свята'}
+                      {isPostEventReveal ? '🎉 Після події' : '🔒 До події'}
                     </button>
                   </div>
                   {isPostEventReveal ? (
@@ -955,7 +1036,7 @@ function DashboardContent() {
                     </ul>
                   ) : (
                     <p className="text-sm font-medium text-slate-300">
-                      Імена дарувальників приховані Сюрприз-режимом і відкриються наступного дня після дати свята.
+                      Імена дарувальників приховані Сюрприз-режимом і відкриються наступного дня після дати події.
                     </p>
                   )}
                 </div>
@@ -967,7 +1048,7 @@ function DashboardContent() {
             {/* --------------------------------------------------------------- */}
             {activeTab === 'header' && (
               <div className="rounded-[24px] bg-[#171D30] border border-white/10 p-5 sm:p-6 space-y-5">
-                <h2 className="text-lg font-black text-white">👤 Профіль свята та квіти</h2>
+                <h2 className="text-lg font-black text-white">👤 Профіль вішліста та квіти</h2>
 
                 <div className="space-y-4">
                   <div>
@@ -997,7 +1078,7 @@ function DashboardContent() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold text-slate-200 mb-1.5">
-                        📅 Дата свята (для розкриття подяк):
+                        📅 Дата події (для розкриття подяк):
                       </label>
                       <input
                         type="date"
@@ -1404,6 +1485,16 @@ function DashboardContent() {
           </aside>
         </div>
       </main>
+
+      {mobileView === 'editor' && (
+        <button
+          type="button"
+          onClick={() => setMobileView('preview')}
+          className={`lg:hidden fixed bottom-5 right-4 z-40 min-h-[48px] px-5 rounded-full text-sm font-extrabold shadow-2xl border border-black/10 inline-flex items-center gap-2 ${solidBtnClass}`}
+        >
+          <span>👁️ Прев&apos;ю ({items.length})</span>
+        </button>
+      )}
     </div>
   );
 }

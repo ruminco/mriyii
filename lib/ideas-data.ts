@@ -92,7 +92,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: 'Rozetka.ua',
     imageUrl:
       'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://rozetka.com.ua/ua/',
+    originalUrl: 'https://rozetka.com.ua/ua/search/?text=Dyson+Airwrap',
     description: 'Топовий лот для спільного збору на Монобанку або подарунка від компанії друзів.',
     categorySlug: 'for-girlfriend',
     tags: ['for-her', 'luxury', 'tech'],
@@ -106,7 +106,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: '@kamelia_flowers_kyiv',
     imageUrl:
       'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://instagram.com/kamelia_flowers_kyiv',
+    originalUrl: 'https://www.instagram.com/kamelia_flowers_kyiv/',
     description: 'Доставка через Direct бутіка — отримувач сам обирає час та місце без передачі адреси.',
     categorySlug: 'luxury-surprise',
     tags: ['for-her', 'luxury'],
@@ -120,7 +120,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: 'Comfy.ua',
     imageUrl:
       'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://comfy.ua/',
+    originalUrl: 'https://comfy.ua/ua/search/?q=Apple+AirPods+Max',
     description: 'Ідеальний подарунок для роботи, подорожей та музики. Підходить і для неї, і для нього.',
     categorySlug: 'for-boyfriend',
     tags: ['for-him', 'for-her', 'tech', 'luxury'],
@@ -134,7 +134,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: 'Rozetka.ua',
     imageUrl:
       'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://rozetka.com.ua/ua/',
+    originalUrl: 'https://rozetka.com.ua/ua/search/?text=PlayStation+5+Slim',
     description: 'Легендарний груповий подарунок — друзі легко закривають збір через Apple Pay на Банку.',
     categorySlug: 'for-boyfriend',
     tags: ['for-him', 'tech'],
@@ -148,7 +148,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: 'Makeup.ua',
     imageUrl:
       'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://makeup.com.ua/',
+    originalUrl: 'https://makeup.com.ua/ua/search/?q=Rituals+Sakura',
     description: 'Естетичний б’юті-комплімент до 3 000 ₴ з ароматом вишневого цвіту та рисового молока.',
     categorySlug: 'for-friend',
     tags: ['for-her', 'under-3000'],
@@ -162,7 +162,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: 'Rozetka.ua',
     imageUrl:
       'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://rozetka.com.ua/ua/',
+    originalUrl: 'https://rozetka.com.ua/ua/search/?text=Chemex',
     description: 'Для поціновувачів спешелті-кави вдома — стильний дизайн і чистий смак.',
     categorySlug: 'for-friend',
     tags: ['for-him', 'for-her', 'under-3000'],
@@ -176,7 +176,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: 'Comfy.ua',
     imageUrl:
       'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://comfy.ua/',
+    originalUrl: 'https://comfy.ua/ua/search/?q=Marshall+Stanmore+III',
     description: 'Культовий звук та інтер’єрний акцент для дому або студії.',
     categorySlug: 'for-boyfriend',
     tags: ['for-him', 'tech', 'luxury'],
@@ -190,7 +190,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: '@silk_atelier_ua',
     imageUrl:
       'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://instagram.com/',
+    originalUrl: 'https://www.instagram.com/silk_atelier_ua/',
     description: 'Ідеальний VIP-подарунок з доставкою через Instagram Direct без розкриття адреси.',
     categorySlug: 'luxury-surprise',
     tags: ['for-her', 'luxury'],
@@ -204,7 +204,7 @@ export const CURATED_IDEAS: IdeaGiftItem[] = [
     shopName: 'Comfy.ua',
     imageUrl:
       'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=800&q=80',
-    originalUrl: 'https://comfy.ua/',
+    originalUrl: 'https://comfy.ua/ua/search/?q=Baseus+20000+65W',
     description: 'Заряджає навіть MacBook — практичний мастхев подарунок до 3 000 ₴.',
     categorySlug: 'for-friend',
     tags: ['for-him', 'for-her', 'under-3000', 'tech'],

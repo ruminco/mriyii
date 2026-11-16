@@ -362,7 +362,7 @@ export function SmokedGiftCard({
                       Сюрприз-захист активний! ✨
                     </div>
                     <div className="text-sm font-semibold text-indigo-800">
-                      Друзі вже збирають Банку або забронювали цей лот. Деталі приховано до свята!
+                      Друзі вже збирають Банку або забронювали цей лот. Деталі приховано до моменту вручення!
                     </div>
                   </div>
                 </div>
@@ -525,8 +525,17 @@ export function SmokedGiftCard({
                   <span>Замовити в Instagram @{cleanShopHandle} 📸</span>
                 </button>
                 {igCopiedLocal && (
-                  <div className="text-sm font-bold text-emerald-800 text-center bg-emerald-50 border border-emerald-200 rounded-lg py-1.5 px-2">
-                    Текст замовлення скопійовано в буфер обміну! 💌
+                  <div className="text-sm font-bold text-emerald-900 text-center bg-emerald-50 border border-emerald-200 rounded-xl py-2 px-3 space-y-1.5">
+                    <div>Текст скопійовано! 💌 Оформили в Direct?</div>
+                    {!item.isBooked && onBookClick && (
+                      <button
+                        type="button"
+                        onClick={() => onBookClick(item)}
+                        className="w-full min-h-[40px] rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-extrabold px-3 py-1.5 transition"
+                      >
+                        🔒 Зафіксувати бронь, щоб не продублювали
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

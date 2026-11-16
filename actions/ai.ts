@@ -10,7 +10,7 @@ import {
   type GeneratedGiftIdea,
 } from '@/lib/gemini';
 import { buildSearchAffiliateUrl } from '@/lib/affiliate';
-import { assertGuestBookingQuota } from '@/actions/booking';
+import { assertGuestBookingQuota, computeGuestFingerprint } from '@/actions/booking';
 import { markCreatorGiftValidated, trackEvent } from '@/lib/analytics';
 import Wishlist from '@/models/Wishlist';
 import User from '@/models/User';
@@ -31,7 +31,14 @@ const CommitAiSurpriseGiftZodSchema = z.object({
   estimatedPrice: z.number().min(0),
   searchQuery: z.string().trim().min(1).max(200),
   guestName: z.string().trim().min(2).max(80),
-  guestEmail: z.string().trim().email(),
+  guestEmail: z
+    .string()
+    .trim()
+    .refine((val) => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: 'Вкажіть коректний email або залиште поле порожнім',
+    })
+    .optional()
+    .default(''),
   existingBrowserTokens: z.array(z.string().trim()).max(20).optional(),
 });
 
@@ -157,9 +164,13 @@ export async function bookAiSurpriseGift(
     throw new Error('Вішліст не знайдено.');
   }
 
+  const cleanEmail = input.guestEmail.trim().toLowerCase();
+  const fingerprint = await computeGuestFingerprint();
+
   await assertGuestBookingQuota({
     wishlistId: wishlist._id,
-    guestEmail: input.guestEmail,
+    guestEmail: cleanEmail,
+    bookedByFingerprint: fingerprint,
     existingBrowserTokens: input.existingBrowserTokens,
   });
 
@@ -176,8 +187,9 @@ export async function bookAiSurpriseGift(
     affiliateUrl,
     isBooked: true,
     bookedByName: input.guestName,
-    bookedByEmail: input.guestEmail.toLowerCase(),
+    ...(cleanEmail ? { bookedByEmail: cleanEmail } : {}),
     bookingToken,
+    bookedByFingerprint: fingerprint,
     isAiSurprise: true,
   });
 

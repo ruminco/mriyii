@@ -36,7 +36,7 @@ async function resolveWishlistData(slug: string) {
         slug: dbWishlist.slug,
         title: dbWishlist.title,
         themePreset: dbWishlist.themePreset,
-        ownerName: dbWishlist.ownerName || 'Іменинник',
+        ownerName: dbWishlist.ownerName || 'Автор вішліста',
         ownerInstagramHandle: dbWishlist.ownerInstagramHandle,
         flowerAndGiftNotes: dbWishlist.flowerAndGiftNotes,
         items: (dbWishlist.items as GuestGiftItemDTO[]).map((item) => ({
@@ -82,6 +82,7 @@ export default async function PublicWishlistPage({ params, searchParams }: PageP
   const { slug } = await params;
   const resolvedSearch = searchParams ? await searchParams : {};
   const data = await resolveWishlistData(slug);
+  const isDraftPreview = resolvedSearch.preview === 'draft';
 
   // Server-side non-blocking analytics (AdBlock-proof, без PII)
   try {
@@ -127,6 +128,7 @@ export default async function PublicWishlistPage({ params, searchParams }: PageP
       ownerInstagramHandle={data.ownerInstagramHandle}
       flowerAndGiftNotes={data.flowerAndGiftNotes}
       initialItems={data.items}
+      isDraftPreview={isDraftPreview}
     />
   );
 }

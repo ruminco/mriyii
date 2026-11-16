@@ -130,10 +130,31 @@
 }
 
 .serif-accent {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--font-serif-accent, 'Cormorant Garamond'), Georgia, serif;
   font-style: italic;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+@keyframes typewriterBlink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 0.78em;
+  vertical-align: -0.06em;
+  margin-left: 3px;
+  background-color: currentColor;
+  animation: typewriterBlink 0.9s step-end infinite;
 }
 
 .band-hero {

@@ -1,5 +1,14 @@
 import type { Metadata } from 'next';
+import { Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ['cyrillic', 'latin'],
+  weight: ['500', '600', '700'],
+  style: ['italic'],
+  variable: '--font-serif-accent',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Mriyii — Розумні вішлісти зі зборами на Монобанку та ШІ-асистентом',
@@ -13,15 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uk">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600;1,700&display=swap&subset=cyrillic"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="uk" className={cormorantGaramond.variable}>
       <body className="min-h-screen bg-[#EFEAFF] text-[#141218] antialiased">
         {children}
       </body>

@@ -178,13 +178,13 @@ function buildDemoWishlistRecommendations(
         item.description ||
         (isJarTopUp
           ? `Товар коштує ${price.toLocaleString('uk-UA')} ₴ — ви можете закинути комфортний внесок ${budget.toLocaleString('uk-UA')} ₴ у Монобанку!`
-          : 'Позиція вже є у вішлісті іменинника та вільна для бронювання.'),
+          : 'Позиція вже є у вішлісті автора та вільна для бронювання.'),
       estimatedPrice: isJarTopUp ? budget : price,
       currency: 'UAH',
       searchQuery: item.title,
       whyItFits: isJarTopUp
         ? 'Спільний збір на Монобанку дозволяє підтримати мрію в межах вашого бюджету.'
-        : '100% збіг із бажанням іменинника зі списку.',
+        : '100% збіг із бажанням отримувача зі списку.',
       mode: 'from_wishlist',
       wishlistItemId: item.id,
       isMonoJarContribution: isJarTopUp,
@@ -214,6 +214,7 @@ export function AiGiftAssistantWidget({
   const [selectedIdea, setSelectedIdea] = useState<AiGiftRecommendationDTO | null>(null);
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
+  const [isAnonymousSurprise, setIsAnonymousSurprise] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const tokens = THEME_TOKENS[themePreset];
@@ -233,10 +234,9 @@ export function AiGiftAssistantWidget({
       );
       if (fromList.length > 0) return fromList;
     }
-    return FALLBACK_AI_IDEAS[themePreset].map((item) => ({
-      ...item,
-      estimatedPrice: Math.min(item.estimatedPrice, budget),
-    }));
+    return [...FALLBACK_AI_IDEAS[themePreset]].sort(
+      (a, b) => Math.abs(a.estimatedPrice - budget) - Math.abs(b.estimatedPrice - budget)
+    );
   }, [customIdeas, mode, wishlistItems, budget, activeInterestQuery, guestQuery, themePreset]);
 
   const runAiFetch = async (
@@ -277,10 +277,18 @@ export function AiGiftAssistantWidget({
   const handleCommitSurprise = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedIdea) return;
-    if (guestName.trim().length < 2 || !guestEmail.includes('@')) {
-      setErrorMessage("Вкажіть ваше ім'я та коректний email.");
+    const trimmedName = guestName.trim();
+    const trimmedEmail = guestEmail.trim();
+    if (!isAnonymousSurprise && trimmedName.length < 2) {
+      setErrorMessage("Вкажіть ваше ім'я або оберіть анонімний режим.");
       return;
     }
+    if (trimmedEmail.length > 0 && !trimmedEmail.includes('@')) {
+      setErrorMessage('Перевірте формат email або залиште поле порожнім.');
+      return;
+    }
+
+    const effectiveName = isAnonymousSurprise ? 'Таємний шанувальник 🕶️' : trimmedName;
 
     setIsLoading(true);
     setErrorMessage(null);
@@ -293,8 +301,8 @@ export function AiGiftAssistantWidget({
         description: selectedIdea.description,
         estimatedPrice: selectedIdea.estimatedPrice,
         searchQuery: selectedIdea.searchQuery,
-        guestName: guestName.trim(),
-        guestEmail: guestEmail.trim(),
+        guestName: effectiveName,
+        guestEmail: trimmedEmail,
         existingBrowserTokens,
       });
 
@@ -305,15 +313,21 @@ export function AiGiftAssistantWidget({
         description: selectedIdea.description,
         price: selectedIdea.estimatedPrice,
         affiliateUrl: result.affiliateUrl,
-        bookedByName: guestName.trim(),
+        bookedByName: effectiveName,
         bookingToken: result.bookingToken,
       });
 
       setSelectedIdea(null);
+      setIsAnonymousSurprise(false);
     } catch (err) {
       if (err instanceof Error && err.message.includes('не більше 2')) {
         setErrorMessage(err.message);
-      } else {
+      } else if (
+        wishlistSlug.includes('demo') ||
+        wishlistSlug === 'olena-vip' ||
+        wishlistSlug === 'max-cyber' ||
+        wishlistSlug.includes('cyber')
+      ) {
         const demoToken = `demo_token_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
         onSurpriseBooked({
           id: `ai-surprise-${Date.now()}`,
@@ -322,10 +336,17 @@ export function AiGiftAssistantWidget({
           description: selectedIdea.description,
           price: selectedIdea.estimatedPrice,
           affiliateUrl: selectedIdea.affiliateSearchUrl,
-          bookedByName: guestName.trim(),
+          bookedByName: effectiveName,
           bookingToken: demoToken,
         });
         setSelectedIdea(null);
+        setIsAnonymousSurprise(false);
+      } else {
+        setErrorMessage(
+          err instanceof Error
+            ? err.message
+            : 'Не вдалося зафіксувати сюрприз. Спробуйте ще раз.'
+        );
       }
     } finally {
       setIsLoading(false);
@@ -357,7 +378,7 @@ export function AiGiftAssistantWidget({
             </h2>
             {hasOwnerInterests && (
               <p className="text-sm font-semibold text-emerald-300 mt-1">
-                🧠 ШІ враховує інтереси, розміри та табу іменинника (приховані від сторонніх очей)
+                🧠 ШІ враховує інтереси, розміри та табу отримувача (приховані від сторонніх очей)
               </p>
             )}
           </div>
@@ -406,7 +427,7 @@ export function AiGiftAssistantWidget({
       <form onSubmit={handleGenerate} className="space-y-4">
         <div className="space-y-2">
           <div className="text-sm font-extrabold uppercase tracking-wider text-slate-200">
-            1. Оберіть інтерес іменинника (миттєво оновлює 3 картки):
+            1. Оберіть інтерес отримувача (миттєво оновлює 3 картки):
           </div>
           <div className="flex flex-wrap gap-2">
             {INTEREST_CHIPS.map((chip) => (
@@ -632,25 +653,40 @@ export function AiGiftAssistantWidget({
             </button>
           </div>
           <p className="text-sm font-semibold text-slate-200">
-            Інші гості побачать, що цей сюрприз уже зайнятий вами, але іменинник у своєму кабінеті НЕ побачить цей лот до свята!
+            Інші гості побачать, що цей сюрприз уже зайнятий вами, але власник вішліста у своєму кабінеті НЕ побачить цей лот до моменту вручення!
           </p>
 
-          <div className="grid sm:grid-cols-2 gap-3">
+          <label className="flex items-center justify-between gap-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 px-4 py-2.5 cursor-pointer select-none">
+            <span className="text-sm font-extrabold text-white">
+              🕶️ Анонімно (Таємний шанувальник)
+            </span>
             <input
-              type="text"
-              required
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder="Ваше ім'я або нікнейм"
-              className="min-h-[48px] rounded-xl bg-black/40 border border-white/20 px-4 text-sm font-semibold text-white placeholder:text-slate-300"
+              type="checkbox"
+              checked={isAnonymousSurprise}
+              onChange={(e) => setIsAnonymousSurprise(e.target.checked)}
+              className="w-5 h-5 accent-emerald-400 rounded"
             />
+          </label>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            {!isAnonymousSurprise && (
+              <input
+                type="text"
+                required={!isAnonymousSurprise}
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="Ваше ім'я або нікнейм"
+                className="min-h-[48px] rounded-xl bg-black/40 border border-white/20 px-4 text-sm font-semibold text-white placeholder:text-slate-300"
+              />
+            )}
             <input
               type="email"
-              required
               value={guestEmail}
               onChange={(e) => setGuestEmail(e.target.value)}
-              placeholder="Ваш email (для керування бронню)"
-              className="min-h-[48px] rounded-xl bg-black/40 border border-white/20 px-4 text-sm font-semibold text-white placeholder:text-slate-300"
+              placeholder="Ваш email (необов'язково)"
+              className={`min-h-[48px] rounded-xl bg-black/40 border border-white/20 px-4 text-sm font-semibold text-white placeholder:text-slate-300 ${
+                isAnonymousSurprise ? 'sm:col-span-2' : ''
+              }`}
             />
           </div>
 

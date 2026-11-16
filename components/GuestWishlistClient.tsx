@@ -21,6 +21,8 @@ import {
 } from '@/actions/booking';
 
 const GUEST_TOKENS_STORAGE_KEY = 'mriyii_guest_booking_tokens_v1';
+const DRAFT_STORAGE_KEY = 'mriyii_delayed_auth_draft_v1';
+const isMongoObjectId = (id: string) => /^[a-f0-9]{24}$/i.test(id);
 
 interface BookedTicketData {
   title: string;
@@ -38,6 +40,7 @@ interface GuestWishlistClientProps {
   flowerAndGiftNotes?: string;
   initialItems: UnifiedGiftCardItem[];
   isDemoMode?: boolean;
+  isDraftPreview?: boolean;
 }
 
 export function GuestWishlistClient({
@@ -49,14 +52,19 @@ export function GuestWishlistClient({
   flowerAndGiftNotes,
   initialItems,
   isDemoMode = false,
+  isDraftPreview = false,
 }: GuestWishlistClientProps) {
   const [themePreset, setThemePreset] = useState<ThemePreset>(initialThemePreset);
+  const [displayTitle, setDisplayTitle] = useState(initialTitle);
+  const [displayOwnerIg, setDisplayOwnerIg] = useState(ownerInstagramHandle);
+  const [displayFlowerNotes, setDisplayFlowerNotes] = useState(flowerAndGiftNotes);
   const [locale, setLocale] = useState<'ua' | 'en'>('ua');
   const [items, setItems] = useState<UnifiedGiftCardItem[]>(initialItems);
   const [bookingTokensMap, setBookingTokensMap] = useState<Record<string, string>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [forceFallbackPoster, setForceFallbackPoster] = useState(false);
   const [showFullAiGenerator, setShowFullAiGenerator] = useState(false);
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
 
   // Модалка бронювання
   const [activeBookingItem, setActiveBookingItem] =
@@ -102,6 +110,67 @@ export function GuestWishlistClient({
     }
   }, []);
 
+  // Issue #24: ?preview=draft рендерить актуальну чернетку автора з localStorage
+  useEffect(() => {
+    if (!isDraftPreview) return;
+    try {
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        title?: string;
+        themePreset?: ThemePreset;
+        ownerInstagramHandle?: string;
+        flowerAndGiftNotes?: string;
+        items?: UnifiedGiftCardItem[];
+      };
+      if (parsed.themePreset === 'rose_luxury' || parsed.themePreset === 'cyber_titanium') {
+        setThemePreset(parsed.themePreset);
+      }
+      if (parsed.title) setDisplayTitle(parsed.title);
+      if (parsed.ownerInstagramHandle) setDisplayOwnerIg(parsed.ownerInstagramHandle);
+      if (parsed.flowerAndGiftNotes) setDisplayFlowerNotes(parsed.flowerAndGiftNotes);
+      if (Array.isArray(parsed.items) && parsed.items.length > 0) {
+        setItems(parsed.items);
+      }
+    } catch {
+      // Ігноруємо пошкоджену чернетку
+    }
+  }, [isDraftPreview]);
+
+  // Issue #24: Авто-синхронізація балансу Монобанки при поверненні з додатку Monobank
+  useEffect(() => {
+    const onVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return;
+      const dbJarItems = items.filter(
+        (it) => Boolean(it.monoJarUrl) && isMongoObjectId(it.id)
+      );
+      if (dbJarItems.length === 0) return;
+
+      for (const jarItem of dbJarItems) {
+        try {
+          const synced = await syncMonoJarProgress(jarItem.id);
+          setItems((prev) =>
+            prev.map((it) =>
+              it.id === jarItem.id
+                ? {
+                    ...it,
+                    jarCurrentAmount: synced.jarCurrentAmount,
+                    jarTargetAmount: synced.jarTargetAmount ?? it.jarTargetAmount,
+                    isBooked: synced.isGoalReached ? true : it.isBooked,
+                  }
+                : it
+            )
+          );
+        } catch {
+          // Кеш або мережева помилка не блокує UI
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [items]);
+
   const persistBookingToken = (itemId: string, token: string) => {
     setBookingTokensMap((prev) => {
       const next = { ...prev, [itemId]: token };
@@ -131,8 +200,8 @@ export function GuestWishlistClient({
   const existingBrowserTokens = Object.values(bookingTokensMap);
   const tokens = THEME_TOKENS[themePreset];
   const demoProfile = DEMO_WISHLISTS[themePreset];
-  const resolvedOwnerIg = ownerInstagramHandle || demoProfile.ownerInstagramHandle;
-  const resolvedFlowerNotes = flowerAndGiftNotes || demoProfile.flowerAndGiftNotes;
+  const resolvedOwnerIg = displayOwnerIg || demoProfile.ownerInstagramHandle;
+  const resolvedFlowerNotes = displayFlowerNotes || demoProfile.flowerAndGiftNotes;
 
   const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,9 +214,20 @@ export function GuestWishlistClient({
       return;
     }
 
+    const trimmedName = guestName.trim();
+    const trimmedEmail = guestEmail.trim();
+    if (!isAnonymousBooking && trimmedName.length < 2) {
+      setModalError("Вкажіть ваше ім'я (мінімум 2 символи) або оберіть анонімний режим.");
+      return;
+    }
+    if (trimmedEmail.length > 0 && !trimmedEmail.includes('@')) {
+      setModalError('Перевірте формат email або залиште поле порожнім.');
+      return;
+    }
+
     const effectiveGuestName = isAnonymousBooking
       ? 'Таємний шанувальник 🕶️'
-      : guestName.trim() || 'Гість';
+      : trimmedName;
 
     setIsSubmitting(true);
     setModalError(null);
@@ -159,11 +239,32 @@ export function GuestWishlistClient({
       isAnonymous: isAnonymousBooking,
     };
 
+    const isDemoOrDraftItem =
+      isDemoMode || isDraftPreview || !isMongoObjectId(activeBookingItem.id);
+
     try {
+      if (isDemoOrDraftItem) {
+        const fallbackToken = `local_tok_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        persistBookingToken(activeBookingItem.id, fallbackToken);
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === activeBookingItem.id
+              ? { ...it, isBooked: true, bookedByName: effectiveGuestName }
+              : it
+          )
+        );
+        setLastBookedTicket(ticketPayload);
+        setShowStoriesPreview(false);
+        setLikeBurstKey((k) => k + 1);
+        setActiveBookingItem(null);
+        setTimeout(() => setShowGrowthModal(true), 450);
+        return;
+      }
+
       const res = await bookGiftItem(
         activeBookingItem.id,
         effectiveGuestName,
-        guestEmail.trim(),
+        trimmedEmail,
         existingBrowserTokens
       );
 
@@ -181,24 +282,11 @@ export function GuestWishlistClient({
       setActiveBookingItem(null);
       setTimeout(() => setShowGrowthModal(true), 450);
     } catch (err) {
-      if (err instanceof Error && err.message.includes('не більше 2')) {
-        setModalError(err.message);
-      } else {
-        const fallbackToken = `local_tok_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-        persistBookingToken(activeBookingItem.id, fallbackToken);
-        setItems((prev) =>
-          prev.map((it) =>
-            it.id === activeBookingItem.id
-              ? { ...it, isBooked: true, bookedByName: effectiveGuestName }
-              : it
-          )
-        );
-        setLastBookedTicket(ticketPayload);
-        setShowStoriesPreview(false);
-        setLikeBurstKey((k) => k + 1);
-        setActiveBookingItem(null);
-        setTimeout(() => setShowGrowthModal(true), 450);
-      }
+      setModalError(
+        err instanceof Error
+          ? err.message
+          : 'Не вдалося зафіксувати бронювання. Спробуйте ще раз.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -208,10 +296,15 @@ export function GuestWishlistClient({
     const token = bookingTokensMap[item.id];
     if (!token) return;
 
-    try {
-      await cancelGiftBooking(item.id, token);
-    } catch {
-      // Демо-фолбек
+    if (!isDemoMode && !isDraftPreview && isMongoObjectId(item.id)) {
+      try {
+        await cancelGiftBooking(item.id, token);
+      } catch (err) {
+        triggerToast(
+          err instanceof Error ? err.message : 'Не вдалося скасувати бронювання.'
+        );
+        return;
+      }
     }
 
     removeBookingToken(item.id);
@@ -229,7 +322,28 @@ export function GuestWishlistClient({
     setIsSubmitting(true);
     setModalError(null);
 
+    const isDemoOrDraftItem =
+      isDemoMode || isDraftPreview || !isMongoObjectId(activeJarItem.id);
+
     try {
+      if (isDemoOrDraftItem) {
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === activeJarItem.id
+              ? {
+                  ...it,
+                  monoJarUrl: monoJarUrlInput.trim(),
+                  jarCurrentAmount: 0,
+                  jarTargetAmount: it.price ?? 5000,
+                }
+              : it
+          )
+        );
+        setActiveJarItem(null);
+        setMonoJarUrlInput('');
+        return;
+      }
+
       const jarStatus = await attachMonoJar(activeJarItem.id, monoJarUrlInput.trim());
       setItems((prev) =>
         prev.map((it) =>
@@ -256,65 +370,56 @@ export function GuestWishlistClient({
       setMonoJarUrlInput('');
       setTimeout(() => setShowGrowthModal(true), 450);
     } catch (err) {
-      if (
-        err instanceof Error &&
-        (err.message.includes('send.monobank.ua') || err.message.includes('HTTPS'))
-      ) {
-        setModalError(err.message);
-      } else {
-        setItems((prev) =>
-          prev.map((it) =>
-            it.id === activeJarItem.id
-              ? {
-                  ...it,
-                  monoJarUrl: monoJarUrlInput.trim(),
-                  jarCurrentAmount: 0,
-                  jarTargetAmount: it.price ?? 5000,
-                }
-              : it
-          )
-        );
-        setActiveJarItem(null);
-        setMonoJarUrlInput('');
-      }
+      setModalError(
+        err instanceof Error
+          ? err.message
+          : 'Не вдалося прив’язати Банку Monobank. Перевірте посилання.'
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleSyncJar = async (item: UnifiedGiftCardItem) => {
-    try {
-      const synced = await syncMonoJarProgress(item.id);
-      setItems((prev) =>
-        prev.map((it) =>
-          it.id === item.id
-            ? {
-                ...it,
-                jarCurrentAmount: synced.jarCurrentAmount,
-                jarTargetAmount: synced.jarTargetAmount ?? it.jarTargetAmount,
-                isBooked: synced.isGoalReached ? true : it.isBooked,
-              }
-            : it
-        )
-      );
-      setLikeBurstKey((k) => k + 1);
-    } catch {
-      const step = 2000;
-      setItems((prev) =>
-        prev.map((it) => {
-          if (it.id !== item.id) return it;
-          const target = it.jarTargetAmount ?? it.price ?? 10000;
-          const nextAmount = Math.min(target, (it.jarCurrentAmount ?? 0) + step);
-          return {
-            ...it,
-            jarCurrentAmount: nextAmount,
-            isBooked: nextAmount >= target ? true : it.isBooked,
-          };
-        })
-      );
-      setLikeBurstKey((k) => k + 1);
-      triggerToast('🐈‍⬛ Баланс Монобанки оновлено (+2 000 ₴ у демо)!');
+    if (!isDemoMode && !isDraftPreview && isMongoObjectId(item.id)) {
+      try {
+        const synced = await syncMonoJarProgress(item.id);
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === item.id
+              ? {
+                  ...it,
+                  jarCurrentAmount: synced.jarCurrentAmount,
+                  jarTargetAmount: synced.jarTargetAmount ?? it.jarTargetAmount,
+                  isBooked: synced.isGoalReached ? true : it.isBooked,
+                }
+              : it
+          )
+        );
+        setLikeBurstKey((k) => k + 1);
+      } catch (err) {
+        triggerToast(
+          err instanceof Error ? err.message : 'Зачекайте хвилину перед наступним оновленням.'
+        );
+      }
+      return;
     }
+
+    const step = 2000;
+    setItems((prev) =>
+      prev.map((it) => {
+        if (it.id !== item.id) return it;
+        const target = it.jarTargetAmount ?? it.price ?? 10000;
+        const nextAmount = Math.min(target, (it.jarCurrentAmount ?? 0) + step);
+        return {
+          ...it,
+          jarCurrentAmount: nextAmount,
+          isBooked: nextAmount >= target ? true : it.isBooked,
+        };
+      })
+    );
+    setLikeBurstKey((k) => k + 1);
+    triggerToast('🐈‍⬛ Баланс Монобанки оновлено (+2 000 ₴ у демо)!');
   };
 
   const featuredFlowerShop =
@@ -408,16 +513,16 @@ export function GuestWishlistClient({
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6 space-y-5">
+      <main className="mx-auto max-w-5xl px-4 py-4 sm:py-6 space-y-4 sm:space-y-5">
         {/* =================================================================== */}
-        {/* 1. PROFILE HEADER (Аватарка + 2px кільце, ім'я, коротке біо)        */}
+        {/* 1. PROFILE HEADER (Компактний на мобайлі 390px)                     */}
         {/* =================================================================== */}
-        <section className="bg-[#171D30]/95 backdrop-blur-xl border border-white/15 rounded-[26px] p-5 sm:p-6 flex flex-col justify-between text-center sm:text-left shadow-xl">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+        <section className="bg-[#171D30]/95 backdrop-blur-xl border border-white/15 rounded-[24px] p-4 sm:p-6 flex flex-col justify-between text-center sm:text-left shadow-xl">
+          <div className="flex flex-row items-center gap-3.5 sm:gap-4 text-left">
             {/* Кругла аватарка з 2px кільцем */}
             <div className="relative shrink-0">
               <div
-                className={`w-20 h-20 rounded-full ${tokens.avatarRingClass} p-[2px] shadow-xl`}
+                className={`w-14 h-14 sm:w-20 sm:h-20 rounded-full ${tokens.avatarRingClass} p-[2px] shadow-xl`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -426,35 +531,35 @@ export function GuestWishlistClient({
                   className="w-full h-full rounded-full object-cover border-2 border-[#0E1324]"
                 />
               </div>
-              <span className="absolute -bottom-1 right-0 text-sm font-extrabold px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow">
+              <span className="hidden sm:inline-block absolute -bottom-1 right-0 text-sm font-extrabold px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 shadow">
                 VIP ✨
               </span>
             </div>
 
-            <div className="space-y-1.5 flex-1">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm font-extrabold">
-                <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
-                  🎂 До свята {demoProfile.daysLeft} днів
+            <div className="space-y-1 flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-sm font-extrabold">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                  ✨ До події {demoProfile.daysLeft} днів
                 </span>
-                <span className="px-3 py-0.5 rounded-full bg-white/10 text-white border border-white/15">
+                <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/15">
                   @{resolvedOwnerIg}
                 </span>
-                <span className="px-3 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30">
+                <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-200 border border-amber-400/30">
                   🤫 Сюрприз-режим
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {initialTitle}
+              <h1 className="text-xl sm:text-3xl font-black text-white tracking-tight truncate">
+                {displayTitle}
               </h1>
-              <p className="text-sm font-semibold text-slate-200 leading-snug">
+              <p className="hidden sm:block text-sm font-semibold text-slate-200 leading-snug">
                 {demoProfile.ownerBio}
               </p>
             </div>
           </div>
 
-          {/* 3 кольорові чіпси-факти з анкети іменинника */}
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-4 pt-4 border-t border-white/10 text-sm font-extrabold">
+          {/* 3 кольорові чіпси-факти з анкети отримувача (на мобайлі компактно) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-start gap-2 mt-4 pt-4 border-t border-white/10 text-sm font-extrabold">
             <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
               📏 {demoProfile.aiSizes}
             </span>
@@ -475,7 +580,7 @@ export function GuestWishlistClient({
             type="button"
             onClick={() => setShowFullAiGenerator((p) => !p)}
             aria-expanded={showFullAiGenerator}
-            className="w-full min-h-[56px] rounded-[22px] bg-[#171D30]/95 hover:bg-[#1E2640] border border-amber-400/50 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left shadow-xl spring-transition"
+            className="w-full min-h-[52px] rounded-[20px] bg-[#171D30]/95 hover:bg-[#1E2640] border border-amber-400/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-left shadow-xl spring-transition"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/45 flex items-center justify-center text-xl shrink-0">
@@ -485,7 +590,7 @@ export function GuestWishlistClient({
                 <div className="text-sm sm:text-base font-extrabold text-white">
                   ✨ Не знаєш що обрати? → Підібрати VIP-сюрприз за 10 сек
                 </div>
-                <div className="text-sm font-semibold text-slate-300">
+                <div className="hidden sm:block text-sm font-semibold text-slate-300">
                   ШІ підбере подарунки для {ownerName} зі списку або в магазинах під твій бюджет
                 </div>
               </div>
@@ -498,14 +603,20 @@ export function GuestWishlistClient({
           {showFullAiGenerator && (
             <AiGiftAssistantWidget
               wishlistSlug={slug}
-              wishlistTitle={initialTitle}
+              wishlistTitle={displayTitle}
               themePreset={themePreset}
               existingBrowserTokens={existingBrowserTokens}
               wishlistItems={items}
               hasOwnerInterests={true}
-              onSelectWishlistItem={() => {
+              onSelectWishlistItem={(targetItemId) => {
                 setShowFullAiGenerator(false);
-                triggerToast('🎁 Оберіть підсвічений лот зі списку нижче!');
+                setHighlightedItemId(targetItemId);
+                triggerToast('🎁 Ось підсвічений лот зі списку!');
+                setTimeout(() => {
+                  const el = document.getElementById(`gift-card-${targetItemId}`);
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 80);
+                setTimeout(() => setHighlightedItemId(null), 2600);
               }}
               onSurpriseBooked={(surprise) => {
                 persistBookingToken(surprise.id, surprise.bookingToken);
@@ -539,41 +650,40 @@ export function GuestWishlistClient({
         </section>
 
         {/* =================================================================== */}
-        {/* 3. FREE APP NOTE                                                    */}
-        {/* =================================================================== */}
-        <section className="rounded-2xl bg-[#171D30]/85 border border-white/10 px-4 py-3 flex items-center justify-center sm:justify-start gap-2.5 text-sm font-semibold text-amber-200">
-          <span>✨</span>
-          <span>
-            Mriyii безкоштовний для тебе і гостей — магазини платять нам невеликий % партнерської винагороди за перехід.
-          </span>
-        </section>
-
-        {/* =================================================================== */}
-        {/* 4. OWNER-CHOSEN ITEMS WITH STATUSES (Білі картки #FFFFFF)           */}
+        {/* 3. OWNER-CHOSEN ITEMS WITH STATUSES (одразу на першому екрані 390px) */}
         {/* =================================================================== */}
         <section id="wishlist-grid" className="grid gap-5 sm:grid-cols-2">
           {items.map((item) => (
-            <SmokedGiftCard
+            <div
               key={item.id}
-              item={item}
-              themePreset={themePreset}
-              viewMode="guest"
-              locale={locale}
-              ownerInstagramHandle={resolvedOwnerIg}
-              forceFallbackPoster={forceFallbackPoster}
-              isBookedByCurrentVisitor={Boolean(bookingTokensMap[item.id])}
-              onInstagramOrderToast={triggerToast}
-              onBookClick={(target) => {
-                setModalError(null);
-                setActiveBookingItem(target);
-              }}
-              onCancelBookingClick={handleCancelBooking}
-              onAttachJarClick={(target) => {
-                setModalError(null);
-                setActiveJarItem(target);
-              }}
-              onSyncJarClick={handleSyncJar}
-            />
+              id={`gift-card-${item.id}`}
+              className={
+                highlightedItemId === item.id
+                  ? 'rounded-[26px] ring-4 ring-amber-400/90 ring-offset-4 ring-offset-[#141218] transition-all'
+                  : 'transition-all'
+              }
+            >
+              <SmokedGiftCard
+                item={item}
+                themePreset={themePreset}
+                viewMode="guest"
+                locale={locale}
+                ownerInstagramHandle={resolvedOwnerIg}
+                forceFallbackPoster={forceFallbackPoster}
+                isBookedByCurrentVisitor={Boolean(bookingTokensMap[item.id])}
+                onInstagramOrderToast={triggerToast}
+                onBookClick={(target) => {
+                  setModalError(null);
+                  setActiveBookingItem(target);
+                }}
+                onCancelBookingClick={handleCancelBooking}
+                onAttachJarClick={(target) => {
+                  setModalError(null);
+                  setActiveJarItem(target);
+                }}
+                onSyncJarClick={handleSyncJar}
+              />
+            </div>
           ))}
         </section>
 
@@ -586,7 +696,7 @@ export function GuestWishlistClient({
               💡 Маєш власну круту ідею подарунка?
             </div>
             <p className="text-sm text-slate-300">
-              Запропонуй її іншим гостям — іменинник не побачить сюрприз до дати свята.
+              Запропонуй її іншим гостям — отримувач не побачить сюрприз до моменту вручення.
             </p>
           </div>
           <button
@@ -660,7 +770,7 @@ export function GuestWishlistClient({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <span className="text-sm font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900">
-                  🤫 Сюрприз для іменинника
+                  🤫 Сюрприз без спойлерів
                 </span>
                 <h3 className="text-lg font-black text-slate-950 mt-1.5">
                   {activeBookingItem.emoji} {activeBookingItem.title}
@@ -726,7 +836,7 @@ export function GuestWishlistClient({
 
               <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm font-semibold text-emerald-900 flex items-center gap-2">
                 <span>🔒</span>
-                <span>{ownerName} не дізнається, хто забронював подарунок, до дня свята.</span>
+                <span>{ownerName} не дізнається, хто забронював подарунок, до моменту вручення.</span>
               </div>
 
               <button
@@ -939,7 +1049,7 @@ export function GuestWishlistClient({
             )}
 
             <p className="text-sm font-semibold text-slate-600 leading-relaxed">
-              Хочете такий самий Linktree-вішліст із Монобанкою та ШІ для свого свята? Створіть його безкоштовно за 30 секунд!
+              Хочете такий самий Linktree-вішліст із Монобанкою та ШІ для себе чи близьких? Створіть його безкоштовно за 30 секунд!
             </p>
             <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
               <Link
@@ -994,7 +1104,7 @@ export function GuestWishlistClient({
                   id: `fan-suggest-${Date.now()}`,
                   title: fanTitle.trim(),
                   emoji: '💡',
-                  description: `Ідея від гостя (${guestLabel}) — приховано від іменинника до свята 🤫`,
+                  description: `Ідея від гостя (${guestLabel}) — приховано від отримувача до вручення 🤫`,
                   price: Number.parseInt(fanPrice, 10) || undefined,
                   currency: 'UAH',
                   originalUrl: fanUrl.trim() || undefined,
@@ -1010,7 +1120,7 @@ export function GuestWishlistClient({
                 setFanGuestName('');
                 setIsAnonymousFan(false);
                 setShowFanSuggestModal(false);
-                triggerToast('💡 Ідею додано для інших гостей! Іменинник не побачить сюрприз.');
+                triggerToast('💡 Ідею додано для інших гостей! Отримувач не побачить сюрприз.');
               }}
               className="space-y-3"
             >

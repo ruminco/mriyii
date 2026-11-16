@@ -27,7 +27,14 @@ const BookGiftItemZodSchema = z.object({
     .trim()
     .min(2, "Вкажіть ваше ім'я (мінімум 2 символи)")
     .max(80, "Ім'я занадто довге"),
-  guestEmail: z.string().trim().email('Вкажіть коректний email для можливості скасування броні'),
+  guestEmail: z
+    .string()
+    .trim()
+    .refine((val) => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: 'Вкажіть коректний email або залиште поле порожнім',
+    })
+    .optional()
+    .default(''),
   existingBrowserTokens: z.array(z.string().trim()).max(20).optional(),
   clientFingerprint: z.string().trim().max(128).optional(),
 });
@@ -76,24 +83,31 @@ export async function computeGuestFingerprint(customSeed?: string): Promise<stri
 }
 
 /**
- * Перевіряє правило анти-тролінгу: не більше 2 активних бронювань на один guestEmail,
+ * Перевіряє правило анти-тролінгу: не більше 2 активних бронювань на один guestEmail (якщо вказано),
  * bookedByFingerprint або на масив bookingToken з браузера гостя у межах одного wishlistId.
  */
 export async function assertGuestBookingQuota(params: {
   wishlistId: unknown;
-  guestEmail: string;
+  guestEmail?: string;
   bookedByFingerprint?: string;
   existingBrowserTokens?: string[];
 }): Promise<void> {
-  const normalizedEmail = params.guestEmail.trim().toLowerCase();
+  const normalizedEmail = (params.guestEmail ?? '').trim().toLowerCase();
   const validTokens = (params.existingBrowserTokens ?? []).filter((t) => t.length >= 16);
 
-  const orConditions: Array<Record<string, unknown>> = [{ bookedByEmail: normalizedEmail }];
+  const orConditions: Array<Record<string, unknown>> = [];
+  if (normalizedEmail.length > 0) {
+    orConditions.push({ bookedByEmail: normalizedEmail });
+  }
   if (params.bookedByFingerprint) {
     orConditions.push({ bookedByFingerprint: params.bookedByFingerprint });
   }
   if (validTokens.length > 0) {
     orConditions.push({ bookingToken: { $in: validTokens } });
+  }
+
+  if (orConditions.length === 0) {
+    return;
   }
 
   const activeBookingsCount = await GiftItem.countDocuments({
@@ -110,12 +124,12 @@ export async function assertGuestBookingQuota(params: {
 }
 
 /**
- * ПРАВИЛО 2 [Tech Lead]: Атомарне бронювання подарунка гостем + Анти-тролінг (макс. 2 броні на гостя за email або fingerprint).
+ * ПРАВИЛО 2 [Tech Lead]: Атомарне бронювання подарунка гостем + Анти-тролінг (макс. 2 броні на гостя за email, токенами або fingerprint).
  */
 export async function bookGiftItem(
   itemId: string,
   guestName: string,
-  guestEmail: string,
+  guestEmail: string = '',
   existingBrowserTokens?: string[],
   clientFingerprint?: string
 ): Promise<BookGiftItemResult> {
@@ -143,28 +157,31 @@ export async function bookGiftItem(
   }
 
   const fingerprint = await computeGuestFingerprint(input.clientFingerprint);
+  const cleanEmail = input.guestEmail.trim().toLowerCase();
 
   // Перевірка ліміту анти-тролінгу (не більше 2 активних бронювань у цьому вішлісті)
   await assertGuestBookingQuota({
     wishlistId: targetItem.wishlistId,
-    guestEmail: input.guestEmail,
+    guestEmail: cleanEmail,
     bookedByFingerprint: fingerprint,
     existingBrowserTokens: input.existingBrowserTokens,
   });
 
   const bookingToken = crypto.randomBytes(24).toString('hex');
 
+  const updateFields: Record<string, unknown> = {
+    isBooked: true,
+    bookedByName: input.guestName,
+    bookingToken,
+    bookedByFingerprint: fingerprint,
+  };
+  if (cleanEmail.length > 0) {
+    updateFields.bookedByEmail = cleanEmail;
+  }
+
   const updatedItem = await GiftItem.findOneAndUpdate(
     { _id: input.itemId, isBooked: false },
-    {
-      $set: {
-        isBooked: true,
-        bookedByName: input.guestName,
-        bookedByEmail: input.guestEmail.toLowerCase(),
-        bookingToken,
-        bookedByFingerprint: fingerprint,
-      },
-    },
+    { $set: updateFields },
     { new: true }
   ).lean();
 

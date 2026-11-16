@@ -45,7 +45,7 @@ export const THEME_TOKENS: Record<ThemePreset, ThemeVisualTokens> = {
     primaryCtaGradient:
       'bg-[#F4FF7A] hover:bg-[#e8f566] !text-[#141218] shadow-lg',
     primaryJarBtnText: '🐈 Поповнити Банку',
-    primaryBookBtnText: '👑 Подарувати все',
+    primaryBookBtnText: '🎁 Забронювати подарунок',
     donorsBadgeClass: 'bg-[#EFEAFF] text-[#5B50EC]',
     surpriseBoxGradient:
       'from-[#EFEAFF] via-slate-50 to-[#FFE8EE] border-[#DECFFC]',
