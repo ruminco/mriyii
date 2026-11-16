@@ -210,10 +210,18 @@ export function SmokedGiftCard({
     );
   };
 
+  const imgObjectPos = item.imageUrl?.includes('5208818')
+    ? '85% 90%'
+    : item.imageUrl?.includes('4669901')
+    ? 'center 25%'
+    : item.imageUrl?.includes('5410144')
+    ? 'center 15%'
+    : 'center center';
+
   return (
-    <div className="solid-white-card rounded-[26px] overflow-hidden border border-white flex flex-col justify-between spring-transition">
-      {/* ВЕРХНЯ ФОТО-ШАПКА (h-44) ІЗ КУТОВИМИ БЕЙДЖАМИ ТА SMART LUXURY POSTER FALLBACK */}
-      <div className="relative h-44 w-full overflow-hidden">
+    <div className="solid-white-card rounded-[26px] overflow-hidden border border-slate-200/80 flex flex-col justify-between spring-transition">
+      {/* ВЕРХНЯ ФОТО-ШАПКА (h-48) БЕЗ БРУДНОГО ОВЕРЛЕЮ */}
+      <div className="relative h-48 w-full overflow-hidden bg-slate-100">
         {showRealPhoto ? (
           <div className="w-full h-full relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -223,9 +231,9 @@ export function SmokedGiftCard({
               loading="eager"
               referrerPolicy="no-referrer"
               onError={() => setImgError(true)}
+              style={{ objectPosition: imgObjectPos }}
               className="w-full h-full object-cover spring-transition hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent" />
           </div>
         ) : (
           /* Smart Luxury Poster Fallback (Рівень 2 захисту обкладинки) */
@@ -233,13 +241,12 @@ export function SmokedGiftCard({
             className={`w-full h-full ${tokens.fallbackPosterClass} relative flex flex-col items-center justify-center overflow-hidden`}
           >
             <div className="absolute inset-0 poster-pattern" />
-            <div className="relative z-10 w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md border border-white/40 shadow-xl flex items-center justify-center text-4xl -translate-y-1.5 select-none">
+            <div className="relative z-10 w-16 h-16 rounded-[18px] bg-white/20 backdrop-blur-md border border-white/40 shadow-xl flex items-center justify-center text-4xl -translate-y-1.5 select-none">
               <span>{item.emoji || '✨'}</span>
             </div>
-            <span className="relative z-10 text-[10px] font-bold uppercase tracking-widest text-white/85">
+            <span className="relative z-10 text-sm font-bold text-white/95 px-3 py-1 rounded-full bg-black/35">
               Офіційний магазин • Перевірено
             </span>
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
           </div>
         )}
 
@@ -250,24 +257,24 @@ export function SmokedGiftCard({
               href={viewMode === 'guest' ? outUrl : storeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-slate-950/80 hover:bg-slate-950 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20 inline-flex items-center gap-1"
+              className="bg-[#141218]/90 hover:bg-[#141218] backdrop-blur-md text-white text-sm font-bold px-3 py-1 rounded-full border border-white/20 inline-flex items-center gap-1.5"
             >
               <span>{storeBadgeText}</span>
-              <ExternalLink className="w-2.5 h-2.5 opacity-80" />
+              <ExternalLink className="w-3.5 h-3.5 opacity-85" />
             </a>
           ) : (
-            <span className="bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/20">
+            <span className="bg-[#141218]/90 backdrop-blur-md text-white text-sm font-bold px-3 py-1 rounded-full border border-white/20">
               {storeBadgeText}
             </span>
           )}
 
           {item.isAiSurprise ? (
-            <span className="bg-purple-600/95 backdrop-blur-md text-white text-[11px] font-extrabold px-2.5 py-1 rounded-full">
+            <span className="bg-[#5B50EC] text-white text-sm font-extrabold px-3 py-1 rounded-full shadow">
               ✨ AI Сюрприз
             </span>
           ) : (
             <span
-              className={`${tokens.priorityBadgeClass} backdrop-blur-md text-[11px] font-extrabold px-2.5 py-1 rounded-full`}
+              className={`${tokens.priorityBadgeClass} text-sm font-extrabold px-3 py-1 rounded-full shadow`}
             >
               {tokens.priorityBadgeText}
             </span>
@@ -278,54 +285,54 @@ export function SmokedGiftCard({
         <div className="absolute top-3 right-3 z-10">
           {viewMode === 'owner' ? (
             item.isBooked || hasJar ? (
-              <span className="bg-indigo-600 text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md inline-flex items-center gap-1">
-                🔒 Заброньовано (Сюрприз!)
+              <span className="bg-[#5B50EC] text-white font-extrabold text-sm px-3 py-1 rounded-full shadow-md inline-flex items-center gap-1">
+                🔒 Заброньовано
               </span>
             ) : (
-              <span className="bg-emerald-500 text-slate-950 font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">
+              <span className="bg-emerald-500 text-[#141218] font-extrabold text-sm px-3 py-1 rounded-full shadow-md">
                 🟢 Вільно
               </span>
             )
           ) : item.isBooked || isGoalReached ? (
-            <span className="bg-emerald-400 text-slate-950 font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">
-              {isGoalReached ? '🎉 Банку зібрано (100%)!' : '💎 Заброньовано'}
+            <span className="bg-emerald-400 text-[#141218] font-extrabold text-sm px-3 py-1 rounded-full shadow-md">
+              {isGoalReached ? '🎉 100% зібрано' : '💎 Заброньовано'}
             </span>
           ) : hasJar ? (
-            <span className="bg-amber-400 text-slate-950 font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">
-              🫙 Йде збір на Банку ({progressPct}%)
+            <span className="bg-[#F4FF7A] text-[#141218] font-extrabold text-sm px-3 py-1 rounded-full shadow-md tabular-nums">
+              🫙 Банка {progressPct}%
             </span>
           ) : cleanShopHandle ? (
-            <span className="bg-pink-500 text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">
-              📸 Instagram Direct
+            <span className="bg-[#141218]/90 text-white font-extrabold text-sm px-3 py-1 rounded-full shadow-md">
+              📸 Direct
             </span>
           ) : (
-            <span className="bg-emerald-400 text-slate-950 font-extrabold text-[11px] px-3 py-1 rounded-full shadow-md">
+            <span className="bg-emerald-400 text-[#141218] font-extrabold text-sm px-3 py-1 rounded-full shadow-md">
               🎁 Доступно
             </span>
           )}
         </div>
 
-        {/* Нижній край фото: Велика ціна в ₴ + Категорійний бейдж */}
-        <div className="absolute bottom-2.5 left-3.5 right-3.5 flex items-end justify-between z-10">
-          <div className="text-2xl font-black text-white drop-shadow tabular-nums">
+        {/* Нижній край фото: Чиста пігулка ціни в ₴ + Категорійний бейдж */}
+        <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between gap-2 z-10">
+          <div className="text-lg sm:text-xl font-black text-white bg-[#141218]/90 backdrop-blur-md px-3.5 py-1 rounded-full shadow-lg tabular-nums">
             {typeof item.price === 'number' && item.price > 0
               ? `${item.price.toLocaleString('uk-UA')} ₴`
               : 'Сюрприз 🎁'}
           </div>
-          <span className="text-[11px] font-extrabold text-amber-300 bg-slate-950/75 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-amber-400/40">
+          <span className="text-sm font-extrabold text-[#141218] bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow">
             {hasJar
-              ? '✨ Груповий подарунок'
+              ? '✨ Спільний подарунок'
               : cleanShopHandle
-              ? '🌸 Доставка через Direct'
-              : '🎁 Індивідуальний лот'}
+              ? '🌸 Через Direct'
+              : '🎁 Індивідуально'}
           </span>
         </div>
       </div>
 
       {/* НИЖНЯ ЧАСТИНА КАРТКИ НА СУЦІЛЬНОМУ БІЛОМУ ТЛІ ІЗ СОКОВИТИМИ КОЛЬОРОВИМИ АКЦЕНТАМИ */}
-      <div className="p-4 space-y-3 flex-1 flex flex-col justify-between bg-white text-slate-950">
+      <div className="p-4 space-y-3 flex-1 flex flex-col justify-between bg-white text-[#141218]">
         <div>
-          <h3 className="font-extrabold text-sm sm:text-base text-slate-950 leading-snug">
+          <h3 className="font-extrabold text-base text-[#141218] leading-snug">
             {item.title}
           </h3>
 
@@ -347,14 +354,14 @@ export function SmokedGiftCard({
                 className={`bg-gradient-to-r ${tokens.surpriseBoxGradient} border rounded-2xl p-3 flex items-center justify-between gap-2.5`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shrink-0">
+                  <span className="w-10 h-10 rounded-xl bg-[#5B50EC] text-white flex items-center justify-center text-base shrink-0">
                     🔒
                   </span>
                   <div className="text-sm">
                     <div className="font-extrabold text-indigo-950">
                       Сюрприз-захист активний! ✨
                     </div>
-                    <div className="text-[11px] font-semibold text-indigo-800">
+                    <div className="text-sm font-semibold text-indigo-800">
                       Друзі вже збирають Банку або забронювали цей лот. Деталі приховано до свята!
                     </div>
                   </div>
@@ -412,9 +419,9 @@ export function SmokedGiftCard({
                         : '🐈‍⬛ Монобанка збору'}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${tokens.donorsBadgeClass}`}
+                      className={`text-sm font-bold px-2 py-0.5 rounded-md ${tokens.donorsBadgeClass}`}
                     >
-                      спільний збір друзів
+                      спільний подарунок
                     </span>
                   </span>
                   <span className="font-black text-emerald-700 tabular-nums">
@@ -440,7 +447,7 @@ export function SmokedGiftCard({
                           setJarBurstKey((k) => k + 1);
                           onDonateSimulateClick(item);
                         }}
-                        className={`flex-1 min-h-[48px] ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95`}
+                        className={`flex-1 min-h-[48px] ${tokens.primaryCtaGradient} hover:brightness-95 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95`}
                       >
                         {tokens.primaryJarBtnText} (+2 000 ₴)
                       </button>
@@ -458,7 +465,7 @@ export function SmokedGiftCard({
                             jarCurrentUah: currentAmount,
                           });
                         }}
-                        className={`flex-1 min-h-[48px] ${tokens.primaryCtaGradient} hover:brightness-110 text-white font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95 inline-flex items-center justify-center gap-1.5`}
+                        className={`flex-1 min-h-[48px] ${tokens.primaryCtaGradient} hover:brightness-95 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95 inline-flex items-center justify-center gap-1.5`}
                       >
                         <span>{tokens.primaryJarBtnText}</span>
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -486,7 +493,7 @@ export function SmokedGiftCard({
                           setJarBurstKey((k) => k + 1);
                           onCloseJar100SimulateClick(item);
                         }}
-                        className="min-h-[48px] bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
+                        className="min-h-[48px] bg-[#141218] hover:bg-slate-800 text-[#F4FF7A] font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
                       >
                         👑 Закрити 100%
                       </button>
@@ -495,7 +502,7 @@ export function SmokedGiftCard({
                         <button
                           type="button"
                           onClick={() => onBookClick(item)}
-                          className="min-h-[48px] bg-slate-950 hover:bg-slate-800 text-amber-300 font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
+                          className="min-h-[48px] bg-[#141218] hover:bg-slate-800 text-[#F4FF7A] font-extrabold text-sm py-2.5 px-3 rounded-xl spring-transition active:scale-95"
                         >
                           👑 Закрити 100%
                         </button>
@@ -512,13 +519,13 @@ export function SmokedGiftCard({
                 <button
                   type="button"
                   onClick={handleInstagramOrderClick}
-                  className="w-full py-2.5 px-3.5 rounded-xl text-sm font-extrabold bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 hover:brightness-110 text-white shadow-md shadow-pink-500/20 spring-transition active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full min-h-[48px] py-2.5 px-3.5 rounded-xl text-sm font-extrabold bg-[#141218] hover:bg-slate-800 text-white shadow-md spring-transition active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Camera className="w-4 h-4 shrink-0" />
                   <span>Замовити в Instagram @{cleanShopHandle} 📸</span>
                 </button>
                 {igCopiedLocal && (
-                  <div className="text-[11px] font-bold text-emerald-800 text-center bg-emerald-50 border border-emerald-200 rounded-lg py-1 px-2">
+                  <div className="text-sm font-bold text-emerald-800 text-center bg-emerald-50 border border-emerald-200 rounded-lg py-1.5 px-2">
                     Текст замовлення скопійовано в буфер обміну! 💌
                   </div>
                 )}

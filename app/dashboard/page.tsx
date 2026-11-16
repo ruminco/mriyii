@@ -49,7 +49,7 @@ const WISHLIST_TEMPLATES: Record<
     items: [
       {
         title: 'Стайлер Dyson Airwrap Complete Long',
-        emoji: '💇‍♀️',
+        emoji: '✨',
         price: 25990,
         description: 'Можна скинутися в Монобанку або подарувати разом ✨',
       },
@@ -124,6 +124,7 @@ function DashboardContent() {
   const [themePreset, setThemePreset] = useState<ThemePreset>(
     initialThemeParam === 'cyber_titanium' ? 'cyber_titanium' : 'rose_luxury'
   );
+  const [cardSurfaceStyle, setCardSurfaceStyle] = useState<'aurora' | 'smoked' | 'editorial'>('aurora');
   const [activeTab, setActiveTab] = useState<EditorTab>('content');
   const [mobileView, setMobileView] = useState<'editor' | 'preview'>('editor');
 
@@ -416,7 +417,7 @@ function DashboardContent() {
           : lower.includes('навуш') || lower.includes('airpods') || lower.includes('sony')
           ? '🎧'
           : lower.includes('dyson') || lower.includes('стайл')
-          ? '💇‍♀️'
+          ? '✨'
           : lower.includes('квіт') || lower.includes('півон')
           ? '🌸'
           : lower.includes('книг')
@@ -491,7 +492,10 @@ function DashboardContent() {
     : 'bg-emerald-400 hover:bg-emerald-500 text-slate-950';
 
   return (
-    <div className={`min-h-screen ${tokens.meshClass} text-white spring-transition pb-20`}>
+    <div
+      data-style={cardSurfaceStyle}
+      className={`min-h-screen ${tokens.meshClass} text-white spring-transition pb-20`}
+    >
       {/* Верхня панель Linktree-редактора */}
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0E1324]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
@@ -1055,15 +1059,13 @@ function DashboardContent() {
               </div>
             )}
 
-            {/* --------------------------------------------------------------- */}
-            {/* TAB 3: DESIGN (Тема DS V2 Option 2)                            */}
-            {/* --------------------------------------------------------------- */}
+                {/* TAB 3: DESIGN (DS V3 Presets + Aurora/Smoked/Editorial Style) */}
             {activeTab === 'design' && (
               <div className="rounded-[24px] bg-[#171D30] border border-white/10 p-5 sm:p-6 space-y-5">
                 <div>
-                  <h2 className="text-lg font-black text-white">🎨 Дизайн-тема DS V2</h2>
+                  <h2 className="text-lg font-black text-white">🎨 Дизайн-система V3 (M3 Expressive)</h2>
                   <p className="text-sm text-slate-300">
-                    Оберіть пресет — праве прев&apos;ю оновиться миттєво.
+                    Оберіть тональний пресет і стиль поверхні — праве прев&apos;ю оновиться миттєво.
                   </p>
                 </div>
 
@@ -1073,27 +1075,27 @@ function DashboardContent() {
                     onClick={() => handleThemeChange('rose_luxury')}
                     className={`rounded-2xl p-5 text-left border-2 transition space-y-3 ${
                       themePreset === 'rose_luxury'
-                        ? 'border-amber-400 bg-[#0E1324]'
-                        : 'border-white/10 bg-[#0E1324]/60 hover:border-white/25'
+                        ? 'border-[#F4FF7A] bg-[#141218]'
+                        : 'border-white/10 bg-[#141218]/60 hover:border-white/25'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-base font-black text-white">
-                        👩 Midnight Velvet
+                        👩 Lavender &amp; Butter
                       </span>
                       {themePreset === 'rose_luxury' && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-sm font-black">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#F4FF7A] text-[#141218] text-sm font-black">
                           Активна
                         </span>
                       )}
                     </div>
                     <p className="text-sm text-slate-300">
-                      Глибокий оксамит #0E1324 + Champagne Amber #F59E0B CTA
+                      Лаванда #EFEAFF + Cream #FAF6F0 + Butter-Lime #F4FF7A CTA
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-[#0E1324] border border-white/25" />
-                      <span className="w-6 h-6 rounded-full bg-amber-500" />
-                      <span className="w-6 h-6 rounded-full bg-amber-200" />
+                      <span className="w-6 h-6 rounded-full bg-[#EFEAFF] border border-white/25" />
+                      <span className="w-6 h-6 rounded-full bg-[#6F66F2]" />
+                      <span className="w-6 h-6 rounded-full bg-[#F4FF7A]" />
                     </div>
                   </button>
 
@@ -1102,29 +1104,58 @@ function DashboardContent() {
                     onClick={() => handleThemeChange('cyber_titanium')}
                     className={`rounded-2xl p-5 text-left border-2 transition space-y-3 ${
                       themePreset === 'cyber_titanium'
-                        ? 'border-emerald-400 bg-[#0B1120]'
-                        : 'border-white/10 bg-[#0B1120]/60 hover:border-white/25'
+                        ? 'border-emerald-400 bg-[#0F1118]'
+                        : 'border-white/10 bg-[#0F1118]/60 hover:border-white/25'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-base font-black text-white">
-                        👨 Cyber Titanium
+                        👨 Pro Titanium
                       </span>
                       {themePreset === 'cyber_titanium' && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-400 text-slate-950 text-sm font-black">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#34D399] text-[#0B1120] text-sm font-black">
                           Активна
                         </span>
                       )}
                     </div>
                     <p className="text-sm text-slate-300">
-                      Титан #0B1120 + Emerald Mint #34D399 + Indigo #4F46E5
+                      Ice-Slate #EEF2FA + Carbon #15161D + Indigo #4F46E5 &amp; Mint #34D399
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-[#0B1120] border border-white/25" />
-                      <span className="w-6 h-6 rounded-full bg-emerald-400" />
-                      <span className="w-6 h-6 rounded-full bg-indigo-500" />
+                      <span className="w-6 h-6 rounded-full bg-[#EEF2FA] border border-white/25" />
+                      <span className="w-6 h-6 rounded-full bg-[#4F46E5]" />
+                      <span className="w-6 h-6 rounded-full bg-[#34D399]" />
                     </div>
                   </button>
+                </div>
+
+                {/* Перенесений із публічного Hero перемикач стилю поверхні */}
+                <div className="pt-3 border-t border-white/10 space-y-2.5">
+                  <div className="text-sm font-bold text-slate-200">
+                    Стиль поверхонь карток (налаштування власника):
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(
+                      [
+                        { id: 'aurora', label: '✨ Aurora' },
+                        { id: 'smoked', label: '🪟 Smoked Glass' },
+                        { id: 'editorial', label: '📰 Editorial' },
+                      ] as const
+                    ).map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setCardSurfaceStyle(s.id)}
+                        className={`min-h-[44px] px-4 rounded-xl text-sm font-extrabold border transition ${
+                          cardSurfaceStyle === s.id
+                            ? `${solidBtnClass} border-transparent`
+                            : 'bg-[#0E1324] text-slate-200 border-white/15 hover:border-white/30'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between">
@@ -1268,7 +1299,7 @@ function DashboardContent() {
                 className={`rounded-[24px] ${tokens.meshClass} p-4 space-y-3.5 max-h-[78vh] overflow-y-auto`}
               >
                 {/* 1. PROFILE HEADER */}
-                <div className="rounded-2xl bg-[#171D30]/95 border border-white/15 p-4 text-center space-y-2.5">
+                <div className="style-surface rounded-2xl bg-[#171D30]/95 border border-white/15 p-4 text-center space-y-2.5">
                   <div className="mx-auto w-16 h-16 rounded-full p-[2px] inline-block bg-gradient-to-br from-amber-400 to-indigo-500">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -1298,7 +1329,7 @@ function DashboardContent() {
                   <button
                     type="button"
                     onClick={() => setPreviewAiExpanded((v) => !v)}
-                    className="w-full min-h-[48px] rounded-2xl bg-[#171D30]/95 border border-amber-400/35 px-4 py-2.5 flex items-center justify-between gap-2 text-left"
+                    className="style-surface w-full min-h-[48px] rounded-2xl bg-[#171D30]/95 border border-amber-400/35 px-4 py-2.5 flex items-center justify-between gap-2 text-left"
                   >
                     <span className="text-sm font-extrabold text-white">
                       ✨ Хочеш, допоможу з ідеєю на основі інтересів?

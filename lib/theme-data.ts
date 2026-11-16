@@ -22,56 +22,58 @@ export interface ThemeVisualTokens {
   surpriseBoxGradient: string;
 }
 
+export type LandingPreset = ThemePreset | 'creator_bio';
+
 export const THEME_TOKENS: Record<ThemePreset, ThemeVisualTokens> = {
   rose_luxury: {
     preset: 'rose_luxury',
     gender: 'female',
-    label: '👩 Для неї • Rose Aurora',
+    label: '👩 Для неї • Lavender & Butter',
     meshClass: 'canvas-rose',
     avatarRingClass: 'avatar-ring-rose',
     fallbackPosterClass: 'fallback-poster-rose',
-    aiBannerGradient: 'bg-[#171D30] border border-rose-400/35',
+    aiBannerGradient: 'bg-[#1A1724] border border-[#DECFFC]/35',
     commentBubbleClass:
-      'bg-rose-50 border-l-4 border-rose-500 text-slate-950',
+      'bg-[#EFEAFF] border-l-4 border-[#5B50EC] text-[#141218]',
     emojiFrameGradient:
-      'from-rose-400 via-pink-400 to-indigo-500 shadow-lg shadow-rose-500/20',
-    priorityBadgeClass: 'bg-rose-400 text-slate-950',
+      'from-[#6F66F2] via-[#DECFFC] to-[#F4FF7A] shadow-lg shadow-[#6F66F2]/20',
+    priorityBadgeClass: 'bg-[#F4FF7A] text-[#141218]',
     priorityBadgeText: '🔥 Мрія #1',
     pricePillClass:
-      'text-rose-200 bg-rose-500/20 border border-rose-400/40',
-    shimmerBarClass: 'bg-emerald-500',
+      'text-[#141218] bg-[#F4FF7A] border border-[#141218]/15',
+    shimmerBarClass: 'bg-[#5B50EC]',
     primaryCtaGradient:
-      'bg-rose-400 hover:bg-rose-500 !text-slate-950 shadow-lg shadow-rose-500/20',
+      'bg-[#F4FF7A] hover:bg-[#e8f566] !text-[#141218] shadow-lg',
     primaryJarBtnText: '🐈 Поповнити Банку',
     primaryBookBtnText: '👑 Подарувати все',
-    donorsBadgeClass: 'bg-emerald-200/80 text-emerald-900',
+    donorsBadgeClass: 'bg-[#EFEAFF] text-[#5B50EC]',
     surpriseBoxGradient:
-      'from-indigo-50 via-slate-50 to-rose-50 border-indigo-200',
+      'from-[#EFEAFF] via-slate-50 to-[#FFE8EE] border-[#DECFFC]',
   },
   cyber_titanium: {
     preset: 'cyber_titanium',
     gender: 'male',
-    label: '👨 Для нього • Cyber Titanium',
+    label: '👨 Для нього • Pro Titanium',
     meshClass: 'canvas-cyber',
     avatarRingClass: 'avatar-ring-cyber',
     fallbackPosterClass: 'fallback-poster-cyber',
-    aiBannerGradient: 'bg-[#171D30] border border-emerald-400/30',
+    aiBannerGradient: 'bg-[#15161D] border border-emerald-400/30',
     commentBubbleClass:
-      'bg-indigo-50 border-l-4 border-indigo-600 text-indigo-950',
+      'bg-[#EEF2FA] border-l-4 border-[#4F46E5] text-[#15161D]',
     emojiFrameGradient:
-      'from-emerald-400 via-cyan-400 to-indigo-500 shadow-lg shadow-emerald-500/20',
-    priorityBadgeClass: 'bg-indigo-600 text-white',
+      'from-emerald-400 via-[#818CF8] to-[#4F46E5] shadow-lg shadow-emerald-500/20',
+    priorityBadgeClass: 'bg-[#4F46E5] text-white',
     priorityBadgeText: '⚡ Топ-бажання',
     pricePillClass:
-      'text-emerald-200 bg-emerald-500/20 border border-emerald-400/40',
+      'text-[#0B1120] bg-[#34D399] border border-emerald-400/40',
     shimmerBarClass: 'bg-emerald-500',
     primaryCtaGradient:
-      'bg-emerald-400 hover:bg-emerald-500 !text-slate-950 shadow-lg shadow-emerald-500/20',
+      'bg-[#34D399] hover:bg-emerald-400 !text-[#0B1120] shadow-lg shadow-emerald-500/20',
     primaryJarBtnText: '🫙 Поповнити Банку',
     primaryBookBtnText: '🎁 Забронювати',
     donorsBadgeClass: 'bg-emerald-200/80 text-emerald-900',
     surpriseBoxGradient:
-      'from-indigo-50 via-blue-50 to-emerald-50 border-indigo-200',
+      'from-[#EEF2FA] via-blue-50 to-emerald-50 border-indigo-200',
   },
 };
 
@@ -99,7 +101,7 @@ export const DEMO_WISHLISTS: Record<
     title: 'Олена Ковальчук • Мої 25 рочків 🥂',
     ownerName: 'Олена Ковальчук',
     ownerAvatarUrl:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+      'https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=400',
     ownerBio:
       'Зібрала тут речі, про які справді мрію. Можна бронювати у 1 клік, замовляти квіти в Direct або скидатися на Банку!',
     daysLeft: 12,
@@ -121,7 +123,7 @@ export const DEMO_WISHLISTS: Record<
         price: 26000,
         currency: 'UAH',
         imageUrl:
-          'https://images.unsplash.com/photo-1522338140262-f46f5913618a?auto=format&fit=crop&w=700&q=80',
+          'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=700',
         originalUrl: 'https://rozetka.com.ua/ua/dyson-airwrap/',
         affiliateUrl: 'https://rozetka.com.ua/ua/dyson-airwrap/?utm_source=mriyii',
         isBooked: false,
@@ -135,14 +137,14 @@ export const DEMO_WISHLISTS: Record<
       {
         id: 'demo-lux-ig-1',
         wishlistId: 'wl-lux',
-        title: 'Авторський букет з 25 білих півоній та ранункулюсів 🌸',
+        title: 'Авторський букет з 25 білих півоній та ранункулюсів',
         emoji: '🌸',
         description:
           'Улюблений букет із бутика @kamelia_flowers. Оплатіть у Direct — магазин сам спитає у мене зручний час доставки!',
         price: 4200,
         currency: 'UAH',
         imageUrl:
-          'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=700&q=80',
+          'https://images.pexels.com/photos/12775959/pexels-photo-12775959.jpeg?auto=compress&cs=tinysrgb&w=700',
         originalUrl: 'https://www.instagram.com/kamelia_flowers/',
         affiliateUrl: 'https://www.instagram.com/kamelia_flowers/?utm_source=mriyii',
         instagramHandle: 'kamelia_flowers',
@@ -153,16 +155,16 @@ export const DEMO_WISHLISTS: Record<
       {
         id: 'demo-lux-ig-2',
         wishlistId: 'wl-lux',
-        title: 'Шовкова сукня-комбінація Champagne Rose (розмір S)',
-        emoji: '👗',
-        description: 'Український Instagram-шоурум @cher17.ua, колір шампань, розмір S 🥂',
-        price: 5400,
+        title: 'Півонії в шовковій стрічці (Подарунковий сет)',
+        emoji: '💐',
+        description: 'Український бутік @kamelia_flowers — доставка без розкриття домашньої адреси 🌸',
+        price: 3400,
         currency: 'UAH',
         imageUrl:
-          'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=700&q=80',
-        originalUrl: 'https://www.instagram.com/cher17.ua/',
-        affiliateUrl: 'https://www.instagram.com/cher17.ua/?utm_source=mriyii',
-        instagramHandle: 'cher17.ua',
+          'https://images.pexels.com/photos/12615496/pexels-photo-12615496.jpeg?auto=compress&cs=tinysrgb&w=700',
+        originalUrl: 'https://www.instagram.com/kamelia_flowers/',
+        affiliateUrl: 'https://www.instagram.com/kamelia_flowers/?utm_source=mriyii',
+        instagramHandle: 'kamelia_flowers',
         isBooked: false,
         isAiSurprise: false,
         createdAt: new Date().toISOString(),
@@ -170,15 +172,15 @@ export const DEMO_WISHLISTS: Record<
       {
         id: 'demo-lux-2',
         wishlistId: 'wl-lux',
-        title: 'Парфумована вода Maison Francis Kurkdjian Baccarat Rouge 540',
+        title: 'Парфуми Parfums de Marly Delina',
         emoji: '💍',
-        description: 'Оригінал, версія Eau de Parfum 70 ml з Brocard.',
-        price: 13800,
+        description: 'Оригінал, версія Eau de Parfum 75 ml з Brocard.',
+        price: 9400,
         currency: 'UAH',
         imageUrl:
-          'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=700&q=80',
-        originalUrl: 'https://rozetka.com.ua/ua/baccarat-rouge-540/',
-        affiliateUrl: 'https://rozetka.com.ua/ua/baccarat-rouge-540/?utm_source=mriyii',
+          'https://images.pexels.com/photos/4938265/pexels-photo-4938265.jpeg?auto=compress&cs=tinysrgb&w=700',
+        originalUrl: 'https://rozetka.com.ua/ua/delina-parfum/',
+        affiliateUrl: 'https://rozetka.com.ua/ua/delina-parfum/?utm_source=mriyii',
         isBooked: true,
         bookedByName: 'Олександр 👑',
         isAiSurprise: false,
@@ -191,7 +193,7 @@ export const DEMO_WISHLISTS: Record<
     title: 'Максим Дмитренко • Мої 30 рочків 🎉',
     ownerName: 'Максим Дмитренко',
     ownerAvatarUrl:
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=250&q=80',
+      'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=400',
     ownerBio:
       'Мій список гаджетів та апгрейду робочого сетапу. Можна скинутися в Монобанку або забронювати лот!',
     daysLeft: 14,
@@ -213,7 +215,7 @@ export const DEMO_WISHLISTS: Record<
         price: 32999,
         currency: 'UAH',
         imageUrl:
-          'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=700&q=80',
+          'https://images.pexels.com/photos/5208818/pexels-photo-5208818.jpeg?auto=compress&cs=tinysrgb&w=700',
         originalUrl: 'https://rozetka.com.ua/ua/playstation-5-pro/',
         affiliateUrl: 'https://rozetka.com.ua/ua/playstation-5-pro/?utm_source=mriyii',
         isBooked: false,
@@ -227,33 +229,33 @@ export const DEMO_WISHLISTS: Record<
       {
         id: 'demo-cyb-2',
         wishlistId: 'wl-cyb',
-        title: 'Apple AirPods Max (USB-C) Midnight',
+        title: 'Sony WH-1000XM5 Midnight + Дріп-бокс',
         emoji: '🎧',
-        description: 'Оновлена версія з USB-C у кольорі Темна ніч для глибокого фокусу за кодом.',
-        price: 24999,
+        description: 'Топове шумозаглушення для глибокого фокусу за кодом і кави.',
+        price: 14500,
         currency: 'UAH',
         imageUrl:
-          'https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?auto=format&fit=crop&w=700&q=80',
-        originalUrl: 'https://rozetka.com.ua/ua/airpods-max-usbc/',
-        affiliateUrl: 'https://rozetka.com.ua/ua/airpods-max-usbc/?utm_source=mriyii',
+          'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=700',
+        originalUrl: 'https://rozetka.com.ua/ua/sony-wh-1000xm5/',
+        affiliateUrl: 'https://rozetka.com.ua/ua/sony-wh-1000xm5/?utm_source=mriyii',
         isBooked: false,
         monoJarUrl: 'https://send.monobank.ua/jar/demoMaxAirpods',
         monoJarId: 'demoMaxAirpods',
-        jarTargetAmount: 24999,
-        jarCurrentAmount: 18500,
+        jarTargetAmount: 14500,
+        jarCurrentAmount: 9800,
         isAiSurprise: false,
         createdAt: new Date().toISOString(),
       },
       {
         id: 'demo-cyb-3',
         wishlistId: 'wl-cyb',
-        title: 'Кастомна клавіатура Keychron Q1 Pro Wireless',
-        emoji: '⌨️',
-        description: 'Колір Carbon Black, свічі Gateron Jupiter Banana від @keychron_ua.',
-        price: 8999,
+        title: 'Вікенд із друзями та кастомізація сетапу',
+        emoji: '🥂',
+        description: 'Колір Carbon Black, доставка через Direct @max.tech.',
+        price: 12000,
         currency: 'UAH',
         imageUrl:
-          'https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=700&q=80',
+          'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=700',
         originalUrl: 'https://www.instagram.com/keychron_ua/',
         affiliateUrl: 'https://www.instagram.com/keychron_ua/?utm_source=mriyii',
         instagramHandle: 'keychron_ua',

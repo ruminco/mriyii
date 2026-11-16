@@ -13,7 +13,7 @@ import {
   Check,
 } from 'lucide-react';
 import type { ThemePreset, UserGender } from '@/models/User';
-import { THEME_TOKENS, DEMO_WISHLISTS } from '@/lib/theme-data';
+import { THEME_TOKENS, DEMO_WISHLISTS, type LandingPreset } from '@/lib/theme-data';
 import { SmokedGiftCard, type UnifiedGiftCardItem } from '@/components/SmokedGiftCard';
 import { AffiliateDisclosureBadge } from '@/components/AffiliateDisclosureBadge';
 import { LikeBurst } from '@/components/LikeBurst';
@@ -28,18 +28,312 @@ interface DelayedAuthDraft {
   items: UnifiedGiftCardItem[];
 }
 
+interface AiCutoutItem {
+  title: string;
+  price: string;
+  shop: string;
+  img: string;
+  pos?: string;
+}
+
+const PRESET_META: Record<
+  LandingPreset,
+  {
+    label: string;
+    heroImg: string;
+    heroAlt: string;
+    storyImg: string;
+    inviteEmoji: string;
+    inviteTitle: string;
+    inviteSub: string;
+    starburstLine1: string;
+    starburstLine2: string;
+    socialCount: string;
+    jarGoalTitle: string;
+    jarGoalAmount: number;
+    jarDefaultVal: number;
+    storyTitle: string;
+    storySub: string;
+    storySlug: string;
+    instagramHandle: string;
+    safeNote?: string;
+  }
+> = {
+  rose_luxury: {
+    label: '👩 Для неї',
+    heroImg:
+      'https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=900',
+    heroAlt: 'Щаслива іменинниця з букетом квітів',
+    storyImg:
+      'https://images.pexels.com/photos/6641330/pexels-photo-6641330.jpeg?auto=compress&cs=tinysrgb&w=600',
+    inviteEmoji: '🎂',
+    inviteTitle: 'День народження Олени',
+    inviteSub: '12 днів до свята • Без спойлерів',
+    starburstLine1: '0% комісії',
+    starburstLine2: 'Монобанка',
+    socialCount: '+14 друзів уже збираються на свято',
+    jarGoalTitle: 'Стайлер Dyson Airwrap i.d.',
+    jarGoalAmount: 26000,
+    jarDefaultVal: 19500,
+    storyTitle: 'Мій вішліст до ДР',
+    storySub: 'Обери мрію або додай частку в подарунку на Банку без повторів',
+    storySlug: 'olena-vip',
+    instagramHandle: 'olena.muse',
+  },
+  cyber_titanium: {
+    label: '👨 Для нього',
+    heroImg:
+      'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=900',
+    heroAlt: 'Іменинник святкує день народження з друзями',
+    storyImg:
+      'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=600',
+    inviteEmoji: '🎮',
+    inviteTitle: 'ДР Максима • Збір на PS5',
+    inviteSub: '9 друзів уже в команді • Без дублів',
+    starburstLine1: '0% комісії',
+    starburstLine2: 'Pro Titanium',
+    socialCount: '+9 друзів уже скинулись на спільний подарунок',
+    jarGoalTitle: 'Ігрова консоль Sony PlayStation 5 Pro',
+    jarGoalAmount: 32999,
+    jarDefaultVal: 24500,
+    storyTitle: 'Спільний збір Максима',
+    storySub: 'Закидай частку в подарунку на Монобанку або бронюй лот у 1 клік',
+    storySlug: 'max-cyber',
+    instagramHandle: 'max.tech',
+  },
+  creator_bio: {
+    label: '💎 Creator Bio',
+    heroImg:
+      'https://images.pexels.com/photos/36425425/pexels-photo-36425425.jpeg?auto=compress&cs=tinysrgb&w=900',
+    heroAlt: 'Креаторка з подарунками у стилі Creator Safe Mode',
+    storyImg:
+      'https://images.pexels.com/photos/36425425/pexels-photo-36425425.jpeg?auto=compress&cs=tinysrgb&w=600',
+    inviteEmoji: '💎',
+    inviteTitle: 'Safe Mode • @olena.muse',
+    inviteSub: 'Доставка через @шоурум • 0% адреси',
+    starburstLine1: 'Без адреси',
+    starburstLine2: 'та ПІБ',
+    socialCount: '🛡️ Приватність адреси та картки на 100%',
+    jarGoalTitle: 'Стайлер Dyson Airwrap i.d.',
+    jarGoalAmount: 26000,
+    jarDefaultVal: 19500,
+    storyTitle: 'Wishlist у Bio • Safe',
+    storySub: 'Подарунки та букети без розкриття домашньої адреси',
+    storySlug: 'olena-vip',
+    instagramHandle: 'olena.muse',
+  },
+};
+
+const AI_PACKS: Record<'beauty' | 'coffee' | 'gadgets' | 'flowers', AiCutoutItem[][]> = {
+  coffee: [
+    [
+      {
+        title: 'Дріп-бокс + Sony WH',
+        price: '3 800 ₴',
+        shop: 'Foundation / Rozetka',
+        img: 'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Ігровий вечір PS5',
+        price: '3 199 ₴',
+        shop: 'PlayStation Store',
+        img: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center 25%',
+      },
+      {
+        title: 'Нішевий дифузор',
+        price: '2 450 ₴',
+        shop: 'Brocard • ₴ UAH',
+        img: 'https://images.pexels.com/photos/4938265/pexels-photo-4938265.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+    [
+      {
+        title: 'Кавовий спа-бокс',
+        price: '2 950 ₴',
+        shop: 'Rituals / Rozetka',
+        img: 'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Півонії в стрічці',
+        price: '2 200 ₴',
+        shop: '@kamelia_flowers',
+        img: 'https://images.pexels.com/photos/12615496/pexels-photo-12615496.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Сюрприз-коробка',
+        price: '3 400 ₴',
+        shop: 'Safe Direct 🕶️',
+        img: 'https://images.pexels.com/photos/15176450/pexels-photo-15176450.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+  ],
+  beauty: [
+    [
+      {
+        title: 'Dyson Airwrap (частка)',
+        price: '3 500 ₴',
+        shop: 'Монобанка 0%',
+        img: 'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Delina Eau de Parfum',
+        price: '9 400 ₴',
+        shop: 'Brocard • ₴ UAH',
+        img: 'https://images.pexels.com/photos/4938265/pexels-photo-4938265.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Сюрприз без адреси',
+        price: '3 400 ₴',
+        shop: '@kamelia_flowers',
+        img: 'https://images.pexels.com/photos/15176450/pexels-photo-15176450.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+    [
+      {
+        title: 'Дріп-бокс + музика',
+        price: '3 800 ₴',
+        shop: 'Citrus / Apple',
+        img: 'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Вечір із друзями',
+        price: '3 200 ₴',
+        shop: 'Сертифікат',
+        img: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center 25%',
+      },
+      {
+        title: 'Букет у стрічці',
+        price: '2 850 ₴',
+        shop: '@kamelia_flowers',
+        img: 'https://images.pexels.com/photos/12615496/pexels-photo-12615496.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+  ],
+  gadgets: [
+    [
+      {
+        title: 'Sony WH + Дріп-бокс',
+        price: '14 500 ₴',
+        shop: 'Rozetka • ₴ UAH',
+        img: 'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Кооператив на PS5',
+        price: '3 199 ₴',
+        shop: 'Монобанка 0%',
+        img: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center 25%',
+      },
+      {
+        title: 'Аромат для дому',
+        price: '2 450 ₴',
+        shop: 'Brocard • ₴ UAH',
+        img: 'https://images.pexels.com/photos/4938265/pexels-photo-4938265.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+    [
+      {
+        title: 'Догляд & стайлінг',
+        price: '4 200 ₴',
+        shop: 'Citrus / Rozetka',
+        img: 'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Подарунковий бокс',
+        price: '3 400 ₴',
+        shop: 'Direct @шоурум',
+        img: 'https://images.pexels.com/photos/15176450/pexels-photo-15176450.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Квіти в шовку',
+        price: '2 850 ₴',
+        shop: '@kamelia_flowers',
+        img: 'https://images.pexels.com/photos/12615496/pexels-photo-12615496.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+  ],
+  flowers: [
+    [
+      {
+        title: 'Півонії в стрічці',
+        price: '2 850 ₴',
+        shop: '@kamelia_flowers',
+        img: 'https://images.pexels.com/photos/12615496/pexels-photo-12615496.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Сюрприз без адреси',
+        price: '3 400 ₴',
+        shop: 'Direct доставка',
+        img: 'https://images.pexels.com/photos/15176450/pexels-photo-15176450.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Парфум Delina',
+        price: '9 400 ₴',
+        shop: 'Brocard • ₴ UAH',
+        img: 'https://images.pexels.com/photos/4938265/pexels-photo-4938265.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+    [
+      {
+        title: 'Дріп-бокс + Sony',
+        price: '3 800 ₴',
+        shop: 'Rozetka • ₴ UAH',
+        img: 'https://images.pexels.com/photos/29687786/pexels-photo-29687786.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+      {
+        title: 'Свято з друзями',
+        price: '3 200 ₴',
+        shop: 'Сертифікат',
+        img: 'https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center 25%',
+      },
+      {
+        title: 'Стайлер Dyson (частка)',
+        price: '2 950 ₴',
+        shop: 'Монобанка 0%',
+        img: 'https://images.pexels.com/photos/31449823/pexels-photo-31449823.jpeg?auto=compress&cs=tinysrgb&w=500',
+        pos: 'center center',
+      },
+    ],
+  ],
+};
+
 export default function LandingPage() {
   const router = useRouter();
   const sandboxInputRef = useRef<HTMLInputElement | null>(null);
+  const confettiCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [themePreset, setThemePreset] = useState<ThemePreset>('rose_luxury');
+  const [landingPreset, setLandingPreset] = useState<LandingPreset>('rose_luxury');
   const [rolePreview, setRolePreview] = useState<'guest' | 'owner'>('guest');
 
-  // Поля Delayed Auth капсули (додавання бажань без логіну) + Issue #21 states
+  // Поля Delayed Auth капсули + Issue #21 states
   const [urlInput, setUrlInput] = useState('');
   const [capsuleState, setCapsuleState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [activeTemplate, setActiveTemplate] = useState<'bday' | 'vip' | 'him'>('bday');
   const [jarBurstKey, setJarBurstKey] = useState(0);
   const [bioLinkCopied, setBioLinkCopied] = useState(false);
+  const [claimCopied, setClaimCopied] = useState(false);
   const [draftItems, setDraftItems] = useState<UnifiedGiftCardItem[]>([]);
   const [wishlistTitle, setWishlistTitle] = useState(DEMO_WISHLISTS.rose_luxury.title);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -47,93 +341,52 @@ export default function LandingPage() {
   const [locale, setLocale] = useState<'ua' | 'en'>('ua');
   const [heroPillIndex, setHeroPillIndex] = useState<number>(0);
   const [claimSlug, setClaimSlug] = useState<string>('olena-vip');
-  const [aiChip, setAiChip] = useState<'beauty' | 'coffee' | 'gadgets' | 'flowers'>('beauty');
-  const [cssVersion, setCssVersion] = useState<'aurora' | 'smoked' | 'editorial'>('aurora');
-  const [placeholderIndex, setPlaceholderIndex] = useState<number>(0);
   const [comparePos, setComparePos] = useState<number>(52);
-  const heroSectionRef = useRef<HTMLElement | null>(null);
-  const spotlightRef = useRef<HTMLDivElement | null>(null);
-  const confettiCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const HERO_PLACEHOLDERS = [
-    'Встав посилання з rozetka.com.ua або @instagram-шоурум...',
-    'Або з apple.com / brocard.ua / sephora...',
-    'Або просто напиши: «Хочу Dyson Airwrap» ✨',
-  ];
+  // Живий ШІ-помічник на сторінці (Секція 7) + Goo thinking + Stagger
+  const [aiQuery, setAiQuery] = useState(
+    'Любить specialty каву, спорт і красиву музику до 4 000 ₴'
+  );
+  const [aiChip, setAiChip] = useState<'beauty' | 'coffee' | 'gadgets' | 'flowers'>('coffee');
+  const [aiPackIdx, setAiPackIdx] = useState(0);
+  const [aiThinking, setAiThinking] = useState(false);
+
+  const themePreset: ThemePreset =
+    landingPreset === 'cyber_titanium' ? 'cyber_titanium' : 'rose_luxury';
 
   const HERO_PILL_CASES = [
     {
-      dotColor: 'bg-rose-400',
-      pillClass: 'bg-rose-500/15 border border-rose-400/35 text-rose-100',
-      before: '💬 Ще один чат у Telegram і зіпсована інтрига?',
-      after: '🎁 Одне посилання: бронь у 1 клік і Монобанка 0%',
+      before: '💬 Хаос у чатах «То що даруємо?»',
+      after: '🎁 Одне посилання: бронь у 1 клік і 0%',
     },
     {
-      dotColor: 'bg-amber-400',
-      pillClass: 'bg-amber-500/15 border border-amber-400/35 text-amber-100',
-      before: '🤫 Хочу зробити таємний luxury-сюрприз, але не знаю що?',
-      after: '✨ ШІ підбере ідею + доставка без адреси',
+      before: '🤫 Таємний luxury-сюрприз без адреси?',
+      after: '✨ ШІ підбере ідею + доставка в Direct',
     },
     {
-      dotColor: 'bg-emerald-400',
-      pillClass: 'bg-emerald-500/15 border border-emerald-400/35 text-emerald-100',
-      before: '🌸 Хочу подарувати квіти, але не знаю адреси?',
+      before: '🌸 Подарувати квіти, не знаючи адреси?',
       after: '📸 Замовлення в Instagram Direct за 1 клік',
     },
   ];
 
-  const AI_SPOTLIGHT_SAMPLES: Record<
-    'beauty' | 'coffee' | 'gadgets' | 'flowers',
-    { label: string; title: string; price: string; shop: string; img: string }
-  > = {
-    beauty: {
-      label: '💄 Бʼюті та догляд',
-      title: 'Стайлер Dyson Airwrap i.d. Rose Gold',
-      price: '25 999 ₴',
-      shop: 'Brocard / Rozetka',
-      img: 'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&w=700&q=80',
-    },
-    coffee: {
-      label: '☕ Кава та затишок',
-      title: 'Кавоварка DeLonghi Dedica Arte + набір спешелті зерен',
-      price: '8 499 ₴',
-      shop: 'Comfy • ₴ UAH',
-      img: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=700&q=80',
-    },
-    gadgets: {
-      label: '🎧 Гаджети та аудіо',
-      title: 'Навушники Apple AirPods Max USB-C Midnight',
-      price: '23 999 ₴',
-      shop: 'Citrus / Apple',
-      img: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=700&q=80',
-    },
-    flowers: {
-      label: '🌸 Квіти без адреси',
-      title: 'Монобукет білих півоній (15 шт) у крафті',
-      price: '2 850 ₴',
-      shop: '@kamelia_flowers_kyiv',
-      img: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=700&q=80',
-    },
-  };
-
   useEffect(() => {
     const timer = setInterval(() => {
       setHeroPillIndex((prev) => (prev + 1) % 3);
-      setPlaceholderIndex((prev) => (prev + 1) % 3);
     }, 3500);
     return () => clearInterval(timer);
   }, []);
 
   // Живий інтерактивний стан Монобанки у Секції 5 + Number Ticker + Confetti
-  const [demoJarAmount, setDemoJarAmount] = useState<Record<ThemePreset, number>>({
-    rose_luxury: 23000,
+  const [demoJarAmount, setDemoJarAmount] = useState<Record<LandingPreset, number>>({
+    rose_luxury: 19500,
     cyber_titanium: 24500,
+    creator_bio: 19500,
   });
-  const [displayJarAmount, setDisplayJarAmount] = useState<number>(23000);
-  const displayJarRef = useRef<number>(23000);
+  const [displayJarAmount, setDisplayJarAmount] = useState<number>(19500);
+  const displayJarRef = useRef<number>(19500);
 
   useEffect(() => {
-    const target = demoJarAmount[themePreset];
+    const target = demoJarAmount[landingPreset];
     const startVal = displayJarRef.current;
     if (startVal === target) return;
     const startTime = performance.now();
@@ -150,7 +403,7 @@ export default function LandingPage() {
     };
     rafId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(rafId);
-  }, [demoJarAmount, themePreset]);
+  }, [demoJarAmount, landingPreset]);
 
   const fireConfetti = () => {
     const canvas = confettiCanvasRef.current;
@@ -159,8 +412,8 @@ export default function LandingPage() {
     if (!ctx) return;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const accent = themePreset === 'rose_luxury' ? '#FB7185' : '#34D399';
-    const colors = [accent, '#FFFFFF', '#FDE047', '#38BDF8'];
+    const accent = landingPreset === 'cyber_titanium' ? '#34D399' : '#F4FF7A';
+    const colors = [accent, '#FFFFFF', '#DECFFC', '#5B50EC'];
     const parts = Array.from({ length: 55 }, () => ({
       x: canvas.width / 2,
       y: canvas.height / 2,
@@ -211,8 +464,9 @@ export default function LandingPage() {
       const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as DelayedAuthDraft;
-        if (parsed.themePreset === 'rose_luxury' || parsed.themePreset === 'cyber_titanium') {
-          setThemePreset(parsed.themePreset);
+        if (parsed.themePreset === 'cyber_titanium') {
+          setLandingPreset('cyber_titanium');
+          setClaimSlug('max-cyber');
         }
         if (parsed.wishlistTitle) {
           setWishlistTitle(parsed.wishlistTitle);
@@ -244,19 +498,31 @@ export default function LandingPage() {
     }
   };
 
-  const handleSwitchTheme = (nextPreset: ThemePreset) => {
-    setThemePreset(nextPreset);
-    const defaultTitle = DEMO_WISHLISTS[nextPreset].title;
+  const handleSwitchPreset = (nextPreset: LandingPreset) => {
+    setLandingPreset(nextPreset);
+    const dbTheme: ThemePreset = nextPreset === 'cyber_titanium' ? 'cyber_titanium' : 'rose_luxury';
+    const defaultTitle = DEMO_WISHLISTS[dbTheme].title;
     setWishlistTitle(defaultTitle);
-    saveDraftToStorage(nextPreset, defaultTitle, draftItems);
+    setClaimSlug(PRESET_META[nextPreset].storySlug);
+    saveDraftToStorage(dbTheme, defaultTitle, draftItems);
   };
 
-  const addDraftItemDirect = (newItem: UnifiedGiftCardItem) => {
-    const updated = [newItem, ...draftItems];
-    setDraftItems(updated);
-    saveDraftToStorage(themePreset, wishlistTitle, updated);
-    triggerToast('✨ Мрію додано! Відкриваємо редактор з Live Preview...');
-    router.push(`/dashboard?theme=${themePreset}&added=1`);
+  const handleApplyTemplate = (tpl: 'bday' | 'vip' | 'him') => {
+    setActiveTemplate(tpl);
+    if (tpl === 'bday') {
+      handleSwitchPreset('rose_luxury');
+      setUrlInput('rozetka.com.ua/ua/dyson-airwrap/');
+      triggerToast('🎂 Обрано шаблон «День народження» — натисніть «Зібрати вішліст»!');
+    } else if (tpl === 'vip') {
+      handleSwitchPreset('creator_bio');
+      setUrlInput('instagram.com/kamelia_flowers/');
+      triggerToast('💎 Активовано Creator Safe Mode без адреси та ПІБ!');
+    } else {
+      handleSwitchPreset('cyber_titanium');
+      setUrlInput('rozetka.com.ua/ua/playstation-5-pro/');
+      triggerToast('🎮 Обрано шаблон «Хлопцю / ДР» у темі Pro Titanium!');
+    }
+    sandboxInputRef.current?.focus();
   };
 
   const handleAddDraftByUrl = async (e: React.FormEvent) => {
@@ -283,7 +549,7 @@ export default function LandingPage() {
         newItem = {
           id: `draft-${Date.now()}`,
           title: parsed.title,
-          emoji: parsed.emoji || '✨',
+          emoji: parsed.emoji === '💇‍♀️' ? '✨' : parsed.emoji || '✨',
           description:
             parsed.description || 'Додано за прямим посиланням з офіційного магазину ✨',
           price: parsed.price ?? (themePreset === 'rose_luxury' ? 4500 : 3999),
@@ -296,7 +562,9 @@ export default function LandingPage() {
         };
       } catch {
         const isFlowers =
-          raw.toLowerCase().includes('півон') || raw.toLowerCase().includes('букет');
+          raw.toLowerCase().includes('півон') ||
+          raw.toLowerCase().includes('букет') ||
+          raw.toLowerCase().includes('flower');
         newItem = {
           id: `draft-${Date.now()}`,
           title: raw.replace(/^https?:\/\/(www\.)?/i, '').slice(0, 90),
@@ -307,11 +575,11 @@ export default function LandingPage() {
           price: isFlowers ? 4200 : themePreset === 'rose_luxury' ? 5400 : 4900,
           currency: 'UAH',
           imageUrl: isFlowers
-            ? 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=700&q=80'
+            ? 'https://images.pexels.com/photos/12775959/pexels-photo-12775959.jpeg?auto=compress&cs=tinysrgb&w=700'
             : undefined,
           originalUrl: candidateUrl.startsWith('http') ? candidateUrl : undefined,
           affiliateUrl: candidateUrl.startsWith('http') ? candidateUrl : undefined,
-          instagramHandle: igMatch?.[1] ?? (isFlowers ? 'kamelia_flowers_kyiv' : undefined),
+          instagramHandle: igMatch?.[1] ?? (isFlowers ? 'kamelia_flowers' : undefined),
           isBooked: false,
         };
       }
@@ -344,35 +612,48 @@ export default function LandingPage() {
     router.push(`/dashboard?theme=${themePreset}&auth=${providerName}`);
   };
 
+  const runLiveAiSearch = (nextChip?: 'beauty' | 'coffee' | 'gadgets' | 'flowers') => {
+    if (nextChip) {
+      setAiChip(nextChip);
+    }
+    setAiThinking(true);
+    setTimeout(() => {
+      setAiPackIdx((prev) => (prev + 1) % 2);
+      setAiThinking(false);
+    }, 420);
+  };
+
   const tokens = THEME_TOKENS[themePreset];
   const currentDemoWishlist = DEMO_WISHLISTS[themePreset];
+  const presetMeta = PRESET_META[landingPreset];
   const flowerDemoItem =
     currentDemoWishlist.items.find((i) => i.instagramHandle) ?? currentDemoWishlist.items[1]!;
 
-  const accentTextClass =
-    themePreset === 'rose_luxury' ? 'text-rose-300' : 'text-emerald-300';
-
-  const sectionBadgeClass =
-    themePreset === 'rose_luxury'
-      ? 'bg-rose-500/15 border border-rose-400/35 text-rose-200'
-      : 'bg-emerald-500/15 border border-emerald-400/35 text-emerald-200';
-
+  const isCyber = landingPreset === 'cyber_titanium';
+  const isCreator = landingPreset === 'creator_bio';
   const activePill = HERO_PILL_CASES[heroPillIndex] ?? HERO_PILL_CASES[0]!;
 
-  const isRose = themePreset === 'rose_luxury';
-  const styleVars = {
-    '--aurora-accent': isRose ? 'rgba(251, 113, 133, 0.22)' : 'rgba(52, 211, 153, 0.2)',
-    '--spotlight-accent': isRose ? 'rgba(251, 113, 133, 0.14)' : 'rgba(52, 211, 153, 0.14)',
-    '--beam-color': isRose ? '#FB7185' : '#34D399',
-    '--beam-soft': isRose ? '#FDA4AF' : '#6EE7B7',
-  } as React.CSSProperties;
+  const jarAmount = demoJarAmount[landingPreset];
+  const jarTarget = presetMeta.jarGoalAmount;
+  const jarPct = Math.min(100, Math.round((jarAmount / jarTarget) * 100));
+  const waveEnd = Math.max(40, Math.round((jarPct / 100) * 392));
+
+  const aiItems = AI_PACKS[aiChip][aiPackIdx] ?? AI_PACKS.coffee[0]!;
 
   return (
-    <div
-      data-style={cssVersion}
-      style={styleVars}
-      className={`min-h-screen ${tokens.meshClass} text-white spring-transition`}
-    >
+    <div data-preset={landingPreset} className="min-h-screen spring-transition">
+      {/* Hidden SVG Organic Masks (M3 Expressive: scallop-10 & clover-4) */}
+      <svg width="0" height="0" className="absolute pointer-events-none" aria-hidden="true">
+        <defs>
+          <clipPath id="scallop10" clipPathUnits="objectBoundingBox">
+            <path d="M0.5,0.02 C0.56,0.02,0.59,0.07,0.65,0.09 C0.71,0.11,0.77,0.08,0.82,0.12 C0.87,0.16,0.85,0.23,0.89,0.28 C0.93,0.33,0.98,0.35,0.98,0.41 C0.98,0.47,0.93,0.5,0.93,0.56 C0.93,0.62,0.98,0.65,0.96,0.71 C0.94,0.77,0.87,0.77,0.83,0.82 C0.79,0.87,0.8,0.94,0.74,0.96 C0.68,0.98,0.63,0.93,0.57,0.93 C0.51,0.93,0.49,0.98,0.43,0.98 C0.37,0.98,0.34,0.93,0.28,0.91 C0.22,0.89,0.16,0.92,0.12,0.87 C0.08,0.82,0.11,0.75,0.08,0.7 C0.05,0.65,0.01,0.62,0.02,0.56 C0.03,0.5,0.07,0.47,0.07,0.41 C0.07,0.35,0.02,0.32,0.04,0.26 C0.06,0.2,0.13,0.2,0.17,0.15 C0.21,0.1,0.2,0.04,0.26,0.02 C0.32,0.0,0.37,0.05,0.43,0.05 C0.47,0.05,0.48,0.02,0.5,0.02 Z" />
+          </clipPath>
+          <clipPath id="clover4" clipPathUnits="objectBoundingBox">
+            <path d="M0.5,0.04 C0.72,0.04,0.78,0.22,0.78,0.22 C0.78,0.22,0.96,0.28,0.96,0.5 C0.96,0.72,0.78,0.78,0.78,0.78 C0.78,0.78,0.72,0.96,0.5,0.96 C0.28,0.96,0.22,0.78,0.22,0.78 C0.22,0.78,0.04,0.72,0.04,0.5 C0.04,0.28,0.22,0.22,0.22,0.22 C0.22,0.22,0.28,0.04,0.5,0.04 Z" />
+          </clipPath>
+        </defs>
+      </svg>
+
       <canvas
         ref={confettiCanvasRef}
         className="fixed inset-0 pointer-events-none z-50"
@@ -381,33 +662,32 @@ export default function LandingPage() {
 
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#171D30]/95 backdrop-blur-xl rounded-2xl px-5 py-3.5 border border-emerald-400/50 shadow-2xl flex items-center gap-2.5 text-sm font-bold text-emerald-300">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#141218]/95 backdrop-blur-xl rounded-2xl px-5 py-3.5 border border-[#34D399]/50 shadow-2xl flex items-center gap-2.5 text-sm font-bold text-[#34D399]">
           <span>✨</span>
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Спрощений Sticky Header (56–64px, чистий на 390px) */}
-      <header className="sticky top-0 z-30 h-16 border-b border-white/10 bg-[#0E1324]/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2.5">
+      {/* Чистий Sticky Header */}
+      <header className="sticky top-0 z-30 h-16 border-b border-white/10 bg-[#141218]/92 backdrop-blur-xl text-white">
+        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 gap-3">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
             <div
-              className={`w-9 h-9 rounded-xl bg-gradient-to-br ${tokens.emojiFrameGradient} p-[2px]`}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md"
+              style={{ backgroundColor: 'rgba(222, 207, 252, 0.16)' }}
             >
-              <div className="w-full h-full bg-[#171D30] rounded-[10px] flex items-center justify-center text-lg">
-                🎁
-              </div>
+              🎁
             </div>
             <span className="text-xl font-black tracking-tight text-white">Mriyii</span>
           </Link>
 
-          <nav className="flex items-center gap-3">
+          <nav className="flex items-center gap-2.5 sm:gap-3">
             <div className="inline-flex items-center rounded-xl bg-white/10 border border-white/15 p-0.5">
               <button
                 type="button"
                 onClick={() => setLocale('ua')}
                 className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
-                  locale === 'ua' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                  locale === 'ua' ? 'bg-white text-[#141218]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 UA
@@ -416,7 +696,7 @@ export default function LandingPage() {
                 type="button"
                 onClick={() => setLocale('en')}
                 className={`px-2.5 py-1 rounded-lg text-sm font-extrabold transition ${
-                  locale === 'en' ? 'bg-white text-slate-950' : 'text-slate-200 hover:text-white'
+                  locale === 'en' ? 'bg-white text-[#141218]' : 'text-slate-200 hover:text-white'
                 }`}
               >
                 EN
@@ -446,9 +726,13 @@ export default function LandingPage() {
                 e.preventDefault();
                 document.getElementById('capsule-input')?.focus();
               }}
-              className={`min-h-[48px] px-5 rounded-xl text-sm font-extrabold ${tokens.primaryCtaGradient} inline-flex items-center spring-transition active:scale-95`}
+              style={{
+                backgroundColor: 'var(--cta-pop-bg)',
+                color: 'var(--cta-pop-ink)',
+              }}
+              className="min-h-[48px] px-5 rounded-2xl text-sm font-extrabold inline-flex items-center shadow-lg spring-transition active:scale-95"
             >
-              {locale === 'en' ? '✨ Create wishlist' : '✨ Створити вішліст'}
+              {locale === 'en' ? 'Create wishlist' : 'Створити вішліст'}
             </a>
           </nav>
         </div>
@@ -456,245 +740,314 @@ export default function LandingPage() {
 
       <main className="w-full">
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 1: HERO (AURORA + SPOTLIGHT + 3 CSS VERSIONS + PILL)       */}
+        {/* СЕКЦІЯ 1: HERO (DS V3 M3 EXPRESSIVE + MERGE CONTRACT)             */}
         {/* ================================================================= */}
-        <section
-          id="section-1-hero"
-          ref={heroSectionRef}
-          onMouseMove={(e) => {
-            if (!heroSectionRef.current || !spotlightRef.current) return;
-            const rect = heroSectionRef.current.getBoundingClientRect();
-            spotlightRef.current.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-            spotlightRef.current.style.setProperty('--my', `${e.clientY - rect.top}px`);
-          }}
-          className="relative w-full py-10 sm:py-16 overflow-hidden"
-        >
-          <div className="aurora-bg" aria-hidden="true" />
-          <div ref={spotlightRef} className="spotlight-layer" aria-hidden="true" />
-
-          <div className="relative z-10 max-w-3xl mx-auto px-4 text-center space-y-5 sm:space-y-6">
-            {/* 3-кліковий перемикач CSS-версій (Issue #20) */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="text-sm font-semibold text-slate-300 mr-1">Стиль:</span>
-              {(
-                [
-                  { id: 'aurora', label: '✨ Aurora' },
-                  { id: 'smoked', label: '🪟 Smoked Glass' },
-                  { id: 'editorial', label: '📰 Editorial' },
-                ] as const
-              ).map((v) => (
+        <section id="section-1-hero" className="band-hero w-full py-12 sm:py-20">
+          <div className="mx-auto max-w-6xl px-4 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            <div className="lg:col-span-7 space-y-5">
+              {/* Анімована 3-кейсова Hero-пігулка До/Після */}
+              <div className="min-h-[48px] flex items-center">
                 <button
-                  key={v.id}
                   type="button"
-                  onClick={() => setCssVersion(v.id)}
-                  className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-sm font-bold border spring-transition ${
-                    cssVersion === v.id
-                      ? isRose
-                        ? 'bg-rose-400 text-slate-950 border-rose-300 shadow-lg'
-                        : 'bg-emerald-400 text-slate-950 border-emerald-300 shadow-lg'
-                      : 'bg-white/10 text-slate-200 border-white/15 hover:bg-white/15 hover:text-white'
+                  onClick={() => setHeroPillIndex((prev) => (prev + 1) % 3)}
+                  className={`inline-flex flex-wrap items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-sm font-bold border spring-transition text-left ${
+                    isCreator
+                      ? 'bg-[#DECFFC]/15 border-[#DECFFC]/35 text-[#DECFFC]'
+                      : isCyber
+                      ? 'bg-[#4F46E5]/10 border-[#4F46E5]/30 text-[#15161D]'
+                      : 'bg-[#5B50EC]/12 border-[#5B50EC]/30 text-[#141218]'
+                  }`}
+                  title="Натисни, щоб перемкнути сценарій"
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full animate-pulse shrink-0"
+                    style={{ backgroundColor: isCyber ? '#4F46E5' : isCreator ? '#F4FF7A' : '#5B50EC' }}
+                  />
+                  <span>{activePill.before}</span>
+                  <span aria-hidden="true">➔</span>
+                  <span className="font-extrabold">{activePill.after}</span>
+                </button>
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black tracking-tight leading-[1.06]">
+                Твої мрії{' '}
+                <span className="serif-accent" style={{ color: 'var(--accent-strong)' }}>
+                  варті того,
+                </span>{' '}
+                щоб збутися
+              </h1>
+
+              <p
+                className="text-base sm:text-lg max-w-xl leading-relaxed font-medium"
+                style={{ color: 'var(--bg-hero-sub)' }}
+              >
+                Одне посилання для друзів: бронювання в 1 клік без дублів, пряма Монобанка 0% та
+                доставка квітів без розкриття адреси — готова вітрина за{' '}
+                <strong className="font-extrabold">30 секунд</strong>.
+              </p>
+
+              {/* 3-пресетний перемикач тем (Без dev-контролів Стиль) */}
+              <div
+                role="tablist"
+                aria-label="Обери стиль вішліста"
+                className={`inline-flex flex-wrap gap-1.5 p-1.5 rounded-full border ${
+                  isCreator
+                    ? 'bg-white/10 border-white/15'
+                    : 'bg-white/85 border-[#141218]/10 shadow-sm'
+                }`}
+              >
+                {(['rose_luxury', 'cyber_titanium', 'creator_bio'] as const).map((presetId) => {
+                  const active = landingPreset === presetId;
+                  return (
+                    <button
+                      key={presetId}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => handleSwitchPreset(presetId)}
+                      className={`min-h-[44px] px-4 rounded-full text-sm font-extrabold spring-transition ${
+                        active
+                          ? isCreator
+                            ? 'bg-[#F4FF7A] text-[#141218] shadow-md'
+                            : 'bg-[#141218] text-white shadow-md'
+                          : isCreator
+                          ? 'text-slate-200 hover:text-white'
+                          : 'text-[#141218] hover:bg-black/5'
+                      }`}
+                    >
+                      {PRESET_META[presetId].label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Суцільна капсула вводу (Issue #21 Loading -> Success / Error + Shake) */}
+              <form
+                onSubmit={handleAddDraftByUrl}
+                className={`max-w-xl rounded-2xl p-2 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border ${
+                  isCreator
+                    ? 'bg-white/10 border-white/20 backdrop-blur-lg'
+                    : 'bg-white border-[#141218]/10'
+                }`}
+              >
+                <input
+                  id="capsule-input"
+                  ref={sandboxInputRef}
+                  type="text"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="Посилання з Rozetka, Instagram чи Apple..."
+                  className={`flex-1 px-4 py-3 text-base font-semibold bg-transparent focus:outline-none min-w-0 ${
+                    isCreator
+                      ? 'text-white placeholder:text-slate-300'
+                      : 'text-[#141218] placeholder:text-slate-500'
+                  }`}
+                />
+                <button
+                  type="submit"
+                  disabled={capsuleState === 'loading'}
+                  aria-live="polite"
+                  style={
+                    capsuleState === 'idle'
+                      ? {
+                          backgroundColor: isCreator ? 'var(--cta-pop-bg)' : 'var(--cta-main-bg)',
+                          color: isCreator ? 'var(--cta-pop-ink)' : 'var(--cta-main-ink)',
+                        }
+                      : undefined
+                  }
+                  className={`w-full sm:w-[228px] min-h-[48px] px-5 rounded-xl text-base font-bold shrink-0 spring-transition active:scale-95 flex items-center justify-center gap-2 ${
+                    capsuleState === 'success'
+                      ? 'bg-emerald-400 text-[#0B1120]'
+                      : capsuleState === 'error'
+                      ? 'bg-rose-600 text-white shake-2px'
+                      : ''
                   }`}
                 >
-                  {v.label}
+                  {capsuleState === 'loading' ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+                      <span>Додаємо...</span>
+                    </>
+                  ) : capsuleState === 'success' ? (
+                    <>
+                      <Check className="w-5 h-5 shrink-0" />
+                      <span>✓ Додано</span>
+                    </>
+                  ) : capsuleState === 'error' ? (
+                    <span className="text-sm font-extrabold">Не вдалося, спробуй ще</span>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5 shrink-0" />
+                      <span>Зібрати вішліст</span>
+                    </>
+                  )}
                 </button>
-              ))}
-            </div>
+              </form>
 
-            <div className="min-h-[48px] flex items-center justify-center">
-              <button
-                type="button"
-                onClick={() => setHeroPillIndex((prev) => (prev + 1) % 3)}
-                className={`inline-flex flex-wrap items-center justify-center gap-2 min-h-[44px] px-4 sm:px-5 py-2 rounded-full text-sm sm:text-base font-bold backdrop-blur-xl transition-all duration-500 ${activePill.pillClass}`}
-                title="Натисни, щоб перемкнути сценарій"
-              >
+              {/* Inline Claim Link Preview */}
+              <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                <span style={{ color: 'var(--bg-hero-sub)' }}>Твій майбутній лінк:</span>
                 <span
-                  className={`w-2 h-2 rounded-full ${activePill.dotColor} animate-pulse shrink-0`}
+                  className={`inline-flex items-center px-3 py-1.5 rounded-xl border font-bold ${
+                    isCreator
+                      ? 'bg-white/10 border-white/20 text-white'
+                      : 'bg-white border-[#141218]/15 text-[#141218]'
+                  }`}
+                >
+                  mriyii.app/w/
+                  <input
+                    type="text"
+                    value={claimSlug}
+                    onChange={(e) =>
+                      setClaimSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''))
+                    }
+                    aria-label="Твій нікнейм для посилання"
+                    className="w-24 bg-transparent font-black focus:outline-none ml-0.5"
+                    style={{ color: isCreator ? '#F4FF7A' : 'var(--accent-strong)' }}
+                  />
+                </span>
+                <button
+                  type="button"
+                  aria-live="polite"
+                  onClick={() => {
+                    const url = `https://mriyii.app/w/${claimSlug || presetMeta.storySlug}`;
+                    navigator.clipboard?.writeText(url).catch(() => {});
+                    setClaimCopied(true);
+                    setTimeout(() => setClaimCopied(false), 1500);
+                  }}
+                  className={`min-h-[40px] min-w-[144px] px-3.5 rounded-xl text-sm font-bold border inline-flex items-center justify-center gap-1.5 spring-transition ${
+                    claimCopied
+                      ? 'bg-emerald-400 text-[#0B1120] border-transparent'
+                      : isCreator
+                      ? 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                      : 'bg-white text-[#141218] border-[#141218]/15 hover:bg-slate-50'
+                  }`}
+                >
+                  {claimCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  <span>{claimCopied ? '✓ Скопійовано' : 'Скопіювати'}</span>
+                </button>
+              </div>
+
+              {/* 1-Клік шаблони вішлістів */}
+              <div className="flex flex-wrap items-center gap-2 pt-1" aria-label="Готові шаблони">
+                <span className="text-sm font-bold" style={{ color: 'var(--bg-hero-sub)' }}>
+                  Швидкий старт:
+                </span>
+                {(
+                  [
+                    { id: 'bday', label: '🎂 День народження' },
+                    { id: 'vip', label: '💎 Люкс без адреси' },
+                    { id: 'him', label: '🎮 Хлопцю / ДР' },
+                  ] as const
+                ).map((tpl) => {
+                  const active = activeTemplate === tpl.id;
+                  return (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      onClick={() => handleApplyTemplate(tpl.id)}
+                      className={`min-h-[44px] px-4 rounded-full text-sm font-bold border spring-transition ${
+                        active
+                          ? isCreator
+                            ? 'bg-[#DECFFC] text-[#141218] border-transparent'
+                            : 'bg-[#141218] text-white border-transparent'
+                          : isCreator
+                          ? 'bg-white/10 text-white border-[#DECFFC]/30 hover:bg-white/20'
+                          : 'bg-white/80 text-[#141218] border-[#141218]/15 hover:bg-white'
+                      }`}
+                    >
+                      {tpl.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Щит Creator Safe Mode (активний у пресеті creator_bio) */}
+              {isCreator && (
+                <div
+                  role="region"
+                  aria-label="Creator Safe Mode"
+                  className="max-w-xl rounded-[22px] p-4 sm:p-5 bg-[#DECFFC]/12 border border-[#DECFFC]/40 backdrop-blur-lg flex items-center gap-4"
+                >
+                  <div className="diia-box bg-[#DECFFC]/20 text-white">🛡️</div>
+                  <div className="space-y-0.5">
+                    <div className="text-base font-black text-[#F4FF7A]">
+                      Creator Safe Mode активовано
+                    </div>
+                    <div className="text-sm font-medium text-slate-200">
+                      0% адреси • реальні ПІБ на картці приховані • доставка через @шоурум • таємне
+                      бронювання 🕶️
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Кластер аватарок друзів */}
+              <div className="flex items-center gap-3.5 pt-2 flex-wrap">
+                <div className="avatar-cluster">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=120"
+                    alt="Подруга Олена"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://images.pexels.com/photos/6641330/pexels-photo-6641330.jpeg?auto=compress&cs=tinysrgb&w=120"
+                    alt="Подруга Аліна"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=120"
+                    alt="Друг Максим"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://images.pexels.com/photos/36425425/pexels-photo-36425425.jpeg?auto=compress&cs=tinysrgb&w=120"
+                    alt="Друг Софія"
+                  />
+                </div>
+                <span className="text-sm sm:text-base font-bold">{presetMeta.socialCount}</span>
+              </div>
+            </div>
+
+            {/* Right Column: Scallop-10 Emotion Photo + Starburst-12 + Apple Invites Pill */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="relative w-full max-w-[400px] aspect-square">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={presetMeta.heroImg}
+                  alt={presetMeta.heroAlt}
+                  className="scallop-photo"
                 />
-                <span>{activePill.before}</span>
-                <span aria-hidden="true">➔</span>
-                <span className="text-white font-extrabold">{activePill.after}</span>
-              </button>
+                <div className="starburst-badge absolute top-2 right-1 rotate-6 shadow-xl rounded-full">
+                  <svg viewBox="0 0 100 100" aria-hidden="true">
+                    <path d="M50,2 L59,16 L75,9 L77,25 L94,26 L88,41 L99,52 L87,62 L92,78 L76,80 L73,96 L58,88 L48,99 L39,87 L23,94 L22,78 L6,75 L14,60 L3,49 L15,39 L10,23 L26,21 L29,5 L44,13 Z" />
+                  </svg>
+                  <span>
+                    {presetMeta.starburstLine1}
+                    <br />
+                    {presetMeta.starburstLine2}
+                  </span>
+                </div>
+                <div className="absolute bottom-3 left-2 right-6 sm:right-auto bg-white text-[#141218] rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3">
+                  <div className="diia-box !w-11 !h-11 !text-xl !rounded-xl bg-[#EFEAFF]">
+                    {presetMeta.inviteEmoji}
+                  </div>
+                  <div>
+                    <div className="text-sm font-black leading-tight">{presetMeta.inviteTitle}</div>
+                    <div className="text-sm font-semibold text-slate-600">
+                      {presetMeta.inviteSub}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-black tracking-tight text-white leading-[1.08]">
-              Твої мрії <span className={accentTextClass}>варті того,</span> щоб збутися
-            </h1>
-
-            <p className="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed font-medium">
-              Більше жодного зайвого чату в Telegram і руйнування інтриги. Додай лінк на подарунок —
-              отримай стильну вітрину за <strong className="text-white font-bold">30 секунд</strong>.
-            </p>
-
-            {/* Компактний перемикач стилю (Solid активний стан) */}
-            <div className="max-w-xs mx-auto grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-[#171D30] border border-white/15">
-              <button
-                type="button"
-                onClick={() => handleSwitchTheme('rose_luxury')}
-                className={`min-h-[48px] rounded-xl text-sm font-extrabold spring-transition ${
-                  themePreset === 'rose_luxury'
-                    ? 'bg-rose-400 text-slate-950 shadow-lg'
-                    : 'text-slate-200 hover:text-white'
-                }`}
-              >
-                👩 Для неї
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSwitchTheme('cyber_titanium')}
-                className={`min-h-[48px] rounded-xl text-sm font-extrabold spring-transition ${
-                  themePreset === 'cyber_titanium'
-                    ? 'bg-emerald-400 text-slate-950 shadow-lg'
-                    : 'text-slate-200 hover:text-white'
-                }`}
-              >
-                👨 Для нього
-              </button>
-            </div>
-
-            {/* Суцільна біла капсула вводу */}
-            <form
-              onSubmit={handleAddDraftByUrl}
-              className="max-w-2xl mx-auto bg-white rounded-2xl p-2 shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
-            >
-              <input
-                id="capsule-input"
-                ref={sandboxInputRef}
-                type="text"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                placeholder={HERO_PLACEHOLDERS[placeholderIndex]}
-                className="flex-1 px-4 py-3 text-base font-semibold text-slate-950 placeholder:text-slate-400 bg-transparent focus:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={capsuleState === 'loading'}
-                aria-live="polite"
-                className={`w-full sm:w-[244px] min-h-[48px] sm:h-14 px-5 rounded-xl text-base font-bold shrink-0 spring-transition active:scale-95 flex items-center justify-center gap-2 ${
-                  capsuleState === 'success'
-                    ? 'bg-emerald-400 text-slate-950'
-                    : capsuleState === 'error'
-                    ? 'bg-rose-500 text-white shake-2px'
-                    : tokens.primaryCtaGradient
-                }`}
-              >
-                {capsuleState === 'loading' ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin shrink-0" />
-                    <span>Додаємо...</span>
-                  </>
-                ) : capsuleState === 'success' ? (
-                  <>
-                    <Check className="w-5 h-5 shrink-0" />
-                    <span>✓ Додано</span>
-                  </>
-                ) : capsuleState === 'error' ? (
-                  <span className="text-sm font-extrabold">Не вдалося, спробуй ще</span>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5 shrink-0" />
-                    <span>✨ Створити вішліст</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Inline Claim Link Preview (#17) */}
-            <div className="max-w-lg mx-auto flex flex-wrap items-center justify-center gap-2 text-sm font-semibold text-slate-200">
-              <span>Твій майбутній лінк:</span>
-              <span className="inline-flex items-center px-3 py-1 rounded-xl bg-white/10 border border-white/15 font-bold text-white">
-                mriyii.app/w/
-                <input
-                  type="text"
-                  value={claimSlug}
-                  onChange={(e) =>
-                    setClaimSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''))
-                  }
-                  aria-label="Твій нікнейм для посилання"
-                  className="w-24 bg-transparent text-rose-300 font-black focus:outline-none ml-0.5"
-                />
-              </span>
-            </div>
-
-            {/* 4 чисті пігулки швидкого тесту */}
-            <div className="flex flex-wrap items-center justify-center gap-2.5">
-              <button
-                type="button"
-                onClick={() =>
-                  addDraftItemDirect({
-                    ...DEMO_WISHLISTS.rose_luxury.items[0]!,
-                    id: `draft-dyson-${Date.now()}`,
-                    isBooked: false,
-                  })
-                }
-                className="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
-              >
-                ✨ Dyson
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  addDraftItemDirect({
-                    id: `draft-airpods-${Date.now()}`,
-                    title: 'Навушники Apple AirPods Max Midnight USB-C',
-                    emoji: '🎧',
-                    description: 'Оригінальні бездротові навушники з активним шумозаглушенням.',
-                    price: 23999,
-                    currency: 'UAH',
-                    imageUrl:
-                      'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=700&q=80',
-                    jarTargetAmount: 23999,
-                    jarCurrentAmount: 14500,
-                    isBooked: false,
-                  })
-                }
-                className="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
-              >
-                🎧 AirPods Max
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  addDraftItemDirect({
-                    ...DEMO_WISHLISTS.rose_luxury.items[1]!,
-                    id: `draft-peonies-${Date.now()}`,
-                    isBooked: false,
-                  })
-                }
-                className="min-h-[48px] px-4 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 spring-transition"
-              >
-                💐 Півонії з Instagram
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  addDraftItemDirect({
-                    id: `draft-vip-bio-${Date.now()}`,
-                    title: 'VIP-подарунок із доставкою через @instagram Direct',
-                    emoji: '💎',
-                    description: 'Для Instagram Bio: 100% без домашньої адреси, анонімні подарунки 🕶️',
-                    price: 6500,
-                    currency: 'UAH',
-                    instagramHandle: 'kamelia_flowers_kyiv',
-                    imageUrl:
-                      'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=700&q=80',
-                    isBooked: false,
-                  })
-                }
-                className="min-h-[48px] px-4 rounded-full bg-amber-400/15 hover:bg-amber-400/25 text-amber-200 text-sm font-semibold border border-amber-400/35 spring-transition"
-              >
-                💎 Для Instagram Bio (100% без адреси)
-              </button>
-            </div>
-
-            <p className="text-sm font-medium text-slate-300">
-              Без реєстрації для старту • 0% комісії • Тільки ₴ UAH
-            </p>
           </div>
         </section>
 
         {/* Чернетка Delayed Auth (з'являється лише після додавання першої мрії) */}
         {draftItems.length > 0 && (
-          <section className="w-full py-12 bg-[#0F172A] border-y border-white/15">
+          <section className="band-obsidian w-full py-12 border-y border-white/15">
             <div className="mx-auto max-w-5xl px-4 space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -709,7 +1062,11 @@ export default function LandingPage() {
                 <button
                   type="button"
                   onClick={() => setShowAuthModal(true)}
-                  className="min-h-[48px] px-6 rounded-2xl text-base font-bold bg-emerald-400 hover:bg-emerald-300 text-slate-950 shadow-xl spring-transition active:scale-95 flex items-center gap-2"
+                  style={{
+                    backgroundColor: 'var(--cta-pop-bg)',
+                    color: 'var(--cta-pop-ink)',
+                  }}
+                  className="min-h-[48px] px-6 rounded-2xl text-base font-extrabold shadow-xl spring-transition active:scale-95 flex items-center gap-2"
                 >
                   <CheckCircle2 className="w-5 h-5" />
                   <span>Зберегти та отримати лінк</span>
@@ -734,52 +1091,83 @@ export default function LandingPage() {
         )}
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 2: ДО / ПІСЛЯ — SOLID FILL (#0F172A)                       */}
+        {/* СЕКЦІЯ 2: ДО / ПІСЛЯ («Досить здогадок у месенджерах»)            */}
         {/* ================================================================= */}
-        <section id="section-before-after" className="w-full bg-[#0F172A] border-y border-white/5 py-14 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4 space-y-8">
+        <section id="section-before-after" className="band-cream w-full py-16 sm:py-24">
+          <div className="mx-auto max-w-5xl px-4 space-y-10">
             <div className="max-w-3xl mx-auto text-center space-y-3">
-              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                Досить <span className={accentTextClass}>здогадок</span> у месенджерах
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+                Досить{' '}
+                <span
+                  className="serif-accent"
+                  style={{ color: isCyber ? '#34D399' : '#5B50EC' }}
+                >
+                  здогадок
+                </span>{' '}
+                у месенджерах
               </h2>
-              <p className="text-base sm:text-lg text-slate-200">
+              <p className="text-base sm:text-lg opacity-85">
                 Порівняй, як свято виглядає в чатах і як — із твоїм посиланням Mriyii.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="style-surface rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-rose-400/30 space-y-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-400/35 flex items-center justify-center text-3xl shrink-0">
-                    💬
-                  </div>
+              <div
+                className={`rounded-[28px] p-6 sm:p-8 space-y-4 border ${
+                  isCyber
+                    ? 'bg-[#1F222D] border-rose-400/35 text-white'
+                    : 'bg-white border-[#141218]/10 text-[#141218] shadow-lg'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="diia-box bg-[#FEE2E2]">💬</div>
                   <div>
-                    <div className="text-sm font-extrabold text-rose-300">До Mriyii</div>
-                    <h3 className="text-xl font-black text-white">
+                    <div
+                      className={`text-sm font-extrabold ${
+                        isCyber ? 'text-rose-300' : 'text-rose-700'
+                      }`}
+                    >
+                      До Mriyii
+                    </div>
+                    <h3 className="text-xl font-black">
                       Ще один чат у Telegram і руйнування інтриги
                     </h3>
                   </div>
                 </div>
-                <ul className="space-y-2.5 text-base text-slate-200">
+                <ul className="space-y-2.5 text-base opacity-90">
                   <li>• Друзі створюють окремий чат і все одно губляться в ідеях</li>
                   <li>• Хтось дарує два однакові сертифікати чи не той колір</li>
                   <li>• Хтось збирає гроші на картку вручну й плутається в сумах</li>
                 </ul>
               </div>
 
-              <div className="style-surface rounded-3xl p-6 sm:p-7 bg-[#171D30] border border-emerald-400/35 space-y-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-400/35 flex items-center justify-center text-3xl shrink-0">
+              <div
+                className={`rounded-[28px] p-6 sm:p-8 space-y-4 border-2 ${
+                  isCyber
+                    ? 'bg-[#1F222D] border-[#34D399] text-white'
+                    : 'bg-white border-[#5B50EC] text-[#141218] shadow-xl'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className="diia-box"
+                    style={{ backgroundColor: isCyber ? 'rgba(52,211,153,0.18)' : '#EFEAFF' }}
+                  >
                     🎁
                   </div>
                   <div>
-                    <div className="text-sm font-extrabold text-emerald-300">З Mriyii</div>
-                    <h3 className="text-xl font-black text-white">
+                    <div
+                      className="text-sm font-extrabold"
+                      style={{ color: isCyber ? '#34D399' : '#5B50EC' }}
+                    >
+                      З Mriyii
+                    </div>
+                    <h3 className="text-xl font-black">
                       Одне посилання без зайвих чатів і спойлерів
                     </h3>
                   </div>
                 </div>
-                <ul className="space-y-2.5 text-base text-slate-200">
+                <ul className="space-y-2.5 text-base opacity-90">
                   <li>• Бронювання подарунка в 1 клік без реєстрації для гостей</li>
                   <li>• Спільний збір на Банку Monobank або Приват24 з 0% комісії</li>
                   <li>• Сюрприз-режим: ти не бачиш, хто що обрав, до самого свята</li>
@@ -787,16 +1175,15 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Інтерактивний Compare Slider (21st.dev Compare) */}
+            {/* Інтерактивний Compare Slider */}
             <div className="max-w-3xl mx-auto space-y-3 pt-2">
-              <div className="flex items-center justify-between text-sm font-bold text-slate-300 px-1">
+              <div className="flex items-center justify-between text-sm font-bold px-1">
                 <span>↔ Потягни слайдер: Хаос у чаті vs Вітрина Mriyii</span>
-                <span className="tabular-nums text-white">{comparePos}%</span>
+                <span className="tabular-nums font-black">{comparePos}%</span>
               </div>
-              <div className="relative h-52 sm:h-44 rounded-3xl overflow-hidden border border-white/15 bg-[#0B1120] select-none">
-                {/* Right layer: After */}
-                <div className="absolute inset-0 p-6 flex flex-col justify-center bg-gradient-to-br from-[#0F172A] to-[#0E242C]">
-                  <span className="inline-flex w-fit px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-bold mb-2">
+              <div className="relative h-52 sm:h-44 rounded-3xl overflow-hidden border border-black/10 bg-[#141218] select-none shadow-xl">
+                <div className="absolute inset-0 p-6 flex flex-col justify-center bg-[#141218] text-white">
+                  <span className="inline-flex w-fit px-3 py-1 rounded-full bg-[#34D399]/20 text-[#34D399] text-sm font-bold mb-2">
                     ✅ Стало: Mriyii Вітрина
                   </span>
                   <p className="text-lg sm:text-xl font-black text-white">
@@ -806,21 +1193,22 @@ export default function LandingPage() {
                     Жодних дублів і незручних питань у Direct.
                   </p>
                 </div>
-                {/* Left layer: Before (clipped) */}
+
                 <div
-                  className="absolute inset-0 p-6 flex flex-col justify-center bg-[#1F1221] border-r-2 border-white"
+                  className="absolute inset-0 p-6 flex flex-col justify-center bg-[#FAF6F0] text-[#141218] border-r-2 border-[#5B50EC]"
                   style={{ clipPath: `inset(0 ${100 - comparePos}% 0 0)` }}
                 >
-                  <span className="inline-flex w-fit px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 text-sm font-bold mb-2">
+                  <span className="inline-flex w-fit px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-sm font-bold mb-2">
                     ❌ Було: «То що даруємо?» у Telegram
                   </span>
-                  <p className="text-lg sm:text-xl font-black text-white">
+                  <p className="text-lg sm:text-xl font-black text-[#141218]">
                     48 повідомлень • 2 однакові подарунки • Зіпсований сюрприз
                   </p>
-                  <p className="text-sm text-rose-100 mt-1">
+                  <p className="text-sm text-slate-700 mt-1">
                     Гола картка Монобанку без фото й контексту.
                   </p>
                 </div>
+
                 <input
                   type="range"
                   min={10}
@@ -831,10 +1219,10 @@ export default function LandingPage() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
                 />
                 <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none z-10"
+                  className="absolute top-0 bottom-0 w-0.5 bg-[#5B50EC] pointer-events-none z-10"
                   style={{ left: `${comparePos}%` }}
                 >
-                  <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white text-slate-950 font-black text-sm flex items-center justify-center shadow-2xl">
+                  <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white text-[#141218] font-black text-sm flex items-center justify-center shadow-2xl border border-slate-200">
                     ↔
                   </div>
                 </div>
@@ -844,78 +1232,71 @@ export default function LandingPage() {
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 3: ЯК ЦЕ ПРАЦЮЄ ЗА 3 КРОКИ — GRADIENT BAND + ANIMATED BEAM */}
+        {/* СЕКЦІЯ 3: ЯК ЦЕ ПРАЦЮЄ ЗА 3 КРОКИ (TONAL ICE-SKY + BEAM)          */}
         {/* ================================================================= */}
-        <section
-          id="section-2-how-it-works"
-          className="w-full py-16 sm:py-24"
-          style={{ background: 'linear-gradient(180deg, #111c33 0%, #0e242c 100%)' }}
-        >
-          <div className="mx-auto max-w-5xl px-4 space-y-10">
+        <section id="section-2-how-it-works" className="band-ai w-full py-16 sm:py-24">
+          <div className="mx-auto max-w-5xl px-4 space-y-12">
             <div className="max-w-3xl mx-auto text-center space-y-3">
-              <span
-                className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${sectionBadgeClass}`}
-              >
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#141218] border border-black/10 shadow-sm">
                 ⚡ Простий старт за 30 секунд
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-                Як це <span className={accentTextClass}>працює</span> за 3 кроки
+              <h2 className="text-3xl sm:text-5xl font-black text-[#141218] tracking-tight leading-tight">
+                Як це{' '}
+                <span className="serif-accent" style={{ color: '#4F46E5' }}>
+                  працює
+                </span>{' '}
+                за 3 кроки
               </h2>
-              <p className="text-base sm:text-lg text-slate-200 leading-relaxed">
+              <p className="text-base sm:text-lg text-[#3A3546] leading-relaxed">
                 Замість 100 натяків і таємних чатів — один естетичний лінк у профілі чи сторіс.
               </p>
             </div>
 
             <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
-              {/* SVG Animated Beam між 3 кроками */}
               <svg
-                className="hidden md:block absolute top-6 left-[18%] w-[64%] h-6 pointer-events-none"
+                className="hidden md:block absolute top-7 left-[18%] w-[64%] h-6 pointer-events-none"
                 viewBox="0 0 600 24"
                 fill="none"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
+                <path d="M0 12 L600 12" stroke="rgba(20,18,24,0.12)" strokeWidth="3" />
                 <path
                   d="M0 12 L600 12"
-                  stroke="rgba(255,255,255,0.14)"
-                  strokeWidth="3"
-                />
-                <path
-                  d="M0 12 L600 12"
-                  stroke={isRose ? '#FB7185' : '#34D399'}
+                  stroke="#4F46E5"
                   strokeWidth="3"
                   strokeLinecap="round"
                   className="beam-path-pulse"
                 />
               </svg>
 
-              <div className="relative flex flex-col items-center text-center space-y-3">
-                <div className="w-16 h-16 rounded-2xl bg-[#171D30] border-2 border-rose-400/50 flex items-center justify-center text-2xl font-black text-rose-300 shadow-lg z-10">
-                  01
-                </div>
-                <h3 className="text-xl font-black text-white">🔗 Встав лінк або @instagram</h3>
-                <p className="text-base text-slate-200 leading-relaxed max-w-xs">
-                  Ми автоматично підтягнемо фото, ціну в гривні (₴) та назву з будь-якого українського магазину.
+              <div className="relative flex flex-col items-center text-center space-y-3 bg-white rounded-[28px] p-6 shadow-md border border-black/5">
+                <div className="diia-box diia-box-lg bg-[#EFEAFF] text-[#141218] z-10">🔗</div>
+                <div className="text-sm font-black text-[#4F46E5]">Крок 01</div>
+                <h3 className="text-xl font-black text-[#141218]">Встав лінк або @instagram</h3>
+                <p className="text-base text-[#3A3546] leading-relaxed">
+                  Ми автоматично підтягнемо фото, ціну в гривні (₴) та назву з будь-якого
+                  українського магазину.
                 </p>
               </div>
 
-              <div className="relative flex flex-col items-center text-center space-y-3">
-                <div className="w-16 h-16 rounded-2xl bg-[#171D30] border-2 border-indigo-400/50 flex items-center justify-center text-2xl font-black text-indigo-300 shadow-lg z-10">
-                  02
-                </div>
-                <h3 className="text-xl font-black text-white">📲 Поділись одним лінком</h3>
-                <p className="text-base text-slate-200 leading-relaxed max-w-xs">
-                  Додай посилання в Instagram Bio, Telegram або сторіс. Друзям не потрібна реєстрація.
+              <div className="relative flex flex-col items-center text-center space-y-3 bg-white rounded-[28px] p-6 shadow-md border border-black/5">
+                <div className="diia-box diia-box-lg bg-[#EAF1FF] text-[#141218] z-10">📲</div>
+                <div className="text-sm font-black text-[#4F46E5]">Крок 02</div>
+                <h3 className="text-xl font-black text-[#141218]">Поділись одним лінком</h3>
+                <p className="text-base text-[#3A3546] leading-relaxed">
+                  Додай посилання в Instagram Bio, Telegram або сторіс. Друзям не потрібна
+                  реєстрація.
                 </p>
               </div>
 
-              <div className="relative flex flex-col items-center text-center space-y-3">
-                <div className="w-16 h-16 rounded-2xl bg-[#171D30] border-2 border-emerald-400/50 flex items-center justify-center text-2xl font-black text-emerald-300 shadow-lg z-10">
-                  03
-                </div>
-                <h3 className="text-xl font-black text-white">🎁 Друзі бронюють без спойлерів</h3>
-                <p className="text-base text-slate-200 leading-relaxed max-w-xs">
-                  Гості бачать вільні мрії та скидаються на Банку, а ти отримуєш сюрприз без дублікатів.
+              <div className="relative flex flex-col items-center text-center space-y-3 bg-white rounded-[28px] p-6 shadow-md border border-black/5">
+                <div className="diia-box diia-box-lg bg-[#FFE8EE] text-[#141218] z-10">🎁</div>
+                <div className="text-sm font-black text-[#4F46E5]">Крок 03</div>
+                <h3 className="text-xl font-black text-[#141218]">Друзі бронюють без спойлерів</h3>
+                <p className="text-base text-[#3A3546] leading-relaxed">
+                  Гості бачать вільні мрії та скидаються на Банку, а ти отримуєш сюрприз без
+                  дублікатів.
                 </p>
               </div>
             </div>
@@ -923,41 +1304,44 @@ export default function LandingPage() {
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 4: PRODUCT SHOWCASE — SOLID FILL (#0B1120)                 */}
+        {/* СЕКЦІЯ 4: LIVE PRODUCT SHOWCASE (BAND-OBSIDIAN, БЕЗ BORDER-BEAM)  */}
         {/* ================================================================= */}
-        <section id="section-3-showcase" className="w-full bg-[#0B1120] border-y border-white/5 py-16 sm:py-24">
+        <section id="section-3-showcase" className="band-obsidian w-full py-16 sm:py-24">
           <div className="mx-auto max-w-5xl px-4 space-y-10">
             <div className="max-w-3xl mx-auto text-center space-y-3">
-              <span
-                className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${sectionBadgeClass}`}
-              >
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white/10 text-white border border-white/15">
                 👀 Як виглядає твій вішліст для друзів
               </span>
               <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-                Жива <span className={accentTextClass}>вітрина</span> твоїх мрій
+                Жива{' '}
+                <span className="serif-accent" style={{ color: 'var(--cta-pop-bg)' }}>
+                  вітрина
+                </span>{' '}
+                твоїх мрій
               </h2>
               <p className="text-base sm:text-lg text-slate-200 leading-relaxed">
-                Саме так друзі бачать твою сторінку: профіль, підказка ШІ, безкоштовні посилання, статуси лотів та Банка.
+                Саме так друзі бачать твою сторінку: профіль, підказка ШІ, безкоштовні посилання,
+                статуси лотів та Банка.
               </p>
             </div>
 
-            <div className="style-surface max-w-4xl mx-auto rounded-[28px] bg-[#171D30] border border-white/15 p-5 sm:p-8 shadow-2xl space-y-5">
-              {/* 1. Міні-хедер профілю */}
+            <div className="max-w-4xl mx-auto rounded-[28px] bg-[#1E1C2A] border border-white/15 p-5 sm:p-8 shadow-2xl space-y-5">
+              {/* 1. Міні-хедер профілю з Scallop-10 аватаром */}
               <div className="flex flex-col sm:flex-row items-center gap-4 pb-5 border-b border-white/10 text-center sm:text-left">
-                <div className={`w-16 h-16 rounded-full ${tokens.avatarRingClass} p-[2px] shrink-0`}>
+                <div className="w-20 h-20 shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={currentDemoWishlist.ownerAvatarUrl}
                     alt={currentDemoWishlist.ownerName}
-                    className="w-full h-full rounded-full object-cover border-2 border-[#171D30]"
+                    className="scallop-photo"
                   />
                 </div>
                 <div className="flex-1 space-y-1">
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-sm font-bold">
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
                       🎂 До свята {currentDemoWishlist.daysLeft} днів
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-slate-200">
+                    <span className="px-3 py-1 rounded-full bg-white/10 text-slate-200">
                       @{currentDemoWishlist.ownerInstagramHandle}
                     </span>
                   </div>
@@ -969,68 +1353,64 @@ export default function LandingPage() {
               {/* 2. Згорнутий AI-тізер */}
               <Link
                 href={`/w/${currentDemoWishlist.slug}`}
-                className="w-full min-h-[52px] rounded-2xl bg-[#0E1324]/80 hover:bg-[#0E1324] border border-amber-400/35 px-4 py-3 flex items-center justify-between gap-3 spring-transition"
+                className="w-full min-h-[52px] rounded-2xl bg-[#141218] hover:bg-black/60 border border-white/15 px-4 py-3 flex items-center justify-between gap-3 spring-transition"
               >
                 <span className="text-sm sm:text-base font-bold text-white">
                   ✨ Хочеш, допоможу з ідеєю на основі інтересів?
                 </span>
-                <span className="px-3 py-1 rounded-xl bg-amber-400 text-slate-950 text-sm font-black shrink-0">
+                <span
+                  style={{
+                    backgroundColor: 'var(--cta-pop-bg)',
+                    color: 'var(--cta-pop-ink)',
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl text-sm font-black shrink-0"
+                >
                   Підібрати ▾
                 </span>
               </Link>
 
               {/* 3. Free App Note */}
-              <div className="rounded-xl bg-[#0E1324]/60 border border-white/10 px-4 py-2.5 text-sm font-semibold text-amber-200 flex items-center gap-2">
+              <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm font-semibold text-slate-200 flex items-center gap-2">
                 <span>✨</span>
                 <span>
-                  Mriyii безкоштовний для тебе і гостей — магазини платять нам невеликий % партнерської винагороди за перехід.
+                  Mriyii безкоштовний для тебе і гостей — магазини платять нам невеликий %
+                  партнерської винагороди за перехід.
                 </span>
               </div>
 
-              {/* 4. Міні-лоти (білі картки, 1-й лот із Border Beam) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {currentDemoWishlist.items.slice(0, 2).map((item, idx) =>
-                  idx === 0 ? (
-                    <div key={`showcase-${item.id}`} className="border-beam-wrap">
-                      <div className="border-beam-inner">
-                        <SmokedGiftCard
-                          item={item}
-                          themePreset={themePreset}
-                          viewMode="guest"
-                          ownerInstagramHandle={currentDemoWishlist.ownerInstagramHandle}
-                          onInstagramOrderToast={triggerToast}
-                          onBookClick={() =>
-                            triggerToast('💎 Подарунок заброньовано у прев’ю! Спробуй на /w/olena-vip.')
-                          }
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <SmokedGiftCard
-                      key={`showcase-${item.id}`}
-                      item={item}
-                      themePreset={themePreset}
-                      viewMode="guest"
-                      ownerInstagramHandle={currentDemoWishlist.ownerInstagramHandle}
-                      onInstagramOrderToast={triggerToast}
-                      onBookClick={() =>
-                        triggerToast('💎 Подарунок заброньовано у прев’ю! Спробуй на /w/olena-vip.')
-                      }
-                    />
-                  )
-                )}
+              {/* 4. Міні-лоти без border-beam-wrap */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {currentDemoWishlist.items.slice(0, 2).map((item) => (
+                  <SmokedGiftCard
+                    key={`showcase-${item.id}`}
+                    item={item}
+                    themePreset={themePreset}
+                    viewMode="guest"
+                    ownerInstagramHandle={currentDemoWishlist.ownerInstagramHandle}
+                    onInstagramOrderToast={triggerToast}
+                    onBookClick={() =>
+                      triggerToast(
+                        `💎 Подарунок заброньовано у прев’ю! Спробуй на /w/${currentDemoWishlist.slug}.`
+                      )
+                    }
+                  />
+                ))}
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                 <Link
                   href={`/w/${currentDemoWishlist.slug}`}
-                  className={`w-full sm:w-auto min-h-[48px] px-7 py-3 rounded-2xl text-base font-extrabold ${tokens.primaryCtaGradient} inline-flex items-center justify-center gap-2 spring-transition active:scale-95`}
+                  style={{
+                    backgroundColor: 'var(--cta-pop-bg)',
+                    color: 'var(--cta-pop-ink)',
+                  }}
+                  className="w-full sm:w-auto min-h-[48px] px-7 py-3 rounded-2xl text-base font-extrabold inline-flex items-center justify-center gap-2 spring-transition active:scale-95"
                 >
                   <span>Відкрити повний живий приклад →</span>
                 </Link>
                 <Link
                   href={`/dashboard?theme=${themePreset}`}
-                  className="w-full sm:w-auto min-h-[48px] px-6 py-3 rounded-2xl text-base font-bold bg-[#0E1324] hover:bg-[#1E2640] text-white border border-white/20 inline-flex items-center justify-center gap-2 spring-transition active:scale-95"
+                  className="w-full sm:w-auto min-h-[48px] px-6 py-3 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 inline-flex items-center justify-center gap-2 spring-transition active:scale-95"
                 >
                   <span>✏️ Спробувати редактор з Live Preview</span>
                 </Link>
@@ -1040,400 +1420,377 @@ export default function LandingPage() {
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 5: СПІЛЬНИЙ ЗБІР НА МОНОБАНКУ + IG STORIES 9:16 MOCKUP     */}
+        {/* СЕКЦІЯ 5: СПІЛЬНИЙ ЗБІР НА МОНОБАНКУ (WAVY) + IG STORIES 9:16     */}
         {/* ================================================================= */}
-        <section
-          id="section-4-monobank"
-          className="w-full py-16 sm:py-24"
-          style={{ background: 'linear-gradient(135deg, #0b1120 0%, #0e242c 100%)' }}
-        >
+        <section id="section-4-monobank" className="band-periwinkle w-full py-16 sm:py-24">
           <div className="mx-auto max-w-6xl px-4 space-y-12">
             {/* Before / After: Гола Монобанка vs Вітрина мрії */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              <div className="rounded-3xl p-6 bg-[#171D30]/85 border border-rose-400/30 space-y-3">
+              <div className="rounded-3xl p-6 bg-[#141218]/45 border border-white/15 space-y-3 backdrop-blur-lg">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-extrabold text-rose-300">❌ Було: Гола Монобанка в сторіс</span>
-                  <span className="px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-200 text-sm font-bold">0 контексту</span>
+                  <span className="text-sm font-extrabold text-rose-200">
+                    ❌ Було: Гола Монобанка в сторіс
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-100 text-sm font-bold">
+                    0 контексту
+                  </span>
                 </div>
-                <div className="rounded-2xl bg-[#0E1324] border border-white/10 p-4 space-y-2 text-sm text-slate-300">
-                  <p className="font-mono text-emerald-300">send.monobank.ua/jar/4x9k...</p>
-                  <p className="text-slate-200">«Кидайте сюди на ДР, хто скільки може 😅»</p>
+                <div className="rounded-2xl bg-[#141218]/75 border border-white/10 p-4 space-y-2 text-sm text-slate-200">
+                  <p className="font-mono text-[#34D399]">send.monobank.ua/jar/4x9k...</p>
+                  <p className="text-white">«Кидайте сюди на ДР, хто скільки може 😅»</p>
                 </div>
-                <p className="text-sm text-slate-300">
-                  Гості не розуміють, на що саме збираєте, скільки не вистачає і чи не краще купити подарунок окремо.
+                <p className="text-sm text-slate-100">
+                  Гості не розуміють, на що саме збираєте, скільки не вистачає і чи не краще купити
+                  подарунок окремо.
                 </p>
               </div>
 
-              <div className="rounded-3xl p-6 bg-[#171D30] border border-emerald-400/40 space-y-3 shadow-xl">
+              <div className="rounded-3xl p-6 bg-[#141218]/65 border border-white/25 space-y-3 shadow-xl backdrop-blur-lg">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-extrabold text-emerald-300">✅ Стало: Вітрина мрії з коментарем</span>
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-200 text-sm font-bold">Конверсія ×2.4</span>
+                  <span className="text-sm font-extrabold text-[#34D399]">
+                    ✅ Стало: Вітрина мрії з коментарем
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-[#34D399]/20 text-[#34D399] text-sm font-bold">
+                    Конверсія ×2.4
+                  </span>
                 </div>
-                <div className="rounded-2xl bg-white p-4 text-slate-950 space-y-2">
+                <div className="rounded-2xl bg-white p-4 text-[#141218] space-y-2">
                   <div className="flex items-center justify-between text-sm font-black">
-                    <span>🎧 Dyson Airwrap • 26 000 ₴</span>
-                    <span className="text-emerald-700">68% зібрано</span>
+                    <span>✨ Dyson Airwrap • 26 000 ₴</span>
+                    <span className="text-emerald-700">75% зібрано</span>
                   </div>
                   <div className="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
-                    <div className="h-full w-[68%] rounded-full bg-emerald-500" />
+                    <div className="h-full w-[75%] rounded-full bg-emerald-500" />
                   </div>
                   <p className="text-sm font-semibold text-slate-700">
-                    «Друзі, мрію про цей стайлер на ДР! Кожен донат наближає мрію ✨»
+                    «Друзі, мрію про цей стайлер на ДР! Кожен внесок наближає мрію ✨»
                   </p>
                 </div>
-                <p className="text-sm text-slate-200">
-                  Людина бачить фото, мету в ₴ та живий прогрес-бар — і з радістю скидається через Apple Pay за 5 секунд.
+                <p className="text-sm text-slate-100">
+                  Людина бачить фото, мету в ₴ та живий прогрес-бар — і з радістю додає свою частку
+                  через Apple Pay за 5 секунд.
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              <div className="lg:col-span-5 space-y-5">
-                <span
-                  className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${sectionBadgeClass}`}
-                >
-                  🐈‍⬛ Інтеграція з Monobank • ₴ UAH
-                </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-white tracking-tight leading-[1.12]">
-                  Великі мрії здійснюються <span className={accentTextClass}>разом</span> — 0% комісії
-                </h2>
-                <p className="text-base sm:text-lg text-slate-200 leading-relaxed">
-                  Для компанії з 10 друзів дорогий подарунок перетворюється на комфортний комплімент через Apple Pay прямо на твою Банку або Конверт Приват24.
+              <div className="lg:col-span-6 space-y-5">
+                <div className="flex items-center gap-4">
+                  <div className="diia-box diia-box-lg bg-white/15">🫙</div>
+                  <div>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-white/15 text-white mb-2">
+                      🐈‍⬛ Інтеграція з Monobank • ₴ UAH
+                    </span>
+                    <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-[1.12]">
+                      Великі мрії здійснюються{' '}
+                      <span className="serif-accent" style={{ color: 'var(--cta-pop-bg)' }}>
+                        разом
+                      </span>{' '}
+                      — 0% комісії
+                    </h2>
+                  </div>
+                </div>
+                <p className="text-base sm:text-lg text-slate-100 leading-relaxed">
+                  Для компанії з 10 друзів дорогий подарунок перетворюється на комфортну частку
+                  через Apple Pay прямо на твою Банку або Конверт Приват24.
                 </p>
 
-                <ul className="space-y-3 pt-1 text-base text-slate-200">
+                <ul className="space-y-3 pt-1 text-base text-slate-100">
                   <li className="flex items-start gap-3">
                     <span className="text-lg shrink-0">⏱️</span>
                     <span>
-                      <strong className="text-white font-bold">60 секунд авто-оновлення:</strong> живий прогрес-бар оновлюється після кожного донату.
+                      <strong className="text-white font-bold">60 секунд авто-оновлення:</strong>{' '}
+                      живий прогрес-бар оновлюється після кожного внеску на мрію.
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-lg shrink-0">₴</span>
                     <span>
-                      <strong className="text-white font-bold">100% твої гроші (UAH):</strong> кошти йдуть напряму у твій Monobank або Приват24.
+                      <strong className="text-white font-bold">100% твої гроші (UAH):</strong> кошти
+                      йдуть напряму у твій Monobank або Приват24.
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-lg shrink-0">🔒</span>
                     <span>
-                      <strong className="text-white font-bold">Без паролів і токенів:</strong> просто встав публічний лінк <code className="text-emerald-300 font-semibold">send.monobank.ua/jar/...</code>
+                      <strong className="text-white font-bold">Без паролів і токенів:</strong>{' '}
+                      просто встав публічний лінк{' '}
+                      <code className="text-[#F4FF7A] font-semibold">send.monobank.ua/jar/...</code>
                     </span>
                   </li>
                 </ul>
 
-                {/* Інтерактивна картка Банки */}
-                <div className="bg-white rounded-3xl p-5 text-slate-950 shadow-2xl space-y-4">
+                {/* Інтерактивна картка Банки з M3 Expressive wavy-progress + кластер друзів */}
+                <div className="rounded-[30px] bg-[#141218]/45 backdrop-blur-xl border border-white/25 p-6 text-white shadow-2xl space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <h3 className="text-lg font-black text-slate-950">
-                        Стайлер Dyson Airwrap Multi-Styler
+                      <h3 className="text-lg font-black text-white">
+                        Мета: {presetMeta.jarGoalTitle}
                       </h3>
-                      <p className="text-sm font-medium text-slate-600">
-                        Спільний збір на Монобанку (₴ UAH)
+                      <p className="text-sm font-medium text-slate-200">
+                        Спільний подарунок від друзів (₴ UAH)
                       </p>
                     </div>
-                    <div className="text-xl font-black text-slate-950 tabular-nums">26 000 ₴</div>
-                  </div>
-                  <div className="bg-slate-100 rounded-2xl p-4 space-y-2.5">
-                    <div className="flex items-center justify-between text-sm font-extrabold tabular-nums">
-                      <span className="text-emerald-800">
-                        Зібрано: {displayJarAmount.toLocaleString('uk-UA')} ₴
-                      </span>
-                      <span className="text-emerald-700">
-                        {Math.min(100, Math.round((demoJarAmount[themePreset] / 26000) * 100))}%
-                      </span>
+                    <div
+                      className="text-2xl font-black tabular-nums"
+                      style={{ color: 'var(--cta-pop-bg)' }}
+                    >
+                      {jarPct}%
                     </div>
-                    <div className="w-full h-3 rounded-full bg-slate-200 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-emerald-500 spring-transition"
-                        style={{
-                          width: `${Math.min(100, Math.round((demoJarAmount[themePreset] / 26000) * 100))}%`,
-                        }}
+                  </div>
+
+                  <div className="flex items-baseline gap-2.5 flex-wrap">
+                    <span className="text-3xl sm:text-4xl font-black tabular-nums text-white">
+                      {displayJarAmount.toLocaleString('uk-UA')} ₴
+                    </span>
+                    <span className="text-base font-semibold tabular-nums text-slate-200">
+                      із {jarTarget.toLocaleString('uk-UA')} ₴
+                    </span>
+                  </div>
+
+                  {/* Wavy Progress (M3 Expressive) */}
+                  <svg className="w-full h-7" viewBox="0 0 400 26" preserveAspectRatio="none">
+                    <defs>
+                      <clipPath id="jarWaveClip">
+                        <rect x="0" y="0" width={waveEnd} height="26" />
+                      </clipPath>
+                    </defs>
+                    <path
+                      d="M 4 13 L 396 13"
+                      stroke="rgba(255,255,255,0.22)"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                    <path
+                      d="M 4 13 Q 16 4 28 13 T 52 13 T 76 13 T 100 13 T 124 13 T 148 13 T 172 13 T 196 13 T 220 13 T 244 13 T 268 13 T 292 13 T 316 13 T 340 13 T 364 13 T 388 13"
+                      stroke="var(--wave-stroke)"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      fill="none"
+                      clipPath="url(#jarWaveClip)"
+                    />
+                  </svg>
+
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="avatar-cluster">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=100"
+                        alt="Учасник 1"
+                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="https://images.pexels.com/photos/6641330/pexels-photo-6641330.jpeg?auto=compress&cs=tinysrgb&w=100"
+                        alt="Учасник 2"
+                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=100"
+                        alt="Учасник 3"
                       />
                     </div>
-                    <div className="relative flex gap-2">
-                      <LikeBurst burstKey={jarBurstKey} themePreset={themePreset} />
+                    <span className="text-sm font-bold text-slate-100">
+                      11 друзів зробили внесок на мрію
+                    </span>
+                  </div>
+
+                  <div className="relative flex flex-wrap gap-2.5 pt-1">
+                    <LikeBurst burstKey={jarBurstKey} themePreset={themePreset} />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setJarBurstKey((k) => k + 1);
+                        const nextVal = Math.min(jarTarget, jarAmount + 1500);
+                        setDemoJarAmount((prev) => ({
+                          ...prev,
+                          [landingPreset]: nextVal,
+                        }));
+                        if (nextVal >= jarTarget) {
+                          fireConfetti();
+                          triggerToast('🎉 Банка зібрана на 100%! Мрія здійснилась!');
+                        } else {
+                          triggerToast('🐈‍⬛ +1 500 ₴ додано у Монобанку (0% комісії)!');
+                        }
+                      }}
+                      style={{
+                        backgroundColor: 'var(--cta-pop-bg)',
+                        color: 'var(--cta-pop-ink)',
+                      }}
+                      className="flex-1 min-h-[48px] px-5 rounded-2xl text-sm font-extrabold spring-transition active:scale-95"
+                    >
+                      Додати частку +1 500 ₴ (демо)
+                    </button>
+                    {jarAmount >= jarTarget && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setJarBurstKey((k) => k + 1);
-                          const nextVal = Math.min(26000, demoJarAmount[themePreset] + 1500);
+                        onClick={() =>
                           setDemoJarAmount((prev) => ({
                             ...prev,
-                            [themePreset]: nextVal,
-                          }));
-                          if (nextVal >= 26000) {
-                            fireConfetti();
-                            triggerToast('🎉 Банка зібрана на 100%! Мрія здійснилась!');
-                          } else {
-                            triggerToast('🐈‍⬛ +1 500 ₴ додано у Монобанку (0% комісії)!');
-                          }
-                        }}
-                        className="flex-1 min-h-[48px] px-5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-sm font-bold spring-transition active:scale-95"
+                            [landingPreset]: presetMeta.jarDefaultVal,
+                          }))
+                        }
+                        className="min-h-[48px] px-4 rounded-2xl bg-white/15 hover:bg-white/25 text-white text-sm font-bold spring-transition"
                       >
-                        + Закинути 1 500 ₴ (демо)
+                        ↺
                       </button>
-                      {demoJarAmount[themePreset] >= 26000 && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDemoJarAmount((prev) => ({
-                              ...prev,
-                              [themePreset]: 23000,
-                            }))
-                          }
-                          className="min-h-[48px] px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-900 text-sm font-bold spring-transition"
-                        >
-                          ↺
-                        </button>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Вертикальний IG Stories 9:16 Mockup */}
-              <div className="lg:col-span-7 flex justify-center">
-                <div className="w-full max-w-[280px] rounded-[28px] bg-[#0B1120] border-2 border-white/20 p-3 shadow-2xl space-y-3">
-                  {/* Story Progress Bars */}
-                  <div className="grid grid-cols-3 gap-1.5 pt-1">
+              {/* Вертикальний IG Stories 9:16 Mockup (Динамічний на всі 3 теми) */}
+              <div className="lg:col-span-6 flex justify-center">
+                <div
+                  style={{ backgroundColor: 'var(--stories-bg)' }}
+                  className="w-full max-w-[320px] rounded-[34px] border border-white/25 p-6 text-white text-center shadow-2xl space-y-4 spring-transition"
+                >
+                  <div className="grid grid-cols-3 gap-1.5">
                     <div className="h-1 rounded-full bg-white" />
                     <div className="h-1 rounded-full bg-white/75" />
                     <div className="h-1 rounded-full bg-white/30" />
                   </div>
-                  {/* Story Author */}
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={currentDemoWishlist.ownerAvatarUrl}
-                        alt={currentDemoWishlist.ownerName}
-                        className="w-8 h-8 rounded-full object-cover border border-rose-400"
-                      />
-                      <span className="text-sm font-bold text-white">@{currentDemoWishlist.ownerInstagramHandle}</span>
-                    </div>
-                    <span className="text-sm font-bold text-slate-300">2 год</span>
-                  </div>
-                  {/* Story Visual Canvas */}
-                  <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-[#1E1433] to-[#0F172A] border border-white/15 p-4 space-y-4">
+                  <div className="text-sm font-bold opacity-90">Готово для IG Stories 9:16</div>
+                  <div className="w-40 h-40 mx-auto">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&w=500&q=80"
-                      alt="Dyson Airwrap"
-                      className="w-full h-44 rounded-xl object-cover"
+                      src={presetMeta.storyImg}
+                      alt={presetMeta.storyTitle}
+                      className="scallop-photo"
                     />
-                    <div className="text-center space-y-1">
-                      <div className="text-sm font-black text-white">Мій вішліст до ДР 🎂✨</div>
-                      <div className="text-sm text-slate-200">Жодних дублікатів — усе тут 👇</div>
-                    </div>
-                    {/* Instagram Link Sticker */}
-                    <Link
-                      href={`/w/${currentDemoWishlist.slug}`}
-                      className="block w-full min-h-[48px] rounded-xl bg-white text-slate-950 px-3 py-2.5 text-center font-black text-sm shadow-lg hover:bg-slate-100 spring-transition"
-                    >
-                      🔗 mriyii.app/w/{claimSlug || currentDemoWishlist.slug}
-                    </Link>
                   </div>
-                  <div className="text-center text-sm font-semibold text-slate-300 pb-1">
-                    📱 Готовий формат для IG Stories 9:16
+                  <div className="serif-accent text-4xl leading-none text-white">
+                    {presetMeta.storyTitle}
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ================================================================= */}
-        {/* СЕКЦІЯ 6: КВІТИ ТА INSTAGRAM-ШОУРУМИ БЕЗ АДРЕСИ (PHOTO + OVERLAY) */}
-        {/* ================================================================= */}
-        <section
-          id="section-5-instagram-flowers"
-          className="relative w-full overflow-hidden py-16 sm:py-24"
-        >
-          {/* Full-bleed Floral Photo + Deep Slate Overlay */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1600&q=80"
-            alt="Флористичний фон"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-[#0B1120]/82 backdrop-blur-[2px]" />
-
-          <div className="relative z-10 mx-auto max-w-6xl px-4 space-y-10">
-            <div className="max-w-3xl mx-auto text-center space-y-4">
-              <span
-                className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${sectionBadgeClass}`}
-              >
-                🌸 Без розкриття домашньої адреси
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-                Улюблені <span className={accentTextClass}>квіти</span> та шоуруми з Instagram
-              </h2>
-              <p className="text-base sm:text-lg text-slate-200 leading-relaxed">
-                Заповнюй картку побажань — дарувальник оплачує букет чи сукню, а магазин сам уточнює доставку в Direct.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-7 text-slate-950 shadow-2xl space-y-5">
-                <div className="flex items-center gap-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=400&q=80"
-                    alt="Букет білих півоній"
-                    loading="eager"
-                    referrerPolicy="no-referrer"
-                    className="w-16 h-16 rounded-2xl object-cover border border-slate-200 shrink-0"
-                  />
-                  <div>
-                    <span className="text-sm font-bold text-rose-700">Бутік @kamelia_flowers_kyiv</span>
-                    <h3 className="text-xl font-black text-slate-950">
-                      🌸 Які квіти я люблю та мої побажання
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 text-base font-medium text-slate-900">
-                  <p>
-                    <strong className="font-extrabold">Квіти:</strong>{' '}
-                    {currentDemoWishlist.aiFlowerPreferences}
-                  </p>
-                  <p>
-                    <strong className="font-extrabold">Розміри:</strong>{' '}
-                    {currentDemoWishlist.aiSizes} • Бутік{' '}
-                    <span className="text-indigo-700 font-bold">@kamelia_flowers_kyiv</span>
-                  </p>
-                  <p className="text-emerald-800 font-bold">
-                    🔒 Магазин сам уточнює адресу доставки в Direct.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const orderMsg = `Привіт! Хочу замовити та оплатити подарунок із вішліста для @${currentDemoWishlist.ownerInstagramHandle}: «${flowerDemoItem.title}» (${(flowerDemoItem.price ?? 0).toLocaleString('uk-UA')} ₴). Напишіть, будь ласка, отримувачу в Direct для узгодження зручного часу та адреси доставки 🌸`;
-                    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                      navigator.clipboard.writeText(orderMsg).catch(() => {});
-                    }
-                    triggerToast(
-                      '📋 Текст замовлення скопійовано! Бутік сам уточнить адресу доставки в Direct.'
-                    );
-                  }}
-                  className={`w-full min-h-[48px] px-5 py-3.5 rounded-2xl text-base font-extrabold ${tokens.primaryCtaGradient} shadow-lg flex items-center justify-center gap-2 spring-transition active:scale-95`}
-                >
-                  <Copy className="w-5 h-5" />
-                  <span>Замовити в Instagram @kamelia_flowers_kyiv</span>
-                </button>
-              </div>
-
-              <div className="lg:col-span-6 space-y-5">
-                <div className="rounded-3xl p-6 bg-[#171D30]/95 border border-white/15 space-y-1.5">
-                  <div className="text-lg font-black text-white">
-                    1. Вказуєш улюблені квіти та розміри
-                  </div>
-                  <p className="text-base text-slate-200">
-                    Наприклад: «Білі півонії без целофану від @kamelia_flowers_kyiv» та розміри S / 37.
-                  </p>
-                </div>
-                <div className="rounded-3xl p-6 bg-[#171D30]/95 border border-white/15 space-y-1.5">
-                  <div className="text-lg font-black text-white">
-                    2. Дарувальник замовляє в 1 клік
-                  </div>
-                  <p className="text-base text-slate-200">
-                    Ми автоматично копіюємо готовий текст замовлення для @
-                    {currentDemoWishlist.ownerInstagramHandle}.
-                  </p>
-                </div>
-                <div className="rounded-3xl p-6 bg-[#171D30]/95 border border-emerald-400/40 space-y-1.5">
-                  <div className="text-lg font-black text-white">
-                    3. Доставка через Direct — 100% приватно
-                  </div>
-                  <p className="text-base text-slate-200">
-                    Після оплати бутік пише особисто тобі у Direct, і ти сама обираєш, куди прийняти кур&apos;єра.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ================================================================= */}
-        {/* СЕКЦІЯ 7: ШІ-ПОМІЧНИК GEMINI — SOLID INDIGO SLATE (#13192E)       */}
-        {/* ================================================================= */}
-        <section id="section-6-gemini-ai" className="w-full bg-[#13192E] border-y border-white/5 py-16 sm:py-24">
-          <div className="mx-auto max-w-6xl px-4 space-y-10">
-            <div className="max-w-3xl mx-auto text-center space-y-4">
-              <span
-                className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold ${sectionBadgeClass}`}
-              >
-                🤖 Персональний ШІ-стиліст подарунків
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-                ШІ-помічник підбере <span className={accentTextClass}>сюрприз</span> за 10 секунд
-              </h2>
-              <p className="text-base sm:text-lg text-slate-200 leading-relaxed">
-                Гість обирає чіпси інтересів та бюджет — ШІ пропонує 3 влучні подарунки зі списку або з українських магазинів.
-              </p>
-            </div>
-
-            <div className="rounded-[28px] bg-[#171D30] border border-white/15 p-6 sm:p-8 shadow-2xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-7 space-y-5">
-                <div className="flex flex-wrap gap-2">
-                  {(['beauty', 'coffee', 'gadgets', 'flowers'] as const).map((chipKey) => (
-                    <button
-                      key={chipKey}
-                      type="button"
-                      onClick={() => setAiChip(chipKey)}
-                      className={`min-h-[48px] px-4 rounded-xl text-sm font-bold spring-transition ${
-                        aiChip === chipKey
-                          ? `${tokens.primaryCtaGradient} shadow-lg`
-                          : 'bg-[#0E1324] text-slate-200 border border-white/15 hover:border-white/35'
-                      }`}
-                    >
-                      {AI_SPOTLIGHT_SAMPLES[chipKey].label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-white">
-                    Під будь-який бюджет у гривні та з 100% таємним сюрпризом
-                  </h3>
-                  <p className="text-base text-slate-200 leading-relaxed">
-                    Натисни на інтерес вище — і побачиш, як ШІ миттєво підбирає влучний лот. Заброньована порада ховається від іменинника до дня свята, але інші друзі бачать, що ідея вже зайнята.
-                  </p>
-                </div>
-
-                <div className="pt-1">
+                  <p className="text-sm text-slate-100 leading-snug">{presetMeta.storySub}</p>
                   <Link
                     href={`/w/${currentDemoWishlist.slug}`}
-                    className={`min-h-[48px] px-7 py-3.5 rounded-2xl text-base font-extrabold ${tokens.primaryCtaGradient} shadow-xl spring-transition active:scale-95 inline-flex items-center gap-2`}
+                    style={{
+                      backgroundColor: 'var(--stories-pill-bg)',
+                      color: 'var(--stories-pill-ink)',
+                    }}
+                    className="flex items-center justify-center w-full min-h-[48px] rounded-full px-4 py-3 font-black text-sm shadow-lg spring-transition hover:opacity-95"
                   >
-                    <span>🤖 Протестувати ШІ-Помічника →</span>
+                    🔗 mriyii.app/w/{claimSlug || presetMeta.storySlug}
                   </Link>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
 
-              <div className="lg:col-span-5 bg-white rounded-3xl p-5 text-slate-950 shadow-xl space-y-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={AI_SPOTLIGHT_SAMPLES[aiChip].img}
-                  alt={AI_SPOTLIGHT_SAMPLES[aiChip].title}
-                  loading="eager"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-44 rounded-2xl object-cover bg-slate-100"
-                />
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-2 text-sm font-bold text-slate-600">
-                    <span>✨ Порада ШІ</span>
-                    <span>{AI_SPOTLIGHT_SAMPLES[aiChip].shop}</span>
+        {/* ================================================================= */}
+        {/* СЕКЦІЯ 6: КВІТИ БЕЗ АДРЕСИ (CLOVER-4, ZERO DARK PHOTO OVERLAY)   */}
+        {/* ================================================================= */}
+        <section id="section-5-instagram-flowers" className="band-blush w-full py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl px-4 space-y-10">
+            <div className="max-w-3xl mx-auto text-center space-y-4">
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#141218] border border-black/10 shadow-sm">
+                🌸 Без розкриття домашньої адреси
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black text-[#141218] tracking-tight leading-tight">
+                Улюблені{' '}
+                <span
+                  className="serif-accent"
+                  style={{ color: isCyber ? '#4F46E5' : '#5B50EC' }}
+                >
+                  квіти
+                </span>{' '}
+                та шоуруми з Instagram
+              </h2>
+              <p className="text-base sm:text-lg text-[#3A3546] leading-relaxed">
+                Заповнюй картку побажань — дарувальник оплачує букет чи сукню, а магазин сам
+                уточнює доставку в Direct.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+              <div className="lg:col-span-6 space-y-6">
+                <div className="max-w-[380px] mx-auto lg:mx-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="https://images.pexels.com/photos/5410144/pexels-photo-5410144.jpeg?auto=compress&cs=tinysrgb&w=900"
+                    alt="Букет квітів без розкриття адреси"
+                    className="clover-photo shadow-xl"
+                  />
+                </div>
+
+                <div className="bg-white rounded-3xl p-6 text-[#141218] shadow-xl border border-black/5 space-y-4">
+                  <div>
+                    <span className="text-sm font-bold text-[#5B50EC]">
+                      Бутік @kamelia_flowers
+                    </span>
+                    <h3 className="text-xl font-black text-[#141218] mt-0.5">
+                      🌸 Які квіти я люблю та мої побажання
+                    </h3>
                   </div>
-                  <div className="text-lg font-black text-slate-950 leading-snug">
-                    {AI_SPOTLIGHT_SAMPLES[aiChip].title}
+
+                  <div className="bg-[#FAF6F0] border border-black/10 rounded-2xl p-4 space-y-2 text-base font-medium text-[#141218]">
+                    <p>
+                      <strong className="font-extrabold">Квіти:</strong>{' '}
+                      {currentDemoWishlist.aiFlowerPreferences}
+                    </p>
+                    <p>
+                      <strong className="font-extrabold">Розміри:</strong>{' '}
+                      {currentDemoWishlist.aiSizes} • Бутік{' '}
+                      <span className="text-[#4F46E5] font-bold">@kamelia_flowers</span>
+                    </p>
+                    <p className="text-emerald-800 font-bold">
+                      🔒 Магазин сам уточнює адресу доставки в Direct.
+                    </p>
                   </div>
-                  <div className="text-xl font-black text-emerald-700 tabular-nums">
-                    {AI_SPOTLIGHT_SAMPLES[aiChip].price}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const orderMsg = `Привіт! Хочу замовити та оплатити подарунок із вішліста для @${currentDemoWishlist.ownerInstagramHandle}: «${flowerDemoItem.title}» (${(flowerDemoItem.price ?? 0).toLocaleString('uk-UA')} ₴). Напишіть, будь ласка, отримувачу в Direct для узгодження зручного часу та адреси доставки 🌸`;
+                      navigator.clipboard?.writeText(orderMsg).catch(() => {});
+                      triggerToast(
+                        '📋 Текст замовлення скопійовано! Бутік сам уточнить адресу доставки в Direct.'
+                      );
+                    }}
+                    className="w-full min-h-[48px] px-5 py-3.5 rounded-2xl text-base font-extrabold bg-[#141218] hover:bg-slate-800 text-white shadow-lg flex items-center justify-center gap-2 spring-transition active:scale-95"
+                  >
+                    <Copy className="w-5 h-5" />
+                    <span>Замовити в Instagram @kamelia_flowers</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="lg:col-span-6 space-y-5">
+                <div className="rounded-3xl p-6 bg-white border border-black/5 shadow-md flex items-start gap-4">
+                  <div className="diia-box bg-[#FFE8EE]">🌸</div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-[#141218]">
+                      1. Вказуєш улюблені квіти та розміри
+                    </h3>
+                    <p className="text-base text-[#3A3546]">
+                      Наприклад: «Білі півонії без целофану від @kamelia_flowers» та розміри S / 37.
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-3xl p-6 bg-white border border-black/5 shadow-md flex items-start gap-4">
+                  <div className="diia-box bg-[#EFEAFF]">📲</div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-[#141218]">
+                      2. Дарувальник замовляє в 1 клік
+                    </h3>
+                    <p className="text-base text-[#3A3546]">
+                      Ми автоматично копіюємо готовий текст замовлення для @
+                      {currentDemoWishlist.ownerInstagramHandle}.
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-3xl p-6 bg-white border-2 border-[#5B50EC] shadow-md flex items-start gap-4">
+                  <div className="diia-box bg-[#EAF1FF]">🛡️</div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-[#141218]">
+                      3. Доставка через Direct — 100% приватно
+                    </h3>
+                    <p className="text-base text-[#3A3546]">
+                      Після оплати бутік пише особисто тобі у Direct, і ти сама обираєш, куди
+                      прийняти кур&apos;єра.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1442,33 +1799,165 @@ export default function LandingPage() {
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 8: РЕЖИМ СЮРПРИЗУ — PHOTO + DEEP OVERLAY (#0B1120/85)      */}
+        {/* СЕКЦІЯ 7: ШІ-ПОМІЧНИК GEMINI (#EAF1FF + LIVE INPUT + GOO)         */}
         {/* ================================================================= */}
-        <section
-          id="section-7-surprise-mode"
-          className="relative w-full overflow-hidden py-16 sm:py-24"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1600&q=80"
-            alt="Атмосфера свята"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-[#0B1120]/85" />
+        <section id="section-6-gemini-ai" className="band-ai w-full py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl px-4 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            <div className="lg:col-span-6 space-y-5">
+              <div className="flex items-center gap-4">
+                <div className="diia-box bg-white">🧠</div>
+                <div>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-white text-[#141218] border border-black/10 mb-1.5">
+                    Персональний ШІ-стиліст подарунків
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#141218] tracking-tight leading-tight">
+                    ШІ-помічник підбере{' '}
+                    <span className="serif-accent" style={{ color: '#4F46E5' }}>
+                      сюрприз
+                    </span>{' '}
+                    за 10 секунд
+                  </h2>
+                </div>
+              </div>
 
-          <div className="relative z-10 mx-auto max-w-6xl px-4 space-y-10">
+              <p className="text-base sm:text-lg text-[#3A3546] leading-relaxed">
+                Гість обирає чіпси інтересів та бюджет — ШІ пропонує 3 влучні подарунки зі списку
+                або з українських магазинів. Заброньована порада ховається від іменинника до дня
+                свята.
+              </p>
+
+              {/* Живий ШІ-рядок запиту прямо на сторінці */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  runLiveAiSearch();
+                }}
+                className="flex flex-col sm:flex-row gap-2.5 bg-white rounded-2xl p-2 shadow-lg border border-black/5"
+              >
+                <input
+                  type="text"
+                  value={aiQuery}
+                  onChange={(e) => setAiQuery(e.target.value)}
+                  aria-label="Запит до ШІ-помічника"
+                  className="flex-1 px-4 py-3 text-base font-semibold text-[#141218] bg-transparent focus:outline-none min-w-0"
+                />
+                <button
+                  type="submit"
+                  disabled={aiThinking}
+                  className="min-h-[48px] px-6 rounded-xl text-base font-extrabold bg-[#4F46E5] hover:bg-indigo-700 text-white shrink-0 spring-transition active:scale-95"
+                >
+                  {aiThinking ? 'Думаю...' : 'Підібрати'}
+                </button>
+              </form>
+
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { key: 'beauty', label: '💄 Бʼюті та догляд' },
+                    { key: 'coffee', label: '☕ Кава та затишок' },
+                    { key: 'gadgets', label: '🎧 Гаджети та аудіо' },
+                    { key: 'flowers', label: '🌸 Квіти без адреси' },
+                  ] as const
+                ).map((c) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => runLiveAiSearch(c.key)}
+                    className={`min-h-[44px] px-4 rounded-xl text-sm font-bold border spring-transition ${
+                      aiChip === c.key
+                        ? 'bg-[#141218] text-white border-transparent shadow-md'
+                        : 'bg-white text-[#141218] border-black/10 hover:bg-slate-50'
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="pt-1">
+                <Link
+                  href={`/w/${currentDemoWishlist.slug}`}
+                  className="min-h-[48px] px-7 py-3.5 rounded-2xl text-base font-extrabold bg-[#141218] hover:bg-slate-800 text-white shadow-xl spring-transition active:scale-95 inline-flex items-center gap-2"
+                >
+                  <span>Протестувати ШІ-Помічника →</span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 space-y-4">
+              {aiThinking ? (
+                <div className="rounded-3xl bg-white p-8 shadow-xl flex flex-col items-center justify-center gap-3 min-h-[240px]">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-3 h-3 rounded-full bg-[#4F46E5] goo-dot"
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <span
+                      className="w-3 h-3 rounded-full bg-[#4F46E5] goo-dot"
+                      style={{ animationDelay: '160ms' }}
+                    />
+                    <span
+                      className="w-3 h-3 rounded-full bg-[#4F46E5] goo-dot"
+                      style={{ animationDelay: '320ms' }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold text-[#3A3546]">
+                    ШІ підбирає 3 влучні подарунки в ₴...
+                  </span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {aiItems.map((card, idx) => (
+                    <div
+                      key={`${aiChip}-${aiPackIdx}-${idx}`}
+                      style={{ animationDelay: `${idx * 120}ms` }}
+                      className="stagger-card bg-white rounded-3xl p-3.5 shadow-xl border border-black/5 text-center space-y-2.5"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={card.img}
+                        alt={card.title}
+                        loading="eager"
+                        referrerPolicy="no-referrer"
+                        style={{ objectPosition: card.pos || 'center center' }}
+                        className="w-full h-32 rounded-2xl object-cover bg-slate-100"
+                      />
+                      <div className="text-sm font-black text-[#141218] leading-snug">
+                        {card.title}
+                      </div>
+                      <div className="text-sm font-extrabold text-[#4F46E5] tabular-nums">
+                        {card.price}
+                      </div>
+                      <div className="text-sm font-semibold text-slate-600">{card.shop}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================= */}
+        {/* СЕКЦІЯ 8: РЕЖИМ СЮРПРИЗУ (BAND-OBSIDIAN, ZERO DARK PHOTO OVERLAY) */}
+        {/* ================================================================= */}
+        <section id="section-7-surprise-mode" className="band-obsidian w-full py-16 sm:py-24">
+          <div className="mx-auto max-w-6xl px-4 space-y-10">
             <div className="max-w-3xl mx-auto text-center space-y-5">
               <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-                Ти бачиш <span className={accentTextClass}>інтригу</span> — друзі бачать план
+                Ти бачиш{' '}
+                <span className="serif-accent" style={{ color: 'var(--cta-pop-bg)' }}>
+                  інтригу
+                </span>{' '}
+                — друзі бачать план
               </h2>
 
-              <div className="inline-flex p-1.5 rounded-2xl bg-[#171D30] border border-white/15 gap-2">
+              <div className="inline-flex p-1.5 rounded-2xl bg-white/10 border border-white/15 gap-2">
                 <button
                   type="button"
                   onClick={() => setRolePreview('owner')}
                   className={`min-h-[48px] px-5 rounded-xl text-base font-bold spring-transition ${
                     rolePreview === 'owner'
-                      ? 'bg-amber-400 text-slate-950 shadow-lg'
+                      ? 'bg-[#F4FF7A] text-[#141218] shadow-lg'
                       : 'text-slate-200 hover:text-white'
                   }`}
                 >
@@ -1479,7 +1968,7 @@ export default function LandingPage() {
                   onClick={() => setRolePreview('guest')}
                   className={`min-h-[48px] px-5 rounded-xl text-base font-bold spring-transition ${
                     rolePreview === 'guest'
-                      ? 'bg-emerald-400 text-slate-950 shadow-lg'
+                      ? 'bg-[#34D399] text-[#0B1120] shadow-lg'
                       : 'text-slate-200 hover:text-white'
                   }`}
                 >
@@ -1507,138 +1996,123 @@ export default function LandingPage() {
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 9: SOCIAL PROOF — LIGHT CONTRASTING BAND (#FAF7F5)         */}
+        {/* СЕКЦІЯ 9: SOCIAL PROOF (EDITORIAL GRID, NO MARQUEE)               */}
         {/* ================================================================= */}
-        <section
-          id="section-8-social-proof"
-          className="w-full bg-[#FAF7F5] text-slate-950 py-16 sm:py-24"
-        >
+        <section id="section-8-social-proof" className="band-cream w-full py-16 sm:py-24">
           <div className="mx-auto max-w-6xl px-4 space-y-10">
             <div className="max-w-3xl mx-auto text-center space-y-3">
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-rose-100 text-rose-800 border border-rose-200">
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white text-[#141218] border border-black/10 shadow-sm">
                 💛 Живі історії спільноти
               </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight leading-tight">
-                Уже обирають для <span className="text-rose-600">свят</span> в Україні
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+                Уже обирають для{' '}
+                <span
+                  className="serif-accent"
+                  style={{ color: isCyber ? '#34D399' : '#5B50EC' }}
+                >
+                  свят
+                </span>{' '}
+                в Україні
               </h2>
-              <p className="text-base sm:text-lg text-slate-700">
-                Від дня народження в Києві до таємного VIP-букета чи спільного збору на PlayStation 5.
+              <p className="text-base sm:text-lg opacity-85">
+                Від дня народження в Києві до таємного VIP-букета чи спільного збору на PlayStation
+                5.
               </p>
             </div>
 
             {/* 3 живі метрики */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-lg space-y-1">
-                <div className="text-3xl font-black text-rose-600 tabular-nums">1 200+</div>
-                <div className="text-base font-extrabold text-slate-950">створених вішлістів</div>
+              <div className="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-1">
+                <div className="text-3xl font-black text-[#5B50EC] tabular-nums">1 200+</div>
+                <div className="text-base font-extrabold">створених вішлістів</div>
                 <p className="text-sm text-slate-600">Дні народження, новосілля та Таємний Санта</p>
               </div>
-              <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-lg space-y-1">
-                <div className="text-3xl font-black text-emerald-600 tabular-nums">0%</div>
-                <div className="text-base font-extrabold text-slate-950">комісії на Банку</div>
-                <p className="text-sm text-slate-600">Усі донати йдуть напряму у твій Monobank</p>
+              <div className="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-1">
+                <div className="text-3xl font-black text-emerald-700 tabular-nums">0%</div>
+                <div className="text-base font-extrabold">комісії на Банку</div>
+                <p className="text-sm text-slate-600">
+                  Усі внески на мрію йдуть напряму у твій Monobank
+                </p>
               </div>
-              <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-lg space-y-1">
-                <div className="text-3xl font-black text-indigo-600 tabular-nums">30 сек</div>
-                <div className="text-base font-extrabold text-slate-950">на перший лінк</div>
+              <div className="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-1">
+                <div className="text-3xl font-black text-indigo-700 tabular-nums">30 сек</div>
+                <div className="text-base font-extrabold">на перший лінк</div>
                 <p className="text-sm text-slate-600">Без реєстрації для старту та гостям</p>
               </div>
             </div>
 
-            {/* 3 Story Social Proof картки з портретами */}
+            {/* 3 чисті журнальні картки відгуків з портретами Pexels */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-lg space-y-4">
-                <div className="inline-flex px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-sm font-bold border border-rose-200">
+              <div className="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-4">
+                <div className="inline-flex px-3 py-1 rounded-full bg-[#EFEAFF] text-[#5B50EC] text-sm font-bold">
                   🎂 День народження
                 </div>
                 <p className="text-base text-slate-800 leading-relaxed font-medium">
-                  «Кинула лінк у сторіс за тиждень до ДР — подруги самі закрили Банку на Dyson Airwrap і жодна не повторилась!»
+                  «Кинула лінк у сторіс за тиждень до ДР — подруги самі закрили Банку на Dyson
+                  Airwrap і жодна не повторилась!»
                 </p>
                 <div className="flex items-center gap-3 pt-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80"
+                    src="https://images.pexels.com/photos/5910931/pexels-photo-5910931.jpeg?auto=compress&cs=tinysrgb&w=160"
                     alt="Олена, Київ"
                     loading="eager"
                     referrerPolicy="no-referrer"
-                    className="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0"
+                    className="w-11 h-11 rounded-full object-cover object-top border border-slate-200 shrink-0"
                   />
                   <div>
-                    <div className="text-sm font-black text-slate-950">Олена</div>
-                    <div className="text-sm font-bold text-rose-700">@olena.muse • Київ</div>
+                    <div className="text-sm font-black text-[#141218]">Олена</div>
+                    <div className="text-sm font-bold text-[#5B50EC]">@olena.muse • Київ</div>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-lg space-y-4">
-                <div className="inline-flex px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-sm font-bold border border-amber-200">
+              <div className="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-4">
+                <div className="inline-flex px-3 py-1 rounded-full bg-[#FFE8EE] text-rose-800 text-sm font-bold">
                   🌸 VIP-букет без адреси
                 </div>
                 <p className="text-base text-slate-800 leading-relaxed font-medium">
-                  «Поставила лінк у Instagram Bio. Прихильник оплатив букет півоній анонімно, а флорист сам написав мені в Direct!»
+                  «Поставила лінк у Instagram Bio. Прихильник оплатив букет півоній анонімно, а
+                  флорист сам написав мені в Direct!»
                 </p>
                 <div className="flex items-center gap-3 pt-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=160&q=80"
+                    src="https://images.pexels.com/photos/6641330/pexels-photo-6641330.jpeg?auto=compress&cs=tinysrgb&w=160"
                     alt="Катя, Львів"
                     loading="eager"
                     referrerPolicy="no-referrer"
-                    className="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0"
+                    className="w-11 h-11 rounded-full object-cover object-top border border-slate-200 shrink-0"
                   />
                   <div>
-                    <div className="text-sm font-black text-slate-950">Катя</div>
+                    <div className="text-sm font-black text-[#141218]">Катя</div>
                     <div className="text-sm font-bold text-emerald-700">@katya.style • Львів</div>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-lg space-y-4">
-                <div className="inline-flex px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-bold border border-indigo-200">
+              <div className="rounded-3xl p-6 bg-white text-[#141218] border border-black/5 shadow-lg space-y-4">
+                <div className="inline-flex px-3 py-1 rounded-full bg-[#EAF1FF] text-[#4F46E5] text-sm font-bold">
                   🎮 Груповий збір PS5
                 </div>
                 <p className="text-base text-slate-800 leading-relaxed font-medium">
-                  «Хлопці скинулись на Монобанку за два дні без жодних табличок у Excel. Іменинник до останнього не знав, що буде PS5!»
+                  «Хлопці скинулись на Монобанку за два дні без жодних табличок у Excel. Іменинник до
+                  останнього не знав, що буде PS5!»
                 </p>
                 <div className="flex items-center gap-3 pt-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80"
+                    src="https://images.pexels.com/photos/4669901/pexels-photo-4669901.jpeg?auto=compress&cs=tinysrgb&w=160"
                     alt="Максим, Дніпро"
                     loading="eager"
                     referrerPolicy="no-referrer"
-                    className="w-11 h-11 rounded-full object-cover border border-slate-200 shrink-0"
+                    className="w-11 h-11 rounded-full object-cover object-top border border-slate-200 shrink-0"
                   />
                   <div>
-                    <div className="text-sm font-black text-slate-950">Максим</div>
-                    <div className="text-sm font-bold text-indigo-700">@max.dev • Дніпро</div>
+                    <div className="text-sm font-black text-[#141218]">Максим</div>
+                    <div className="text-sm font-bold text-[#4F46E5]">@max.dev • Дніпро</div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Marquee (21st.dev) — живі події спільноти (пауза при наведенні) */}
-            <div className="marquee-wrap py-2" aria-label="Живі події спільноти Mriyii">
-              <div className="marquee-track">
-                {[
-                  '🎂 Оля, Київ • Зібрали 26 000 ₴ на Dyson Airwrap',
-                  '🌸 Софія, Львів • Анонімний букет півоній 🕶️',
-                  '🎮 Ігор, Дніпро • Спільний збір на PS5 Pro',
-                  '☕ Марина, Одеса • Кавоварка DeLonghi за 2 дні',
-                  '💎 Аліна • Вішліст у Instagram Bio без адреси',
-                  '🎂 Оля, Київ • Зібрали 26 000 ₴ на Dyson Airwrap',
-                  '🌸 Софія, Львів • Анонімний букет півоній 🕶️',
-                  '🎮 Ігор, Дніпро • Спільний збір на PS5 Pro',
-                  '☕ Марина, Одеса • Кавоварка DeLonghi за 2 дні',
-                  '💎 Аліна • Вішліст у Instagram Bio без адреси',
-                ].map((story, idx) => (
-                  <span
-                    key={`mq-${idx}`}
-                    className="inline-flex items-center px-4 py-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-sm font-bold text-slate-800 whitespace-nowrap"
-                  >
-                    {story}
-                  </span>
-                ))}
               </div>
             </div>
 
@@ -1648,17 +2122,15 @@ export default function LandingPage() {
                 aria-live="polite"
                 onClick={() => {
                   const link = `https://mriyii.app/w/${claimSlug || currentDemoWishlist.slug}`;
-                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                    navigator.clipboard.writeText(link).catch(() => {});
-                  }
+                  navigator.clipboard?.writeText(link).catch(() => {});
                   setBioLinkCopied(true);
                   setTimeout(() => setBioLinkCopied(false), 1500);
                   triggerToast(`🔗 Скопійовано ${link} — додавай в Instagram Bio!`);
                 }}
                 className={`min-h-[48px] min-w-[272px] px-7 py-3.5 rounded-2xl text-base font-extrabold shadow-xl inline-flex items-center justify-center gap-2 spring-transition active:scale-95 ${
                   bioLinkCopied
-                    ? 'bg-emerald-400 text-slate-950'
-                    : 'bg-slate-950 hover:bg-slate-800 text-white'
+                    ? 'bg-emerald-400 text-[#0B1120]'
+                    : 'bg-[#141218] hover:bg-slate-800 text-white'
                 }`}
               >
                 {bioLinkCopied ? (
@@ -1678,74 +2150,100 @@ export default function LandingPage() {
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 10: FAQ — SOLID DEEP SLATE (#0F172A)                       */}
+        {/* СЕКЦІЯ 10: FAQ (BAND-OBSIDIAN)                                    */}
         {/* ================================================================= */}
-        <section id="section-9-faq" className="w-full bg-[#0F172A] text-white py-16 sm:py-24">
+        <section id="section-9-faq" className="band-obsidian w-full py-16 sm:py-24">
           <div className="mx-auto max-w-6xl px-4 space-y-10">
             <div className="max-w-3xl mx-auto text-center space-y-3">
               <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-                Часті <span className={accentTextClass}>питання</span>
+                Часті{' '}
+                <span className="serif-accent" style={{ color: 'var(--cta-pop-bg)' }}>
+                  питання
+                </span>
               </h2>
             </div>
 
             <div className="max-w-3xl mx-auto space-y-3">
-              <details className="group rounded-2xl bg-[#171D30] border border-white/10 p-5 sm:p-6" open>
+              <details
+                className="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6"
+                open
+              >
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
                   <span>💡 Чи справді Mriyii безкоштовний?</span>
-                  <span className="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+                  <span className="text-slate-300 group-open:rotate-180 transition-transform">
+                    ▾
+                  </span>
                 </summary>
                 <p className="mt-3 text-base text-slate-200 leading-relaxed">
-                  Так! Створення вішліста, бронювання, ШІ-підбір і збір на Монобанку безкоштовні. Ми заробляємо лише на партнерській комісії магазинів, коли гості переходять за посиланнями.
+                  Так! Створення вішліста, бронювання, ШІ-підбір і збір на Монобанку безкоштовні. Ми
+                  заробляємо лише на партнерській комісії магазинів, коли гості переходять за
+                  посиланнями.
                 </p>
               </details>
 
-              <details className="group rounded-2xl bg-[#171D30] border border-white/10 p-5 sm:p-6">
+              <details className="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
                   <span>💳 Як проходять оплати в Монобанці?</span>
-                  <span className="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+                  <span className="text-slate-300 group-open:rotate-180 transition-transform">
+                    ▾
+                  </span>
                 </summary>
                 <p className="mt-3 text-base text-slate-200 leading-relaxed">
-                  Mriyii не приймає гроші на свій рахунок. Кнопка веде напряму на вашу Банку Monobank або Конверт Приват24 з 0% комісії платформи.
+                  Mriyii не приймає гроші на свій рахунок. Кнопка веде напряму на вашу Банку
+                  Monobank або Конверт Приват24 з 0% комісії платформи.
                 </p>
               </details>
 
-              <details className="group rounded-2xl bg-[#171D30] border border-white/10 p-5 sm:p-6">
+              <details className="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
                   <span>🔒 Чи бачить хтось мою домашню адресу?</span>
-                  <span className="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+                  <span className="text-slate-300 group-open:rotate-180 transition-transform">
+                    ▾
+                  </span>
                 </summary>
                 <p className="mt-3 text-base text-slate-200 leading-relaxed">
-                  Ні! Ми принципово не зберігаємо домашні адреси. Для квітів та шоурумів гість передає магазину ваш @instagram, і кур&apos;єр узгоджує доставку напряму з вами.
+                  Ні! Ми принципово не зберігаємо домашні адреси. Для квітів та шоурумів гість
+                  передає магазину ваш @instagram, і кур&apos;єр узгоджує доставку напряму з вами.
                 </p>
               </details>
 
-              <details className="group rounded-2xl bg-[#171D30] border border-white/10 p-5 sm:p-6">
+              <details className="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
                   <span>📲 Чи потрібен Telegram або реєстрація?</span>
-                  <span className="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+                  <span className="text-slate-300 group-open:rotate-180 transition-transform">
+                    ▾
+                  </span>
                 </summary>
                 <p className="mt-3 text-base text-slate-200 leading-relaxed">
-                  Гостям реєстрація не потрібна взагалі. Ви можете додати перші мрії прямо зараз, а увійти через Google/Apple лише при збереженні свого посилання.
+                  Гостям реєстрація не потрібна взагалі. Ви можете додати перші мрії прямо зараз, а
+                  увійти через Google/Apple лише при збереженні свого посилання.
                 </p>
               </details>
 
-              <details className="group rounded-2xl bg-[#171D30] border border-white/10 p-5 sm:p-6">
+              <details className="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
                   <span>🔄 А якщо гість передумає або захоче скасувати бронь?</span>
-                  <span className="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+                  <span className="text-slate-300 group-open:rotate-180 transition-transform">
+                    ▾
+                  </span>
                 </summary>
                 <p className="mt-3 text-base text-slate-200 leading-relaxed">
-                  Бронь скасовується в 1 клік, і подарунок одразу стає вільним. Діє анти-спам ліміт: не більше 2 активних бронювань на одного гостя, щоб ніхто не заблокував увесь список.
+                  Бронь скасовується в 1 клік, і подарунок одразу стає вільним. Діє анти-спам
+                  ліміт: не більше 2 активних бронювань на одного гостя, щоб ніхто не заблокував
+                  увесь список.
                 </p>
               </details>
 
-              <details className="group rounded-2xl bg-[#171D30] border border-white/10 p-5 sm:p-6">
+              <details className="group rounded-2xl bg-white/5 border border-white/12 p-5 sm:p-6">
                 <summary className="cursor-pointer list-none flex items-center justify-between gap-4 text-lg font-black text-white">
                   <span>✈️ Чи можна додати бажання без посилання — подорож або сертифікат?</span>
-                  <span className="text-slate-300 group-open:rotate-180 transition-transform">▾</span>
+                  <span className="text-slate-300 group-open:rotate-180 transition-transform">
+                    ▾
+                  </span>
                 </summary>
                 <p className="mt-3 text-base text-slate-200 leading-relaxed">
-                  Звісно! Можна додати будь-яку мрію текстом — квитки, враження, благодійний донат чи просто спільний збір на Монобанку без конкретного магазину.
+                  Звісно! Можна додати будь-яку мрію текстом — квитки, враження, благодійний внесок
+                  на мрію чи просто спільний збір на Монобанку без конкретного магазину.
                 </p>
               </details>
             </div>
@@ -1753,33 +2251,39 @@ export default function LandingPage() {
         </section>
 
         {/* ================================================================= */}
-        {/* СЕКЦІЯ 11: ФІНАЛЬНИЙ CTA + FOOTER — AURORA GRADIENT              */}
+        {/* СЕКЦІЯ 11: КОМПАКТНИЙ ФІНАЛЬНИЙ CTA + FOOTER                      */}
         {/* ================================================================= */}
         <section
           id="section-10-final-cta"
-          className="w-full py-16 sm:py-24"
-          style={{ background: 'linear-gradient(180deg, #111c33 0%, #0b1120 100%)' }}
+          className="w-full bg-[#141218] text-white border-t border-white/10 py-14 sm:py-18"
         >
-          <div className="mx-auto max-w-4xl px-4 text-center space-y-6">
+          <div className="mx-auto max-w-4xl px-4 text-center space-y-5">
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-[1.12]">
-              Створи свій вішліст за <span className={accentTextClass}>30 секунд</span>
+              Створи свій вішліст за{' '}
+              <span className="serif-accent" style={{ color: 'var(--cta-pop-bg)' }}>
+                30 секунд
+              </span>
             </h2>
-            <p className="text-base sm:text-xl text-slate-200">
-              Повністю безкоштовно. Працює в Instagram Bio, Telegram та TikTok.
+            <p className="text-base sm:text-lg text-slate-200">
+              Безкоштовно • 0% комісії на Монобанку • Працює в Instagram Bio, Telegram та TikTok.
             </p>
-            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => scrollToSandbox()}
-                className={`w-full sm:w-auto min-h-[48px] px-8 py-3.5 rounded-2xl text-base font-extrabold ${tokens.primaryCtaGradient} shadow-2xl spring-transition active:scale-95`}
+                style={{
+                  backgroundColor: 'var(--cta-pop-bg)',
+                  color: 'var(--cta-pop-ink)',
+                }}
+                className="w-full sm:w-auto min-h-[48px] px-8 py-3.5 rounded-2xl text-base font-extrabold shadow-2xl spring-transition active:scale-95"
               >
-                ✨ Створити свій список мрій безкоштовно
+                Створити свій лінк Mriyii
               </button>
               <Link
                 href={`/dashboard?theme=${themePreset}`}
-                className="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-[#171D30] hover:bg-[#1E2640] text-white border border-white/20 spring-transition flex items-center justify-center"
+                className="w-full sm:w-auto min-h-[48px] px-6 py-3.5 rounded-2xl text-base font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 spring-transition flex items-center justify-center"
               >
-                ✏️ Спробувати редактор з Live Preview
+                ✏️ Редактор з Live Preview
               </Link>
               <Link
                 href="/ideas"
@@ -1795,7 +2299,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div className="pt-8">
+            <div className="pt-6">
               <AffiliateDisclosureBadge />
             </div>
           </div>
@@ -1808,7 +2312,7 @@ export default function LandingPage() {
           <div className="solid-white-card rounded-3xl w-full max-w-md p-6 space-y-5">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-xl font-black text-slate-950">Збережіть ваш вішліст ✨</h3>
+                <h3 className="text-xl font-black text-[#141218]">Збережіть ваш вішліст ✨</h3>
                 <p className="text-sm font-medium text-slate-600 mt-1">
                   Ваша тема ({tokens.label}) та додані мрії ({draftItems.length} шт.) миттєво
                   перенесуться у ваш персональний лінк.
@@ -1831,7 +2335,7 @@ export default function LandingPage() {
                 type="text"
                 value={wishlistTitle}
                 onChange={(e) => setWishlistTitle(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-base font-semibold text-slate-950 focus:outline-none focus:border-slate-950"
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-base font-semibold text-[#141218] focus:outline-none focus:border-[#141218]"
               />
             </div>
 
@@ -1839,7 +2343,11 @@ export default function LandingPage() {
               <button
                 type="button"
                 onClick={() => handleCompleteOnboarding('google')}
-                className={`w-full min-h-[48px] px-4 rounded-xl text-base font-bold ${tokens.primaryCtaGradient} text-white flex items-center justify-center gap-2`}
+                style={{
+                  backgroundColor: 'var(--cta-pop-bg)',
+                  color: 'var(--cta-pop-ink)',
+                }}
+                className="w-full min-h-[48px] px-4 rounded-xl text-base font-extrabold flex items-center justify-center gap-2 shadow-lg"
               >
                 <span>Продовжити з Google (1 клік)</span>
                 <ArrowRight className="w-5 h-5" />
@@ -1847,7 +2355,7 @@ export default function LandingPage() {
               <button
                 type="button"
                 onClick={() => handleCompleteOnboarding('apple')}
-                className="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-slate-950 text-white hover:bg-slate-800"
+                className="w-full min-h-[48px] px-4 rounded-xl text-base font-bold bg-[#141218] text-white hover:bg-slate-800"
               >
                  Увійти з Apple ID
               </button>

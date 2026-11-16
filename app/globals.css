@@ -2,68 +2,297 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'MacPaw Fixel';
+  src: url('https://cdn.jsdelivr.net/gh/MacPaw/Fixel@main/fonts/webfonts/FixelText-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MacPaw Fixel';
+  src: url('https://cdn.jsdelivr.net/gh/MacPaw/Fixel@main/fonts/webfonts/FixelText-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MacPaw Fixel';
+  src: url('https://cdn.jsdelivr.net/gh/MacPaw/Fixel@main/fonts/webfonts/FixelDisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MacPaw Fixel';
+  src: url('https://cdn.jsdelivr.net/gh/MacPaw/Fixel@main/fonts/webfonts/FixelDisplay-Black.woff2') format('woff2');
+  font-weight: 800 900;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --font-sans: 'MacPaw Fixel', -apple-system, BlinkMacSystemFont, 'SF Pro Display',
       'Inter', system-ui, sans-serif;
+    --bg-hero: #EFEAFF;
+    --bg-hero-ink: #141218;
+    --bg-hero-sub: #3A3546;
+    --bg-cream: #FAF6F0;
+    --bg-cream-ink: #141218;
+    --bg-obsidian: #141218;
+    --bg-periwinkle: #6F66F2;
+    --bg-ai: #EAF1FF;
+    --bg-blush: #FFE8EE;
+    --cta-main-bg: #141218;
+    --cta-main-ink: #FFFFFF;
+    --cta-pop-bg: #F4FF7A;
+    --cta-pop-ink: #141218;
+    --accent-soft: #DECFFC;
+    --accent-strong: #5B50EC;
+    --wave-stroke: #F4FF7A;
+    --stories-bg: #6F66F2;
+    --stories-pill-bg: #F4FF7A;
+    --stories-pill-ink: #141218;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #0e1324;
-    color: #ffffff;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 }
 
-.spring-transition {
-  transition: all 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+/* ========================================================================= */
+/* DS V3: 3 Tonal Presets (M3 Expressive × Дія × Emotion Photography)       */
+/* ========================================================================= */
+[data-preset='rose_luxury'] {
+  --bg-hero: #EFEAFF;
+  --bg-hero-ink: #141218;
+  --bg-hero-sub: #3A3546;
+  --bg-cream: #FAF6F0;
+  --bg-cream-ink: #141218;
+  --bg-obsidian: #141218;
+  --bg-periwinkle: #6F66F2;
+  --bg-ai: #EAF1FF;
+  --bg-blush: #FFE8EE;
+  --cta-main-bg: #141218;
+  --cta-main-ink: #FFFFFF;
+  --cta-pop-bg: #F4FF7A;
+  --cta-pop-ink: #141218;
+  --accent-soft: #DECFFC;
+  --accent-strong: #5B50EC;
+  --wave-stroke: #F4FF7A;
+  --stories-bg: #6F66F2;
+  --stories-pill-bg: #F4FF7A;
+  --stories-pill-ink: #141218;
 }
 
-/* DS V2.1: Rose Aurora on Midnight Gradient */
+[data-preset='cyber_titanium'] {
+  --bg-hero: #EEF2FA;
+  --bg-hero-ink: #15161D;
+  --bg-hero-sub: #334155;
+  --bg-cream: #15161D;
+  --bg-cream-ink: #FFFFFF;
+  --bg-obsidian: #0F1118;
+  --bg-periwinkle: #15161D;
+  --bg-ai: #EEF2FA;
+  --bg-blush: #DCE4F2;
+  --cta-main-bg: #15161D;
+  --cta-main-ink: #FFFFFF;
+  --cta-pop-bg: #34D399;
+  --cta-pop-ink: #0B1120;
+  --accent-soft: #818CF8;
+  --accent-strong: #4F46E5;
+  --wave-stroke: #34D399;
+  --stories-bg: #15161D;
+  --stories-pill-bg: #34D399;
+  --stories-pill-ink: #0B1120;
+}
+
+[data-preset='creator_bio'] {
+  --bg-hero: #141218;
+  --bg-hero-ink: #FFFFFF;
+  --bg-hero-sub: #E2E8F0;
+  --bg-cream: #FAF6F0;
+  --bg-cream-ink: #141218;
+  --bg-obsidian: #141218;
+  --bg-periwinkle: #1A1722;
+  --bg-ai: #EFEAFF;
+  --bg-blush: #FAF6F0;
+  --cta-main-bg: #DECFFC;
+  --cta-main-ink: #141218;
+  --cta-pop-bg: #F4FF7A;
+  --cta-pop-ink: #141218;
+  --accent-soft: #DECFFC;
+  --accent-strong: #F4FF7A;
+  --wave-stroke: #F4FF7A;
+  --stories-bg: #141218;
+  --stories-pill-bg: #F4FF7A;
+  --stories-pill-ink: #141218;
+}
+
+.serif-accent {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.band-hero {
+  background-color: var(--bg-hero);
+  color: var(--bg-hero-ink);
+}
+
+.band-cream {
+  background-color: var(--bg-cream);
+  color: var(--bg-cream-ink);
+}
+
+.band-obsidian {
+  background-color: var(--bg-obsidian);
+  color: #ffffff;
+}
+
+.band-periwinkle {
+  background-color: var(--bg-periwinkle);
+  color: #ffffff;
+}
+
+.band-ai {
+  background-color: var(--bg-ai);
+  color: #141218;
+}
+
+.band-blush {
+  background-color: var(--bg-blush);
+  color: #141218;
+}
+
+.diia-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(20, 18, 24, 0.08);
+}
+
+.diia-box-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  font-size: 30px;
+}
+
+.scallop-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  clip-path: url(#scallop10);
+  display: block;
+}
+
+.clover-photo {
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  object-fit: cover;
+  object-position: center 15%;
+  clip-path: url(#clover4);
+  display: block;
+}
+
+.starburst-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  height: 112px;
+  color: var(--cta-pop-ink);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.starburst-badge svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--cta-pop-bg);
+  z-index: 0;
+}
+
+.starburst-badge span {
+  position: relative;
+  z-index: 1;
+  padding: 10px;
+}
+
+.avatar-cluster {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-cluster img {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  margin-left: -10px;
+}
+
+.avatar-cluster img:first-child {
+  margin-left: 0;
+}
+
+.spring-transition {
+  transition: all 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Dashboard / Guest / Auth surfaces */
 .mesh-luxury,
 .canvas-rose {
-  background-color: #0b1120;
+  background-color: #141218;
   background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(251, 113, 133, 0.13) 0px, transparent 60%),
-    linear-gradient(180deg, #0b1120 0%, #111c33 38%, #0e242c 72%, #0b1120 100%);
+    radial-gradient(ellipse at 50% 0%, rgba(111, 102, 242, 0.16) 0px, transparent 60%),
+    linear-gradient(180deg, #141218 0%, #1d192b 45%, #141218 100%);
 }
 
-/* DS V2.1: Cyber Titanium Emerald Mint */
 .mesh-cyber,
 .canvas-cyber {
-  background-color: #0b1120;
+  background-color: #0f1118;
   background-image:
-    radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.11) 0px, transparent 60%),
-    linear-gradient(180deg, #0b1120 0%, #111c33 38%, #0e242c 72%, #0b1120 100%);
+    radial-gradient(ellipse at 50% 0%, rgba(79, 70, 229, 0.16) 0px, transparent 60%),
+    linear-gradient(180deg, #0f1118 0%, #151828 45%, #0f1118 100%);
 }
 
 .ds-v2-card {
-  background: #171d30;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1a1724;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* Градієнтні кільця аватарки Linktree-профілю */
 .avatar-ring-rose {
-  background: linear-gradient(135deg, #fb7185, #f472b6, #818cf8);
+  background: linear-gradient(135deg, #decffc, #6f66f2, #f4ff7a);
 }
 
 .avatar-ring-cyber {
-  background: linear-gradient(135deg, #34d399, #38bdf8, #818cf8);
+  background: linear-gradient(135deg, #34d399, #4f46e5, #818cf8);
 }
 
-/* Smart Luxury Poster Fallback (Коли og:image відсутнє або заблоковане) */
 .fallback-poster-rose {
   background:
-    radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.45), transparent 55%),
-    linear-gradient(135deg, #db2777 0%, #7c3aed 58%, #1e1b4b 100%);
+    radial-gradient(circle at 80% 20%, rgba(244, 255, 122, 0.35), transparent 55%),
+    linear-gradient(135deg, #6f66f2 0%, #3b2d7a 58%, #141218 100%);
 }
 
 .fallback-poster-cyber {
   background:
-    radial-gradient(circle at 80% 20%, rgba(52, 211, 153, 0.45), transparent 55%),
-    linear-gradient(135deg, #2563eb 0%, #4f46e5 58%, #0f172a 100%);
+    radial-gradient(circle at 80% 20%, rgba(52, 211, 153, 0.4), transparent 55%),
+    linear-gradient(135deg, #4f46e5 0%, #1e1b4b 58%, #0f1118 100%);
 }
 
 .poster-pattern {
@@ -71,18 +300,16 @@
   background-size: 16px 16px;
 }
 
-/* Суцільна біла картка з преміальною тінню (100% контраст за специфікацією 05_UI_UX_POC_Reference) */
 .solid-white-card {
   background: #ffffff;
-  color: #0f172a;
+  color: #141218;
   box-shadow:
-    0 20px 38px -10px rgba(0, 0, 0, 0.42),
-    0 6px 14px -3px rgba(0, 0, 0, 0.18);
+    0 20px 38px -10px rgba(20, 18, 24, 0.18),
+    0 6px 14px -3px rgba(20, 18, 24, 0.08);
 }
 
-/* Напівпрозора скляна шапка для Linktree профілю та модалок */
 .smoked-glass {
-  background: rgba(15, 17, 26, 0.72);
+  background: rgba(20, 18, 24, 0.78);
   backdrop-filter: blur(24px) saturate(185%);
   -webkit-backdrop-filter: blur(24px) saturate(185%);
   box-shadow:
@@ -98,7 +325,7 @@
 }
 
 .shimmer-rose {
-  background: linear-gradient(90deg, #ec4899 0%, #f472b6 45%, #fde047 55%, #ec4899 100%);
+  background: linear-gradient(90deg, #6f66f2 0%, #decffc 45%, #f4ff7a 55%, #6f66f2 100%);
   background-size: 200% 100%;
   animation: shimmer 2.2s infinite linear;
 }
@@ -128,79 +355,6 @@
   }
 }
 
-/* ========================================================================= */
-/* Issue #20: Hybrid 21st.dev Motion + 3 CSS Versions (Aurora|Smoked|Editorial) */
-/* ========================================================================= */
-.aurora-bg {
-  position: absolute;
-  inset: -35%;
-  background:
-    radial-gradient(circle at 25% 30%, var(--aurora-accent, rgba(251, 113, 133, 0.2)), transparent 45%),
-    radial-gradient(circle at 75% 60%, rgba(56, 189, 248, 0.14), transparent 50%);
-  filter: blur(48px);
-  animation: auroraDrift 14s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-@keyframes auroraDrift {
-  0% {
-    transform: translate3d(-2%, -2%, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(3%, 2%, 0) scale(1.06);
-  }
-}
-
-.spotlight-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    520px circle at var(--mx, 50%) var(--my, 30%),
-    var(--spotlight-accent, rgba(251, 113, 133, 0.14)),
-    transparent 60%
-  );
-  transition: opacity 0.3s ease;
-}
-
-/* Border Beam на головному лоті Showcase */
-.border-beam-wrap {
-  position: relative;
-  border-radius: 26px;
-  padding: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  transition: transform 0.2s ease-out;
-}
-
-.border-beam-wrap::before {
-  content: '';
-  position: absolute;
-  inset: -120%;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    transparent 280deg,
-    var(--beam-color, #fb7185) 330deg,
-    var(--beam-soft, #fda4af) 360deg
-  );
-  animation: borderBeamSpin 4.5s linear infinite;
-  pointer-events: none;
-}
-
-.border-beam-inner {
-  position: relative;
-  z-index: 1;
-  border-radius: 24px;
-  height: 100%;
-}
-
-@keyframes borderBeamSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* SVG Animated Beam (3-step flow) */
 .beam-path-pulse {
   stroke-dasharray: 24 48;
@@ -216,83 +370,24 @@
   }
 }
 
-/* Marquee Social Proof */
-.marquee-wrap {
-  overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-
-.marquee-track {
-  display: flex;
-  gap: 14px;
-  width: max-content;
-  animation: marqueeScroll 28s linear infinite;
-}
-
-.marquee-wrap:hover .marquee-track {
-  animation-play-state: paused;
-}
-
-@keyframes marqueeScroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-/* 3 CSS Versions Switcher: Smoked Glass & Editorial overrides */
-[data-style='smoked'] .aurora-bg {
-  opacity: 0.35;
-}
-
+/* Dashboard Design Tab Style Overrides (Aurora | Smoked Glass | Editorial) */
 [data-style='smoked'] .style-surface {
-  background: rgba(15, 17, 26, 0.78) !important;
+  background: rgba(20, 18, 24, 0.78) !important;
   backdrop-filter: blur(26px) saturate(180%);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
   border-color: rgba(255, 255, 255, 0.22) !important;
   box-shadow:
-    0 24px 48px -12px rgba(0, 0, 0, 0.55),
+    0 24px 48px -12px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.22) !important;
 }
 
-[data-style='editorial'] .aurora-bg,
-[data-style='editorial'] .spotlight-layer {
-  opacity: 0 !important;
-}
-
-[data-style='editorial'] .border-beam-wrap::before {
-  animation: none !important;
-  opacity: 0.35;
-}
-
 [data-style='editorial'] .style-surface {
-  background: #0f172a !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-color: rgba(255, 255, 255, 0.22) !important;
   border-radius: 16px !important;
   box-shadow: none !important;
 }
 
-[data-style='editorial'] h1,
-[data-style='editorial'] h2 {
-  letter-spacing: -0.035em;
-}
-
-@media (pointer: coarse) {
-  .spotlight-layer {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .aurora-bg,
-  .border-beam-wrap::before,
   .beam-path-pulse,
-  .marquee-track,
   .shimmer-emerald,
   .shimmer-rose,
   .pulse-dot,
@@ -384,5 +479,3 @@
 .stagger-card {
   animation: staggerIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
-

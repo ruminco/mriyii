@@ -4,7 +4,7 @@ export default function PrivacyPolicyPage() {
   return (
     <main className="min-h-screen mesh-cyber text-white px-4 py-12">
       <div className="mx-auto max-w-3xl smoked-glass rounded-[28px] p-6 sm:p-8 space-y-4">
-        <Link href="/" className="text-xs font-extrabold text-cyan-300 hover:underline">
+        <Link href="/" className="text-sm font-extrabold text-cyan-300 hover:underline">
           ← На головну Mriyii
         </Link>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
